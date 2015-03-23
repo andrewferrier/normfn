@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+
+from sys import platform as _platform
+import argparse
+import logging
+import logging.handlers
+import sys
+
+        # if add_prefix_date:
+        #     if not re.search("\d\d\d\d[-_]\d\d[-_]\d\d", filename):
+        #         filename = datetime.now().strftime("%Y-%m-%d-") + filename
+
+def main(argv, sysLogHandler, sysErrHandler):
+    logger = logging.getLogger('normalize-filename')
+
+    class ArgumentParser(argparse.ArgumentParser):
+        def error(self, message):
+            raise FatalException(message)
+
+    parser = ArgumentParser(description="Normalizes filenames in a variety of ways. "
+                            "See https://github.com/andrewferrier/normalize-filename for more information.", add_help=False)
+
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                        help="Make the output more verbose. This affects both the output logged to "
+                        "syslog, as well as output to the console. Using this twice makes it doubly verbose.")
+
+    parser.add_argument('-h', '--help', action='store_true',
+                        help="Show some basic help information about how to use normalize-filename.")
+
+    parser.add_argument('filenames', nargs='+', help='Filenames')
+
+    args = parser.parse_args(argv[1:])
+
+    if args.help:
+        parser.print_help()
+        return
+
+    if sysLogHandler:
+        if args.verbose > 1:
+            sysLogHandler.setLevel(logging.DEBUG)
+        elif args.verbose == 1:
+            sysLogHandler.setLevel(logging.DEBUG)
+        else:
+            sysLogHandler.setLevel(logging.INFO)
+
+    if sysErrHandler:
+        if args.verbose > 1:
+            sysErrHandler.setLevel(logging.DEBUG)
+        elif args.verbose == 1:
+            sysErrHandler.setLevel(logging.INFO)
+        else:
+            sysErrHandler.setLevel(logging.WARNING)
+
+    for filename in args.filenames:
+        logger.info("Processing filename " + filename)
+
+
+warning_pending = False
+
+
+def warning(message):
+    global warning_pending
+    logger = logging.getLogger("normalize-filename")
+    logger.warning(message)
+    warning_pending = True
+
+class FatalException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+if __name__ == "__main__":
+    logger = logging.getLogger("normalize-filename")
+    logger.propagate = False
+    logger.setLevel(logging.DEBUG)
+
+    if _platform == "linux" or _platform == "linux2":
+        sysLogAddress = '/dev/log'
+    elif _platform == "darwin":
+        sysLogAddress = '/var/run/syslog'
+    else:
+        print("Unsupported platform.")
+        sys.exit(3)
+
+    sysLogHandler = logging.handlers.SysLogHandler(address=sysLogAddress)
+    sysLogHandler.setLevel(logging.INFO)
+    sysLogFormatter = logging.Formatter('%(pathname)s[%(process)d] %(levelname)s %(lineno)d %(message)s')
+    sysLogHandler.setFormatter(sysLogFormatter)
+    logger.addHandler(sysLogHandler)
+
+    sysErrHandler = logging.StreamHandler(stream=sys.stderr)
+    sysErrHandler.setLevel(logging.WARNING)
+    sysErrFormatter = logging.Formatter('%(levelname)s: %(message)s')
+    sysErrHandler.setFormatter(sysErrFormatter)
+    logger.addHandler(sysErrHandler)
+
+    try:
+        main(sys.argv, sysLogHandler, sysErrHandler)
+    except FatalException as e:
+        logger.error(e.value)
+        sys.exit(2)
+    except:
+        traceback.print_exc()
+        sys.exit(3)
+
+    if warning_pending:
+        sys.exit(1)
