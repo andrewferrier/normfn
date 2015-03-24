@@ -65,21 +65,24 @@ def main(argv, sysLogHandler, sysErrHandler):
         basename = os.path.basename(filename)
 
         if(not args.no_prefix_date):
-            if not re.search("\d\d\d\d[-_]\d\d[-_]\d\d", basename):
+            def replacement(matchobj):
+                return (matchobj.group(2) + "-" +
+                        matchobj.group(3) + "-" +
+                        matchobj.group(4) +
+                        (("-" + matchobj.group(1)) if matchobj.group(1) != '' else '') +
+                        (("-" + matchobj.group(5)) if matchobj.group(5) != '' else ''))
+
+            (non_extension, extension) = os.path.splitext(basename)
+            (basename, number_of_subs) = re.subn(r"^(.*?)[-_]?((?:19|20)\d\d)[-_](\d\d)[-_](\d\d)[-_]?(.*)$",
+                                                 replacement,
+                                                 non_extension)
+            basename = basename + extension
+
+            assert(number_of_subs <= 1)
+
+            if(number_of_subs == 0):
                 logger.debug("Didn't find date")
                 basename = datetime.now().strftime("%Y-%m-%d-") + basename
-            else:
-                def replacement(matchobj):
-                    return (matchobj.group(2) + "-" +
-                            matchobj.group(3) + "-" +
-                            matchobj.group(4) +
-                            (("-" + matchobj.group(1)) if matchobj.group(1) != '' else '') +
-                            (("-" + matchobj.group(5)) if matchobj.group(5) != '' else ''))
-
-                (non_extension, extension) = os.path.splitext(basename)
-                basename = re.sub(r"(.*?)[-_]?((?:19|20)\d\d)[-_](\d\d)[-_](\d\d)[-_]?(.*)",
-                                  replacement,
-                                  non_extension) + extension
 
         filename = os.path.join(os.path.dirname(original_filename), basename)
         logger.debug("New filename " + filename)
