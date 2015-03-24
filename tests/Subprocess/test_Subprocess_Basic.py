@@ -67,3 +67,13 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah-bling.txt')))
         self.assertEqual('', output)
         self.assertEqual('', error)
+
+    def test_basicdatemove2_underscore(self):
+        filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename])
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah-bling.txt')))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
