@@ -69,19 +69,12 @@ def main(argv, sysLogHandler, sysErrHandler):
                 logger.debug("Didn't find date")
                 basename = datetime.now().strftime("%Y-%m-%d-") + basename
             else:
-
                 def replacement(matchobj):
-                    if(not matchobj.group(5) == ''):
-                        return (matchobj.group(2) + "-" +
-                                matchobj.group(3) + "-" +
-                                matchobj.group(4) + "-" +
-                                matchobj.group(1) + "-" +
-                                matchobj.group(5))
-                    else:
-                        return (matchobj.group(2) + "-" +
-                                matchobj.group(3) + "-" +
-                                matchobj.group(4) + "-" +
-                                matchobj.group(1))
+                    return (matchobj.group(2) + "-" +
+                            matchobj.group(3) + "-" +
+                            matchobj.group(4) +
+                            (("-" + matchobj.group(1)) if matchobj.group(1) != '' else '') +
+                            (("-" + matchobj.group(5)) if matchobj.group(5) != '' else ''))
 
                 (non_extension, extension) = os.path.splitext(basename)
                 basename = re.sub(r"(.*?)[-_]?((?:19|20)\d\d)[-_](\d\d)[-_](\d\d)[-_]?(.*)",
