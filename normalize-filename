@@ -70,10 +70,12 @@ def main(argv, sysLogHandler, sysErrHandler):
                         matchobj.group(3) +
                         (("-" + matchobj.group(4)) if matchobj.group(4) is not None else '') +
                         (("-" + matchobj.group(1)) if matchobj.group(1) != '' else '') +
-                        (("-" + matchobj.group(5)) if matchobj.group(5) != '' else ''))
+                        (matchobj.group(5) if matchobj.group(5) != '' else ''))
 
             (non_extension, extension) = os.path.splitext(basename)
-            (basename, number_of_subs) = re.subn(r"^(.*?)[-_]?((?:19|20)\d\d)[-_](\d\d)(?:[-_](\d\d))?[-_]?(.*)$",
+            (basename, number_of_subs) = re.subn(r"^(.*?)[-_]?" +
+                                                 r"((?:19|20)\d\d)[-_](\d\d)(?:[-_](\d\d))?" +
+                                                 r"((?:[-_]|T)?.*)$",
                                                  replacement,
                                                  non_extension)
             basename = basename + extension

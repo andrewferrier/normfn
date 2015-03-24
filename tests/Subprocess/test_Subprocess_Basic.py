@@ -165,7 +165,7 @@ class TestBasic(NormalizeFilenameTestCase):
         (rc, output, error) = self.invokeAsSubprocess([filename])
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah-bling.txt')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah_bling.txt')))
         self.assertEqual(1, self.directoryCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
