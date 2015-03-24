@@ -65,6 +65,18 @@ def main(argv, sysLogHandler, sysErrHandler):
             if not re.search("\d\d\d\d[-_]\d\d[-_]\d\d", basename):
                 logger.info("Didn't find date")
                 basename = datetime.now().strftime("%Y-%m-%d-") + basename
+            else:
+
+                def replacement(matchobj):
+                    if(not matchobj.group(3) == ''):
+                        return matchobj.group(2) + "-" + matchobj.group(1) +  "-" + matchobj.group(3)
+                    else:
+                        return matchobj.group(2) + "-" + matchobj.group(1)
+
+                (non_extension, extension) = os.path.splitext(basename)
+                basename = re.sub(r"(.*?)[-_]?(\d\d\d\d[-_]\d\d[-_]\d\d)[-_]?(.*)",
+                                  replacement,
+                                  non_extension) + extension
 
         filename = os.path.join(os.path.dirname(original_filename), basename)
         logger.info("New filename " + filename)
