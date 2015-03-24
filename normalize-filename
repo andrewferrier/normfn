@@ -93,6 +93,8 @@ def main(argv, sysLogHandler, sysErrHandler):
             logger.info(original_filename + " -> " + filename)
             if not args.dry_run:
                 shutil.move(original_filename, filename)
+        else:
+            logger.info("No changes to " + original_filename)
 
 warning_pending = False
 
