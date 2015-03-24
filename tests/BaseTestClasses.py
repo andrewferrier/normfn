@@ -15,14 +15,17 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def getDatePrefix(self):
         return datetime.now().strftime("%Y-%m-%d-")
 
-    def invokeAsSubprocess(self, inputFiles, extraParams=[]):
+    def invokeAsSubprocess(self, inputFiles, extraParams=[], cwd=None):
+        if cwd is None:
+            cwd = self.workingDir
+
         options = [NormalizeFilenameTestCase.COMMAND]
 
         options.extend(inputFiles)
 
         options.extend(extraParams)
 
-        p = Popen(options, stdout=PIPE, stderr=PIPE)
+        p = Popen(options, stdout=PIPE, stderr=PIPE, cwd=cwd)
 
         output, error = p.communicate()
         p.wait()

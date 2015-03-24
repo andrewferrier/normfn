@@ -22,7 +22,16 @@ class TestBasic(NormalizeFilenameTestCase):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
         (rc, output, error) = self.invokeAsSubprocess([filename])
-        print(error)
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_basicdateprefix_cwd(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess(['blah.txt'], cwd=self.workingDir)
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
