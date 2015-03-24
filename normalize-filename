@@ -81,14 +81,15 @@ def main(argv, sysLogHandler, sysErrHandler):
                                 matchobj.group(1))
 
                 (non_extension, extension) = os.path.splitext(basename)
-                basename = re.sub(r"(.*?)[-_]?(\d\d\d\d)[-_](\d\d)[-_](\d\d)[-_]?(.*)",
+                basename = re.sub(r"(.*?)[-_]?((?:19|20)\d\d)[-_](\d\d)[-_](\d\d)[-_]?(.*)",
                                   replacement,
                                   non_extension) + extension
 
         filename = os.path.join(os.path.dirname(original_filename), basename)
         logger.info("New filename " + filename)
 
-        shutil.move(original_filename, filename)
+        if not filename == original_filename:
+            shutil.move(original_filename, filename)
 
 warning_pending = False
 

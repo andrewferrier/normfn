@@ -1,6 +1,7 @@
 from datetime import datetime
 from subprocess import Popen, PIPE
 import os
+import os.path
 import shutil
 import tempfile
 import unittest
@@ -14,6 +15,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
     def getDatePrefix(self):
         return datetime.now().strftime("%Y-%m-%d-")
+
+    def directoryCount(self, directory):
+        return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
     def invokeAsSubprocess(self, inputFiles, extraParams=[], cwd=None):
         if cwd is None:
