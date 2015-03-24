@@ -1,5 +1,5 @@
+from datetime import datetime
 from subprocess import Popen, PIPE
-
 import os
 import shutil
 import tempfile
@@ -12,10 +12,15 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def setUp(self):
         self.workingDir = tempfile.mkdtemp(dir='/tmp')
 
-    def invokeAsSubprocess(self, inputFiles):
+    def getDatePrefix(self):
+        return datetime.now().strftime("%Y-%m-%d-")
+
+    def invokeAsSubprocess(self, inputFiles, extraParams=[]):
         options = [NormalizeFilenameTestCase.COMMAND]
 
         options.extend(inputFiles)
+
+        options.extend(extraParams)
 
         p = Popen(options, stdout=PIPE, stderr=PIPE)
 

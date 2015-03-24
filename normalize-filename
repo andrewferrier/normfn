@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from sys import platform as _platform
 import argparse
 import logging
 import logging.handlers
+import os.path
+import re
+import shutil
 import sys
-
-        # if add_prefix_date:
-        #     if not re.search("\d\d\d\d[-_]\d\d[-_]\d\d", filename):
-        #         filename = datetime.now().strftime("%Y-%m-%d-") + filename
 
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
@@ -27,7 +27,9 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-h', '--help', action='store_true',
                         help="Show some basic help information about how to use normalize-filename.")
 
-    parser.add_argument('filenames', nargs='+', help='Filenames')
+    parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False)
+
+    parser.add_argument('filenames', metavar="filename", nargs='+', help='Filenames')
 
     args = parser.parse_args(argv[1:])
 
@@ -52,8 +54,22 @@ def main(argv, sysLogHandler, sysErrHandler):
             sysErrHandler.setLevel(logging.WARNING)
 
     for filename in args.filenames:
-        logger.info("Processing filename " + filename)
+        if not os.path.exists(filename):
+            raise FatalException(filename + " does not exist")
 
+        logger.info("Processing filename " + filename)
+        original_filename = filename
+        basename = os.path.basename(filename)
+
+        if(not args.no_prefix_date):
+            if not re.search("\d\d\d\d[-_]\d\d[-_]\d\d", basename):
+                logger.info("Didn't find date")
+                basename = datetime.now().strftime("%Y-%m-%d-") + basename
+
+        filename = os.path.join(os.path.dirname(original_filename), basename)
+        logger.info("New filename " + filename)
+
+        shutil.move(original_filename, filename)
 
 warning_pending = False
 
