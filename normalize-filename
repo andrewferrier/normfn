@@ -27,6 +27,9 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-h', '--help', action='store_true',
                         help="Show some basic help information about how to use normalize-filename.")
 
+    parser.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
+                        help="Don't actually make any changes, just show them.")
+
     parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False)
 
     parser.add_argument('filenames', metavar="filename", nargs='+', help='Filenames')
@@ -57,13 +60,13 @@ def main(argv, sysLogHandler, sysErrHandler):
         if not os.path.exists(filename):
             raise FatalException(filename + " does not exist")
 
-        logger.info("Processing filename " + filename)
+        logger.debug("Processing filename " + filename)
         original_filename = filename
         basename = os.path.basename(filename)
 
         if(not args.no_prefix_date):
             if not re.search("\d\d\d\d[-_]\d\d[-_]\d\d", basename):
-                logger.info("Didn't find date")
+                logger.debug("Didn't find date")
                 basename = datetime.now().strftime("%Y-%m-%d-") + basename
             else:
 
@@ -86,10 +89,12 @@ def main(argv, sysLogHandler, sysErrHandler):
                                   non_extension) + extension
 
         filename = os.path.join(os.path.dirname(original_filename), basename)
-        logger.info("New filename " + filename)
+        logger.debug("New filename " + filename)
 
         if not filename == original_filename:
-            shutil.move(original_filename, filename)
+            logger.info(original_filename + " -> " + filename)
+            if not args.dry_run:
+                shutil.move(original_filename, filename)
 
 warning_pending = False
 

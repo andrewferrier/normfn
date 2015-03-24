@@ -30,6 +30,17 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertEqual('', output)
         self.assertEqual('', error)
 
+    def test_basicdateprefix_dryrun(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], extraParams=['--dry-run'])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
     def test_basicdateprefix_cwd(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
@@ -37,6 +48,36 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_nodatemoveneeded(self):
+        filename = os.path.join(self.workingDir, '2015-01-01-blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_nodatemoveneeded2(self):
+        filename = os.path.join(self.workingDir, '2015-01-01T12-00-00-blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_nodatemoveneeded_partial(self):
+        filename = os.path.join(self.workingDir, '2015-01-blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
         self.assertEqual(1, self.directoryCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
