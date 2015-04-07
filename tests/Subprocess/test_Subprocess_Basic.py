@@ -169,3 +169,18 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
+
+    def test_directory(self):
+        filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
+        self.touch(filename)
+        filename2 = os.path.join(self.workingDir, '2015-03-04-xyz.txt')
+        self.touch(filename2)
+        (rc, output, error) = self.invokeAsSubprocess([self.workingDir])
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(filename2))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah_bling.txt')))
+        self.assertEqual(2, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
