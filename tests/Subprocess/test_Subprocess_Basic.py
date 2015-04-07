@@ -184,3 +184,15 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertEqual('', output)
         self.assertEqual('', error)
 
+    def test_directory_norecursive(self):
+        filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
+        self.touch(filename)
+        filename2 = os.path.join(self.workingDir, '2015-03-04-xyz.txt')
+        self.touch(filename2)
+        (rc, output, error) = self.invokeAsSubprocess([self.workingDir], extraParams=['--no-recursive'])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertTrue(os.path.exists(filename2))
+        self.assertEqual(2, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)

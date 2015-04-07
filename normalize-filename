@@ -32,6 +32,8 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False)
 
+    parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False)
+
     parser.add_argument('filenames', metavar="filename", nargs='+', help='Filenames')
 
     args = parser.parse_args(argv[1:])
@@ -61,11 +63,12 @@ def main(argv, sysLogHandler, sysErrHandler):
             raise FatalException(filename + " does not exist")
 
         if os.path.isdir(filename):
-            for root, dirs, files in os.walk(filename):
-                logger.debug("Working in directory " + root)
-                for sub_filename in files:
-                    process_filename(os.path.join(root, sub_filename),
-                                     args.no_prefix_date, args.dry_run)
+            if not args.no_recursive:
+                for root, dirs, files in os.walk(filename):
+                    logger.debug("Working in directory " + root)
+                    for sub_filename in files:
+                        process_filename(os.path.join(root, sub_filename),
+                                         args.no_prefix_date, args.dry_run)
         else:
             process_filename(filename, args.no_prefix_date, args.dry_run)
 
