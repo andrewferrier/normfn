@@ -30,6 +30,9 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
                         help="Don't actually make any changes, just show them.")
 
+    parser.add_argument('-a', '--all', action='store_true', dest="all",
+                        help="Affect all files, including those that begin with a .")
+
     parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False)
 
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False)
@@ -68,14 +71,20 @@ def main(argv, sysLogHandler, sysErrHandler):
                     logger.debug("Working in directory " + root)
                     for sub_filename in files:
                         process_filename(os.path.join(root, sub_filename),
-                                         args.no_prefix_date, args.dry_run)
+                                         args.no_prefix_date, args.dry_run,
+                                         args.all)
         else:
-            process_filename(filename, args.no_prefix_date, args.dry_run)
+            process_filename(filename, args.no_prefix_date, args.dry_run,
+                             args.all)
 
-def process_filename(filename, no_prefix_date, dry_run):
+def process_filename(filename, no_prefix_date, dry_run, all):
     logger.debug("Processing filename " + filename)
     original_filename = filename
     basename = os.path.basename(filename)
+
+    if basename.startswith(".") and (not all):
+        logger.info("Skipping " + filename + " as it begins with .")
+        return
 
     if(not no_prefix_date):
         def replacement(matchobj):

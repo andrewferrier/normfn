@@ -170,6 +170,27 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertEqual('', output)
         self.assertEqual('', error)
 
+    def test_startswith_period(self):
+        filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_startswith_period_all(self):
+        filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], extraParams=['--all'])
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-.blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
     def test_directory(self):
         filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
         self.touch(filename)
