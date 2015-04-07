@@ -15,6 +15,7 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     class ArgumentParser(argparse.ArgumentParser):
         def error(self, message):
+            parser.print_help()
             raise FatalException(message)
 
     parser = ArgumentParser(description="Normalizes filenames in a variety of ways. "
