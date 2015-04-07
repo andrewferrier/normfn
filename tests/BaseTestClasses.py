@@ -1,5 +1,8 @@
 from datetime import datetime
 from subprocess import Popen, PIPE
+import inspect
+import io
+import logging
 import os
 import os.path
 import shutil
@@ -18,6 +21,43 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
     def directoryCount(self, directory):
         return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
+
+    def getOriginalScriptPath(self):
+        module_path = inspect.getfile(inspect.currentframe())
+        module_path = os.path.join(os.path.dirname(os.path.dirname(module_path)), 'normalize-filename')
+
+        return module_path
+
+    def invokeDirectly(self, inputFiles, extraParams=[]):
+        import importlib.machinery
+        module_path = self.getOriginalScriptPath()
+        loader = importlib.machinery.SourceFileLoader('normalize-filename', module_path)
+        normalize_filename = loader.load_module()
+
+        options = [module_path]
+
+        options.extend(inputFiles)
+        options.extend(extraParams)
+
+        stream = io.StringIO()
+        handler = logging.StreamHandler(stream)
+        log = logging.getLogger('normalize-filename')
+        log.propagate = False
+        log.setLevel(logging.DEBUG)
+        log.addHandler(handler)
+
+        self.timeInvoked = datetime.now()
+
+        try:
+            normalize_filename.main(options, None, handler)
+        finally:
+            self.timeCompleted = datetime.now()
+            log.removeHandler(handler)
+            handler.close()
+
+        error = stream.getvalue()
+
+        return error
 
     def invokeAsSubprocess(self, inputFiles, extraParams=[], cwd=None):
         if cwd is None:

@@ -79,6 +79,8 @@ def main(argv, sysLogHandler, sysErrHandler):
                              args.all)
 
 def process_filename(filename, no_prefix_date, dry_run, all):
+    logger = logging.getLogger("normalize-filename")
+
     logger.debug("Processing filename " + filename)
     original_filename = filename
     basename = os.path.basename(filename)
