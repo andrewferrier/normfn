@@ -101,3 +101,21 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1990-01-blah-41.txt')))
         self.assertEqual(1, self.directoryCount(self.workingDir))
         self.assertEqual('', error)
+
+    def test_basic_compressed_datemove(self):
+        filename = os.path.join(self.workingDir, 'blah-20150101.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_basic_invalid_compressed_nodatemove(self):
+        filename = os.path.join(self.workingDir, 'blah-20153101.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-20153101.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
