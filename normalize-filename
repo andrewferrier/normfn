@@ -105,7 +105,7 @@ def process_filename(filename, no_prefix_date, dry_run, all):
                                              r"((?:[-_]|T)?.*)$",
                                              replacement,
                                              non_extension)
-        basename = basename + extension
+        basename = basename.strip() + extension
 
         assert(number_of_subs <= 1)
 
