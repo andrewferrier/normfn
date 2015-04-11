@@ -38,7 +38,13 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False)
 
-    parser.add_argument('filenames', metavar="filename", nargs='+', help='Filenames')
+    class FilenamesAction(argparse.Action):
+        def __call__(self, parser, args, values, option=None):
+            args.filenames=values
+            if (not args.help) and len(values) < 1:
+                parser.error("You must specify some file or directory names.")
+
+    parser.add_argument('filenames', metavar="filename", nargs='*', help='Filenames', action=FilenamesAction)
 
     args = parser.parse_args(argv[1:])
 
