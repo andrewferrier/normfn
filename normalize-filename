@@ -99,7 +99,7 @@ def process_filename(filename, no_prefix_date, dry_run, all):
 
         (non_extension, extension) = os.path.splitext(basename)
         (basename, number_of_subs) = re.subn(r"^(.*?)[-_]?" +
-                                             r"((?:19|20)\d\d)[-_](\d\d)(?:[-_](\d\d))?" +
+                                             r"((?:19|20)\d\d)[-_]((?:[01])\d)(?:[-_]((?:[0123])\d))?" +
                                              r"((?:[-_]|T)?.*)$",
                                              replacement,
                                              non_extension)

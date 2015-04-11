@@ -65,3 +65,39 @@ class TestBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah_bling.txt')))
         self.assertEqual(2, self.directoryCount(self.workingDir))
         self.assertEqual('', error)
+
+    def test_ridiculousdate1(self):
+        filename = os.path.join(self.workingDir, 'blah-2100-01-01.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-2100-01-01.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_ridiculousdate2(self):
+        filename = os.path.join(self.workingDir, 'blah-1899-01-01.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1899-01-01.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_invaliddate1(self):
+        filename = os.path.join(self.workingDir, 'blah-1990-20-01.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1990-20-01.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_invaliddate2(self):
+        filename = os.path.join(self.workingDir, 'blah-1990-01-41.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1990-01-blah-41.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
