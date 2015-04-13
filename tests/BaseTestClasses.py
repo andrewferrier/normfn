@@ -59,7 +59,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         return error
 
-    def invokeAsSubprocess(self, inputFiles, extraParams=[], cwd=None, expectOutput=False):
+    def invokeAsSubprocess(self, inputFiles, extraParams=[], feedInput=None, cwd=None, expectOutput=False):
         if cwd is None:
             cwd = self.workingDir
 
@@ -69,9 +69,12 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         options.extend(extraParams)
 
-        p = Popen(options, stdout=PIPE, stderr=PIPE, cwd=cwd)
+        if feedInput:
+            p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)
+        else:
+            p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)
 
-        output, error = p.communicate()
+        output, error = p.communicate(feedInput)
         p.wait()
 
         output = str(output, "utf-8")

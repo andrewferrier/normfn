@@ -1,4 +1,5 @@
 import os
+import re
 
 from freezegun import freeze_time
 from tests.BaseTestClasses import NormalizeFilenameTestCase
@@ -146,4 +147,41 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah_bling.txt')))
         self.assertEqual(1, self.directoryCount(self.workingDir))
         self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_basicdateprefix_interactive_yes(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], feedInput=b'y', extraParams=['--interactive'], expectOutput=True)
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertRegex(output, 'Move ' + re.escape(filename) + '.*')
+        self.assertEqual('', error)
+
+    def test_basicdateprefix_interactive_no(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], feedInput=b'n', extraParams=['--interactive'], expectOutput=True)
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertRegex(output, 'Move ' + re.escape(filename) + '.*')
+        self.assertEqual('', error)
+
+    def test_basicdateprefix_interactive_oneyesonno(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        filename2 = os.path.join(self.workingDir, 'blah2.txt')
+        self.touch(filename)
+        self.touch(filename2)
+        (rc, output, error) = self.invokeAsSubprocess([filename, filename2], feedInput=b'yn', extraParams=['--interactive'], expectOutput=True)
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(filename2))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah2.txt')))
+        self.assertEqual(2, self.directoryCount(self.workingDir))
+        self.assertRegex(output, '(?is)Move ' + re.escape(filename) + ".*Move " + re.escape(filename2) + '.*')
         self.assertEqual('', error)

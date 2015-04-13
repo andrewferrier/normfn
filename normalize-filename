@@ -9,6 +9,8 @@ import os.path
 import re
 import shutil
 import sys
+import termios
+import tty
 
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
@@ -28,8 +30,13 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-h', '--help', action='store_true',
                         help="Show some basic help information about how to use normalize-filename.")
 
-    parser.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
+    doing_options = parser.add_mutually_exclusive_group()
+
+    doing_options.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
                         help="Don't actually make any changes, just show them.")
+
+    doing_options.add_argument('-i', '--interactive', action='store_true', dest="interactive",
+                        help="Ask about each change before it is done.")
 
     parser.add_argument('-a', '--all', action='store_true', dest="all",
                         help="Affect all files, including those that begin with a .")
@@ -77,25 +84,22 @@ def main(argv, sysLogHandler, sysErrHandler):
                 for root, dirs, files in os.walk(filename):
                     logger.debug("Working in directory " + root)
                     for sub_filename in files:
-                        process_filename(os.path.join(root, sub_filename),
-                                         args.no_prefix_date, args.dry_run,
-                                         args.all)
+                        process_filename(os.path.join(root, sub_filename), args)
         else:
-            process_filename(filename, args.no_prefix_date, args.dry_run,
-                             args.all)
+            process_filename(filename, args)
 
-def process_filename(filename, no_prefix_date, dry_run, all):
+def process_filename(filename, args):
     logger = logging.getLogger("normalize-filename")
 
     logger.debug("Processing filename " + filename)
     original_filename = filename
     basename = os.path.basename(filename)
 
-    if basename.startswith(".") and (not all):
+    if basename.startswith(".") and (not args.all):
         logger.info("Skipping " + filename + " as it begins with .")
         return
 
-    if(not no_prefix_date):
+    if(not args.no_prefix_date):
         def replacement(matchobj):
             return (matchobj.group(2) + "-" +
                     matchobj.group(3) +
@@ -124,10 +128,40 @@ def process_filename(filename, no_prefix_date, dry_run, all):
 
     if not filename == original_filename:
         logger.info(original_filename + " -> " + filename)
-        if not dry_run:
-            shutil.move(original_filename, filename)
+        if not args.dry_run:
+            move_it = True
+
+            if args.interactive:
+                move_it = ask_yes_no("Move " + original_filename + " to " + filename + " ?")
+
+            if move_it:
+                shutil.move(original_filename, filename)
     else:
         logger.info("No changes to " + original_filename)
+
+def ask_yes_no(prompt):
+    while True:
+        print(prompt, end="", flush=True)
+        key = readchar().lower()
+        print(str(key, "utf-8"))
+        if key == b'y':
+            return True
+        elif key == b'n':
+            return False
+
+def readchar(wait_for_char=True):
+    assert(sys.platform.startswith('linux') or sys.platform == 'darwin')
+    try:
+        old_settings = termios.tcgetattr(sys.stdin)
+        tty.setcbreak(sys.stdin.fileno())
+        try:
+            if wait_for_char or select.select([sys.stdin, ], [], [], 0.0)[0]:
+                return os.read(sys.stdin.fileno(), 1)
+        finally:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+    except termios.error:
+        return os.read(sys.stdin.fileno(), 1)
+    return None
 
 warning_pending = False
 
