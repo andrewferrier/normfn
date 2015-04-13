@@ -4,9 +4,9 @@ from freezegun import freeze_time
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 
-class TestErrors(NormalizeFilenameTestCase):
+class TestDirectErrors(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestErrors, self).setUp()
+        super(TestDirectErrors, self).setUp()
 
     def test_file_not_exist(self):
         filename = os.path.join(self.workingDir, 'blah.txt')

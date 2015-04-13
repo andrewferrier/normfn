@@ -4,9 +4,9 @@ from freezegun import freeze_time
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 
-class TestBasic(NormalizeFilenameTestCase):
+class TestSubprocessBasic(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestBasic, self).setUp()
+        super(TestSubprocessBasic, self).setUp()
 
     def test_no_basicdateprefix(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
