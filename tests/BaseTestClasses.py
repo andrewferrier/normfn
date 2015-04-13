@@ -59,7 +59,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         return error
 
-    def invokeAsSubprocess(self, inputFiles, extraParams=[], cwd=None):
+    def invokeAsSubprocess(self, inputFiles, extraParams=[], cwd=None, expectOutput=False):
         if cwd is None:
             cwd = self.workingDir
 
@@ -77,7 +77,10 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         output = str(output, "utf-8")
         error = str(error, "utf-8")
 
-        self.assertEqual("", output)
+        if expectOutput:
+            self.assertNotEqual("", output)
+        else:
+            self.assertEqual("", output)
 
         return (p.returncode, output, error)
 
