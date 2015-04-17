@@ -40,11 +40,14 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-a', '--all', action='store_true', dest="all",
                         help="Affect all files, including those that begin with a .")
 
-    parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None)
+    parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None,
+                        help="Put an original copy of each renamed file into a backup directory.")
 
-    parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False)
+    parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False,
+                        help="Don't move or add a date to prefix each filename.")
 
-    parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False)
+    parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
+                        help="Don't recurse into subdirectories of the directories specified on the command line.")
 
     class FilenamesAction(argparse.Action):
         def __call__(self, parser, args, values, option=None):
