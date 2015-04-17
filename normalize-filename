@@ -39,6 +39,8 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-a', '--all', action='store_true', dest="all",
                         help="Affect all files, including those that begin with a .")
 
+    parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None)
+
     parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False)
 
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False)
@@ -72,6 +74,9 @@ def main(argv, sysLogHandler, sysErrHandler):
             sysErrHandler.setLevel(logging.INFO)
         else:
             sysErrHandler.setLevel(logging.WARNING)
+
+    if args.backup_directory and not os.path.exists(args.backup_directory):
+        raise FatalException("Backup directory " + args.backup_directory + " does not exist.")
 
     for filename in args.filenames:
         if not os.path.exists(filename):
@@ -125,7 +130,6 @@ def process_filename(filename, args):
     logger.debug("New filename " + filename)
 
     if not filename == original_filename:
-        logger.info(original_filename + " -> " + filename)
         move_it = True
 
         if args.interactive:
@@ -133,8 +137,16 @@ def process_filename(filename, args):
 
         if move_it:
             if not args.dry_run:
+                if args.backup_directory:
+                    shutil.copy(original_filename, args.backup_directory)
+                    logger.info(original_filename + " copied to " + filename)
+
                 shutil.move(original_filename, filename)
+                logger.info(original_filename + " moved to " + filename)
             else:
+                if args.backup_directory:
+                    logger.info("Not creating a backup copy; dry run.")
+
                 logger.info("Not moving; dry run.")
     else:
         logger.info("No changes to " + original_filename)
