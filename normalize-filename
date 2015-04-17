@@ -3,6 +3,7 @@
 from datetime import datetime
 from sys import platform as _platform
 import argparse
+import coloredlogs
 import logging
 import logging.handlers
 import os.path
@@ -196,6 +197,8 @@ if __name__ == "__main__":
     logger.propagate = False
     logger.setLevel(logging.DEBUG)
 
+    coloredlogs.install(level=logging.DEBUG)
+
     if _platform == "linux" or _platform == "linux2":
         sysLogAddress = '/dev/log'
     elif _platform == "darwin":
@@ -210,10 +213,8 @@ if __name__ == "__main__":
     sysLogHandler.setFormatter(sysLogFormatter)
     logger.addHandler(sysLogHandler)
 
-    sysErrHandler = logging.StreamHandler(stream=sys.stderr)
+    sysErrHandler = coloredlogs.ColoredStreamHandler(stream=sys.stderr, show_timestamps=False, show_hostname=False, show_name=False, show_severity=False)
     sysErrHandler.setLevel(logging.WARNING)
-    sysErrFormatter = logging.Formatter('%(levelname)s: %(message)s')
-    sysErrHandler.setFormatter(sysErrFormatter)
     logger.addHandler(sysErrHandler)
 
     try:
