@@ -30,12 +30,10 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-h', '--help', action='store_true',
                         help="Show some basic help information about how to use normalize-filename.")
 
-    doing_options = parser.add_mutually_exclusive_group()
-
-    doing_options.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
+    parser.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
                         help="Don't actually make any changes, just show them.")
 
-    doing_options.add_argument('-i', '--interactive', action='store_true', dest="interactive",
+    parser.add_argument('-i', '--interactive', action='store_true', dest="interactive",
                         help="Ask about each change before it is done.")
 
     parser.add_argument('-a', '--all', action='store_true', dest="all",
@@ -128,14 +126,16 @@ def process_filename(filename, args):
 
     if not filename == original_filename:
         logger.info(original_filename + " -> " + filename)
-        if not args.dry_run:
-            move_it = True
+        move_it = True
 
-            if args.interactive:
-                move_it = ask_yes_no("Move " + original_filename + " to " + filename + " ?")
+        if args.interactive:
+            move_it = ask_yes_no("Move " + original_filename + " to " + filename + " ?")
 
-            if move_it:
+        if move_it:
+            if not args.dry_run:
                 shutil.move(original_filename, filename)
+            else:
+                logger.info("Not moving; dry run.")
     else:
         logger.info("No changes to " + original_filename)
 
