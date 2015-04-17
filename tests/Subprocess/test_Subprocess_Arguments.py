@@ -1,6 +1,3 @@
-import os
-
-from freezegun import freeze_time
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 

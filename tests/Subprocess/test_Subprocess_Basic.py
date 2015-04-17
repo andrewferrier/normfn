@@ -1,7 +1,6 @@
 import os
 import re
 
-from freezegun import freeze_time
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 
@@ -176,7 +175,8 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         filename2 = os.path.join(self.workingDir, 'blah2.txt')
         self.touch(filename)
         self.touch(filename2)
-        (rc, output, error) = self.invokeAsSubprocess([filename, filename2], feedInput=b'yn', extraParams=['--interactive'], expectOutput=True)
+        (rc, output, error) = self.invokeAsSubprocess([filename, filename2], feedInput=b'yn', extraParams=['--interactive'],
+                                                      expectOutput=True)
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(filename2))

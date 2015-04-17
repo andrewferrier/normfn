@@ -1,7 +1,6 @@
 import os
 import tempfile
 
-from freezegun import freeze_time
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 
