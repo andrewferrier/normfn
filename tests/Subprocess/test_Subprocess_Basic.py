@@ -170,7 +170,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertRegex(output, 'Move ' + re.escape(filename) + '.*')
         self.assertEqual('', error)
 
-    def test_basicdateprefix_interactive_oneyesonno(self):
+    def test_basicdateprefix_interactive_oneyesoneno(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         filename2 = os.path.join(self.workingDir, 'blah2.txt')
         self.touch(filename)
@@ -184,4 +184,24 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah2.txt')))
         self.assertEqual(2, self.directoryCount(self.workingDir))
         self.assertRegex(output, '(?is)Move ' + re.escape(filename) + ".*Move " + re.escape(filename2) + '.*')
+        self.assertEqual('', error)
+
+    def test_basicdateprefix_interactive_oneyesquit(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        filename2 = os.path.join(self.workingDir, 'blah2.txt')
+        filename3 = os.path.join(self.workingDir, 'blah3.txt')
+        self.touch(filename)
+        self.touch(filename2)
+        self.touch(filename3)
+        (rc, output, error) = self.invokeAsSubprocess([filename, filename2, filename3], feedInput=b'yqy', extraParams=['--interactive'],
+                                                      expectOutput=True)
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(filename2))
+        self.assertTrue(os.path.exists(filename3))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah2.txt')))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah3.txt')))
+        self.assertEqual(3, self.directoryCount(self.workingDir))
+        self.assertRegex(output, '(?is)Move ' + re.escape(filename) + '.*Move ' + re.escape(filename2) + '.*')
         self.assertEqual('', error)

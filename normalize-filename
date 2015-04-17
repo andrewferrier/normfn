@@ -82,18 +82,21 @@ def main(argv, sysLogHandler, sysErrHandler):
     if args.backup_directory and not os.path.exists(args.backup_directory):
         raise FatalException("Backup directory " + args.backup_directory + " does not exist.")
 
-    for filename in args.filenames:
-        if not os.path.exists(filename):
-            raise FatalException(filename + " does not exist")
+    try:
+        for filename in args.filenames:
+            if not os.path.exists(filename):
+                raise FatalException(filename + " does not exist")
 
-        if os.path.isdir(filename):
-            if not args.no_recursive:
-                for root, dirs, files in os.walk(filename):
-                    logger.debug("Working in directory " + root)
-                    for sub_filename in files:
-                        process_filename(os.path.join(root, sub_filename), args)
-        else:
-            process_filename(filename, args)
+            if os.path.isdir(filename):
+                if not args.no_recursive:
+                    for root, dirs, files in os.walk(filename):
+                        logger.debug("Working in directory " + root)
+                        for sub_filename in files:
+                            process_filename(os.path.join(root, sub_filename), args)
+            else:
+                process_filename(filename, args)
+    except QuitException:
+        pass
 
 def process_filename(filename, args):
     logger = logging.getLogger("normalize-filename")
@@ -137,7 +140,7 @@ def process_filename(filename, args):
         move_it = True
 
         if args.interactive:
-            move_it = ask_yes_no("Move " + original_filename + " to " + filename + " ?")
+            move_it = ask_yes_no("Move " + original_filename + " to " + filename + " [y/n/q]?")
 
         if move_it:
             if not args.dry_run:
@@ -165,6 +168,8 @@ def ask_yes_no(prompt):
             return True
         elif key == b'n':
             return False
+        elif key == b'q':
+            raise QuitException()
 
 def readchar(wait_for_char=True):
     assert(sys.platform.startswith('linux') or sys.platform == 'darwin')
@@ -194,6 +199,9 @@ class FatalException(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+class QuitException(Exception):
+    pass
 
 if __name__ == "__main__":
     logger = logging.getLogger("normalize-filename")
