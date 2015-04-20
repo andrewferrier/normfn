@@ -197,7 +197,10 @@ def process_filename(filename, args):
 def ask_yes_no(prompt):
     while True:
         print(prompt, end="", flush=True)
-        key = readchar().lower()
+        try:
+            key = readchar().lower()
+        except KeyboardInterrupt:
+            raise QuitException()
         print(str(key, "utf-8"))
         if key == b'y':
             return True
