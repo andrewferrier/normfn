@@ -54,7 +54,8 @@ def main(argv, sysLogHandler, sysErrHandler):
     time_option.add_argument('--now', action='store_const', dest="time_option", const="now",
                              help="Use the date and time now as the default "
                              "prefix for files that don't already have a date "
-                             "and time.")
+                             "and time. This is the default if you don't "
+                             "specify --latest or --earliest.")
 
     time_option.add_argument('--latest', action='store_const', dest="time_option", const="latest",
                              help="Use the latest of ctime and mtime on a file "
