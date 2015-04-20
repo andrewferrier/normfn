@@ -49,6 +49,25 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
                         help="Don't recurse into subdirectories of the directories specified on the command line.")
 
+    time_option = parser.add_mutually_exclusive_group()
+
+    time_option.add_argument('--now', action='store_const', dest="time_option", const="now",
+                             help="Use the date and time now as the default "
+                             "prefix for files that don't already have a date "
+                             "and time.")
+
+    time_option.add_argument('--latest', action='store_const', dest="time_option", const="latest",
+                             help="Use the latest of ctime and mtime on a file "
+                             "to find a date prefix for files that don't already "
+                             "have a date and time.")
+
+    time_option.add_argument('--earliest', action='store_const', dest="time_option", const="earliest",
+                             help="Use the earliest of ctime and mtime on a file "
+                             "to find a date prefix for files that don't already "
+                             "have a date and time.")
+
+    parser.set_defaults(time_option="now")
+
     class FilenamesAction(argparse.Action):
         def __call__(self, parser, args, values, option=None):
             args.filenames=values
@@ -131,7 +150,23 @@ def process_filename(filename, args):
 
         if(number_of_subs == 0):
             logger.debug("Didn't find date")
-            basename = datetime.now().strftime("%Y-%m-%d-") + basename
+            ctime = datetime.fromtimestamp(os.path.getctime(filename))
+            mtime = datetime.fromtimestamp(os.path.getmtime(filename))
+
+            if(args.time_option == "now"):
+                timetouse = datetime.now()
+            elif(args.time_option == "earliest"):
+                if(ctime < mtime):
+                    timetouse = ctime
+                else:
+                    timetouse = mtime
+            else:
+                if(ctime < mtime):
+                    timetouse = mtime
+                else:
+                    timetouse = ctime
+
+            basename = timetouse.strftime("%Y-%m-%d-") + basename
 
     filename = os.path.join(os.path.dirname(original_filename), basename)
     logger.debug("New filename " + filename)
