@@ -193,7 +193,8 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.touch(filename)
         self.touch(filename2)
         self.touch(filename3)
-        (rc, output, error) = self.invokeAsSubprocess([filename, filename2, filename3], feedInput=b'yqy', extraParams=['--interactive'],
+        (rc, output, error) = self.invokeAsSubprocess([filename, filename2, filename3],
+                                                      feedInput=b'yqy', extraParams=['--interactive'],
                                                       expectOutput=True)
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
