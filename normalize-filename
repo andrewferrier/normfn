@@ -54,8 +54,7 @@ def main(argv, sysLogHandler, sysErrHandler):
     time_option.add_argument('--now', action='store_const', dest="time_option", const="now",
                              help="Use the date and time now as the default "
                              "prefix for files that don't already have a date "
-                             "and time. This is the default if you don't "
-                             "specify --latest or --earliest.")
+                             "and time.")
 
     time_option.add_argument('--latest', action='store_const', dest="time_option", const="latest",
                              help="Use the latest of ctime and mtime on a file "
@@ -65,9 +64,10 @@ def main(argv, sysLogHandler, sysErrHandler):
     time_option.add_argument('--earliest', action='store_const', dest="time_option", const="earliest",
                              help="Use the earliest of ctime and mtime on a file "
                              "to find a date prefix for files that don't already "
-                             "have a date and time.")
+                             "have a date and time. This is the default if you "
+                             "don't specify --now or --latest.")
 
-    parser.set_defaults(time_option="now")
+    parser.set_defaults(time_option="earliest")
 
     class FilenamesAction(argparse.Action):
         def __call__(self, parser, args, values, option=None):

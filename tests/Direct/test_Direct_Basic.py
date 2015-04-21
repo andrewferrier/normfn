@@ -140,6 +140,17 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_earliest_default(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        os.utime(filename, (datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp(),
+                            datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp()))
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1980-01-02-blah.txt')))
+        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_latest(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
