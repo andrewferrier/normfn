@@ -43,9 +43,6 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None,
                         help="Put an original copy of each renamed file into a backup directory.")
 
-    parser.add_argument('--no-prefix-date', action='store_true', dest="no_prefix_date", default=False,
-                        help="Don't move or add a date to prefix each filename.")
-
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
                         help="Don't recurse into subdirectories of the directories specified on the command line.")
 
@@ -136,51 +133,50 @@ def process_filename(filename, args):
         logger.info("Skipping " + filename + " as it begins with .")
         return
 
-    if(not args.no_prefix_date):
-        def replacement(matchobj):
-            return (matchobj.group('year') + "-" +
-                    matchobj.group('month') +
-                    (("-" + matchobj.group('day')) if matchobj.group('day') is not None else '') +
-                    (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
-                    (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
-                    (("-" + matchobj.group('second')) if matchobj.group('second') is not None else '') +
-                    (("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
-                    (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
+    def replacement(matchobj):
+        return (matchobj.group('year') + "-" +
+                matchobj.group('month') +
+                (("-" + matchobj.group('day')) if matchobj.group('day') is not None else '') +
+                (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
+                (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
+                (("-" + matchobj.group('second')) if matchobj.group('second') is not None else '') +
+                (("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
+                (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
 
-        (non_extension, extension) = os.path.splitext(basename)
-        (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
-                                             r"(?P<year>(19|20)\d\d)" +
-                                             r"[-_]?(?P<month>([01])\d)" +
-                                             r"([-_]?(?P<day>([0123])\d))?" +
-                                             r"(([-_T\s]|\sat\s)(?P<hour>(?:[012]\d)))?"
-                                             r"([.\s])?(?P<minute>(?:[012345]\d))?"
-                                             r"([.\s])?(?P<second>(?:[012345]\d))?"
-                                             r"(?P<suffix>.*)$",
-                                             replacement,
-                                             non_extension)
-        basename = basename.strip() + extension
+    (non_extension, extension) = os.path.splitext(basename)
+    (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
+                                         r"(?P<year>(19|20)\d\d)" +
+                                         r"[-_]?(?P<month>([01])\d)" +
+                                         r"([-_]?(?P<day>([0123])\d))?" +
+                                         r"(([-_T\s]|\sat\s)(?P<hour>(?:[012]\d)))?"
+                                         r"([.\s])?(?P<minute>(?:[012345]\d))?"
+                                         r"([.\s])?(?P<second>(?:[012345]\d))?"
+                                         r"(?P<suffix>.*)$",
+                                         replacement,
+                                         non_extension)
+    basename = basename.strip() + extension
 
-        assert(number_of_subs <= 1)
+    assert(number_of_subs <= 1)
 
-        if(number_of_subs == 0):
-            logger.debug("Didn't find date")
-            ctime = datetime.fromtimestamp(os.path.getctime(filename))
-            mtime = datetime.fromtimestamp(os.path.getmtime(filename))
+    if(number_of_subs == 0):
+        logger.debug("Didn't find date or time")
+        ctime = datetime.fromtimestamp(os.path.getctime(filename))
+        mtime = datetime.fromtimestamp(os.path.getmtime(filename))
 
-            if(args.time_option == "now"):
-                timetouse = datetime.now()
-            elif(args.time_option == "earliest"):
-                if(ctime < mtime):
-                    timetouse = ctime
-                else:
-                    timetouse = mtime
+        if(args.time_option == "now"):
+            timetouse = datetime.now()
+        elif(args.time_option == "earliest"):
+            if(ctime < mtime):
+                timetouse = ctime
             else:
-                if(ctime < mtime):
-                    timetouse = mtime
-                else:
-                    timetouse = ctime
+                timetouse = mtime
+        else:
+            if(ctime < mtime):
+                timetouse = mtime
+            else:
+                timetouse = ctime
 
-            basename = timetouse.strftime("%Y-%m-%d-") + basename
+        basename = timetouse.strftime("%Y-%m-%d-") + basename
 
     filename = os.path.join(os.path.dirname(original_filename), basename)
     logger.debug("New filename " + filename)
