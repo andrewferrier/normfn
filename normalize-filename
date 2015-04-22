@@ -152,16 +152,23 @@ def process_filename(filename, args):
                 (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
 
     (non_extension, extension) = os.path.splitext(basename)
+
+    YEAR = r"(19|20)\d\d"
+    MONTH = r"[01]\d"
+    DAY = r"[0123]\d"
+    HOUR = r"[012]\d"
+    MINUTE = SECOND = r"[012345]\d"
+
     (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
-                                         r"((?P<year>(19|20)\d\d)" +
-                                         r"[-_]?(?P<month>([01])\d)" +
-                                         r"([-_]?(?P<day>([0123])\d))?|" +
-                                         r"(?P<day2>([0123])\d)" +
-                                         r"-(?P<month2>([01])\d)" +
-                                         r"-(?P<year2>(19|20)\d\d))" +
-                                         r"(([-_T\s]|\sat\s)(?P<hour>(?:[012]\d))"
-                                         r"(([-.\s])?(?P<minute>(?:[012345]\d))"
-                                         r"(([-.\s])?(?P<second>(?:[012345]\d)))?)?)?"
+                                         r"((?P<year>" + YEAR + ")" +
+                                         r"[-_]?(?P<month>" + MONTH + ")" +
+                                         r"([-_]?(?P<day>" + DAY + "))?|" +
+                                         r"(?P<day2>" + DAY + ")" +
+                                         r"-(?P<month2>" + MONTH + ")" +
+                                         r"-(?P<year2>" + YEAR + "))" +
+                                         r"(([-_T\s]|\sat\s)(?P<hour>" + HOUR + ")"
+                                         r"(([-.\s])?(?P<minute>" + MINUTE + ")"
+                                         r"(([-.\s])?(?P<second>" + SECOND + "))?)?)?"
                                          r"(?P<suffix>.*)$",
                                          replacement,
                                          non_extension)
