@@ -14,7 +14,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename], extraParams=['--no-prefix-date'])
         self.assertTrue(os.path.exists(filename))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_basicdateprefix(self):
@@ -42,7 +42,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertTrue(os.path.exists(filename))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_startswith_period_all(self):
@@ -51,7 +51,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename], extraParams=['--all'])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-.blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_directory(self):
@@ -63,7 +63,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(filename2))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah_bling.txt')))
-        self.assertEqual(2, self.directoryCount(self.workingDir))
+        self.assertEqual(2, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_ridiculousdate1(self):
@@ -72,7 +72,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-2100-01-01.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_ridiculousdate2(self):
@@ -81,7 +81,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1899-01-01.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_invaliddate1(self):
@@ -90,7 +90,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1990-20-01.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_invaliddate2(self):
@@ -99,7 +99,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1990-01-blah-41.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_basic_compressed_datemove(self):
@@ -108,7 +108,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_basic_invalid_compressed_nodatemove(self):
@@ -117,7 +117,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-20153101.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_basic_compressed_withspace(self):
@@ -126,7 +126,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_earliest(self):
@@ -137,7 +137,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename], extraParams=['--earliest'])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1980-01-02-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_earliest_default(self):
@@ -148,7 +148,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1980-01-02-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_latest(self):
@@ -159,7 +159,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename], extraParams=['--latest'])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_now(self):
@@ -170,5 +170,5 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename], extraParams=['--now'])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)

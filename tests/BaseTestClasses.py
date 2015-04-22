@@ -19,7 +19,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def getDatePrefix(self):
         return datetime.now().strftime("%Y-%m-%d-")
 
-    def directoryCount(self, directory):
+    def directoryFileCount(self, directory):
         return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
     def getOriginalScriptPath(self):

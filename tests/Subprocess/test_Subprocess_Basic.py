@@ -15,7 +15,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertTrue(os.path.exists(filename))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -26,7 +26,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -37,7 +37,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertTrue(os.path.exists(filename))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -48,7 +48,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -58,7 +58,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, output, error) = self.invokeAsSubprocess([filename])
         self.assertEqual(0, rc)
         self.assertTrue(os.path.exists(filename))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -68,7 +68,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, output, error) = self.invokeAsSubprocess([filename])
         self.assertEqual(0, rc)
         self.assertTrue(os.path.exists(filename))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -78,7 +78,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, output, error) = self.invokeAsSubprocess([filename])
         self.assertEqual(0, rc)
         self.assertTrue(os.path.exists(filename))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -89,7 +89,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -100,7 +100,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -111,7 +111,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-blah-bling.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -122,7 +122,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -133,7 +133,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah-bling.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -144,7 +144,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah_bling.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', output)
         self.assertEqual('', error)
 
@@ -155,7 +155,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertRegex(output, 'Move ' + re.escape(filename) + '.*')
         self.assertEqual('', error)
 
@@ -166,7 +166,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(0, rc)
         self.assertTrue(os.path.exists(filename))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertRegex(output, 'Move ' + re.escape(filename) + '.*')
         self.assertEqual('', error)
 
@@ -182,7 +182,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(filename2))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah2.txt')))
-        self.assertEqual(2, self.directoryCount(self.workingDir))
+        self.assertEqual(2, self.directoryFileCount(self.workingDir))
         self.assertRegex(output, '(?is)Move ' + re.escape(filename) + ".*Move " + re.escape(filename2) + '.*')
         self.assertEqual('', error)
 
@@ -203,6 +203,6 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah2.txt')))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah3.txt')))
-        self.assertEqual(3, self.directoryCount(self.workingDir))
+        self.assertEqual(3, self.directoryFileCount(self.workingDir))
         self.assertRegex(output, '(?is)Move ' + re.escape(filename) + '.*Move ' + re.escape(filename2) + '.*')
         self.assertEqual('', error)

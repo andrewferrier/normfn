@@ -8,5 +8,5 @@ class TestSubprocessErrors(NormalizeFilenameTestCase):
     def test_no_files(self):
         (rc, output, error) = self.invokeAsSubprocess([], expectOutput=True)
         self.assertEqual(2, rc)
-        self.assertEqual(0, self.directoryCount(self.workingDir))
+        self.assertEqual(0, self.directoryFileCount(self.workingDir))
         self.assertRegex(error, ".*You.*must.*specify.*some.*")

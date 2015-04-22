@@ -15,10 +15,10 @@ class TestDirectArguments(NormalizeFilenameTestCase):
             error = self.invokeDirectly([filename], extraParams=['--backup-directory=' + backupDir])
             self.assertFalse(os.path.exists(filename))
             self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-            self.assertEqual(1, self.directoryCount(self.workingDir))
+            self.assertEqual(1, self.directoryFileCount(self.workingDir))
             self.assertTrue(os.path.exists(os.path.join(backupDir, 'blah.txt')))
             self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
-            self.assertEqual(1, self.directoryCount(backupDir))
+            self.assertEqual(1, self.directoryFileCount(backupDir))
             self.assertEqual('', error)
 
     def test_backup_directory_doesnt_exist(self):
@@ -31,6 +31,6 @@ class TestDirectArguments(NormalizeFilenameTestCase):
             self.invokeDirectly([filename], extraParams=['--backup-directory=' + backupDir])
         self.assertTrue(os.path.exists(filename))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryCount(self.workingDir))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertFalse(os.path.exists(os.path.join(backupDir, 'blah.txt')))
         self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
