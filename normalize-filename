@@ -141,6 +141,9 @@ def process_filename(filename, args):
             return (matchobj.group('year') + "-" +
                     matchobj.group('month') +
                     (("-" + matchobj.group('day')) if matchobj.group('day') is not None else '') +
+                    (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
+                    (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
+                    (("-" + matchobj.group('second')) if matchobj.group('second') is not None else '') +
                     (("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
                     (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
 
@@ -149,7 +152,10 @@ def process_filename(filename, args):
                                              r"(?P<year>(19|20)\d\d)" +
                                              r"[-_]?(?P<month>([01])\d)" +
                                              r"([-_]?(?P<day>([0123])\d))?" +
-                                             r"(?P<suffix>([-_]|T)?.*)$",
+                                             r"(([-_T]| at )(?P<hour>(?:[012]\d)))?"
+                                             r"([.])?(?P<minute>(?:[012345]\d))?"
+                                             r"([.])?(?P<second>(?:[012345]\d))?"
+                                             r"(?P<suffix>.*)$",
                                              replacement,
                                              non_extension)
         basename = basename.strip() + extension
