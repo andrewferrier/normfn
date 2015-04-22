@@ -24,6 +24,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def getDatePrefix(self):
         return datetime.now().strftime("%Y-%m-%d-")
 
+    def getDateAndTimePrefix(self):
+        return datetime.now().strftime("%Y-%m-%dT%H-%M-%S-")
+
     def directoryFileCount(self, directory):
         return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 

@@ -34,3 +34,12 @@ class TestDirectArguments(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertFalse(os.path.exists(os.path.join(backupDir, 'blah.txt')))
         self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
+
+    def test_addtime(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--add-time'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDateAndTimePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)

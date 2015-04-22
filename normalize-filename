@@ -40,6 +40,10 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-a', '--all', action='store_true', dest="all",
                         help="Affect all files, including those that begin with a .")
 
+    parser.add_argument('-t', '--add-time', action='store_true', dest='add_time',
+                        help='If a time is not found in the filename, add one '
+                        'when adding the date prefix.')
+
     parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None,
                         help="Put an original copy of each renamed file into a backup directory.")
 
@@ -176,7 +180,10 @@ def process_filename(filename, args):
             else:
                 timetouse = ctime
 
-        basename = timetouse.strftime("%Y-%m-%d-") + basename
+        if args.add_time:
+            basename = timetouse.strftime("%Y-%m-%dT%H-%M-%S-") + basename
+        else:
+            basename = timetouse.strftime("%Y-%m-%d-") + basename
 
     filename = os.path.join(os.path.dirname(original_filename), basename)
     logger.debug("New filename " + filename)
