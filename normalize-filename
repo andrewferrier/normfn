@@ -138,18 +138,18 @@ def process_filename(filename, args):
 
     if(not args.no_prefix_date):
         def replacement(matchobj):
-            return (matchobj.group(2) + "-" +
-                    matchobj.group(3) +
-                    (("-" + matchobj.group(4)) if matchobj.group(4) is not None else '') +
-                    (("-" + matchobj.group(1)) if matchobj.group(1) != '' else '') +
-                    (matchobj.group(5) if matchobj.group(5) != '' else ''))
+            return (matchobj.group('year') + "-" +
+                    matchobj.group('month') +
+                    (("-" + matchobj.group('day')) if matchobj.group('day') is not None else '') +
+                    (("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
+                    (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
 
         (non_extension, extension) = os.path.splitext(basename)
-        (basename, number_of_subs) = re.subn(r"^(.*?)[-_]?" +
-                                             r"((?:19|20)\d\d)" +
-                                             r"[-_]?((?:[01])\d)" +
-                                             r"(?:[-_]?((?:[0123])\d))?" +
-                                             r"((?:[-_]|T)?.*)$",
+        (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
+                                             r"(?P<year>(19|20)\d\d)" +
+                                             r"[-_]?(?P<month>([01])\d)" +
+                                             r"([-_]?(?P<day>([0123])\d))?" +
+                                             r"(?P<suffix>([-_]|T)?.*)$",
                                              replacement,
                                              non_extension)
         basename = basename.strip() + extension
