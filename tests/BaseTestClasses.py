@@ -16,6 +16,11 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def setUp(self):
         self.workingDir = tempfile.mkdtemp(dir='/tmp')
 
+    def makeSubDirectory(self):
+        subDirectory = os.path.join(self.workingDir, "subDirectory")
+        os.mkdir(subDirectory)
+        return subDirectory
+
     def getDatePrefix(self):
         return datetime.now().strftime("%Y-%m-%d-")
 

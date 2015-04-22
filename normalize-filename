@@ -110,9 +110,16 @@ def main(argv, sysLogHandler, sysErrHandler):
             if os.path.isdir(filename):
                 if not args.no_recursive:
                     for root, dirs, files in os.walk(filename):
-                        logger.debug("Working in directory " + root)
+                        logger.debug("Walking directory tree, working in directory " + root)
                         for sub_filename in files:
                             process_filename(os.path.join(root, sub_filename), args)
+                else:
+                    for item in os.listdir(filename):
+                        fullitem = os.path.join(filename, item)
+                        if os.path.isfile(fullitem):
+                            process_filename(fullitem, args)
+                        else:
+                            logger.info("Skipping subdirectory " + fullitem)
             else:
                 process_filename(filename, args)
     except QuitException:
