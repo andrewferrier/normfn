@@ -138,9 +138,13 @@ def process_filename(filename, args):
         return
 
     def replacement(matchobj):
-        return (matchobj.group('year') + "-" +
-                matchobj.group('month') +
-                (("-" + matchobj.group('day')) if matchobj.group('day') is not None else '') +
+        year = matchobj.group('year') if matchobj.group('year') is not None else matchobj.group('year2')
+        month = matchobj.group('month') if matchobj.group('month') is not None else matchobj.group('month2')
+        day = matchobj.group('day') if matchobj.group('day') is not None else matchobj.group('day2')
+
+        return (year + "-" +
+                month +
+                (("-" + day) if day is not None else '') +
                 (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
                 (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
                 (("-" + matchobj.group('second')) if matchobj.group('second') is not None else '') +
@@ -149,9 +153,12 @@ def process_filename(filename, args):
 
     (non_extension, extension) = os.path.splitext(basename)
     (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
-                                         r"(?P<year>(19|20)\d\d)" +
+                                         r"((?P<year>(19|20)\d\d)" +
                                          r"[-_]?(?P<month>([01])\d)" +
-                                         r"([-_]?(?P<day>([0123])\d))?" +
+                                         r"([-_]?(?P<day>([0123])\d))?|" +
+                                         r"(?P<day2>([0123])\d)" +
+                                         r"-(?P<month2>([01])\d)" +
+                                         r"-(?P<year2>(19|20)\d\d))" +
                                          r"(([-_T\s]|\sat\s)(?P<hour>(?:[012]\d)))?"
                                          r"([.\s])?(?P<minute>(?:[012345]\d))?"
                                          r"([.\s])?(?P<second>(?:[012345]\d))?"

@@ -201,7 +201,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual('', error)
 
     def test_photo(self):
-        filename = os.path.join(self.workingDir, 'Photo 2015-04-03 12 34 56.png')
+        filename = os.path.join(self.workingDir, 'Photo 03-04-2015 12 34 56.png')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
@@ -210,7 +210,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual('', error)
 
     def test_video(self):
-        filename = os.path.join(self.workingDir, 'Video 2015-04-03 12 34 56.mov')
+        filename = os.path.join(self.workingDir, 'Video 03-04-2015 12 34 56.mov')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
