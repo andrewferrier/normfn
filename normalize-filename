@@ -152,9 +152,9 @@ def process_filename(filename, args):
                                              r"(?P<year>(19|20)\d\d)" +
                                              r"[-_]?(?P<month>([01])\d)" +
                                              r"([-_]?(?P<day>([0123])\d))?" +
-                                             r"(([-_T]| at )(?P<hour>(?:[012]\d)))?"
-                                             r"([.])?(?P<minute>(?:[012345]\d))?"
-                                             r"([.])?(?P<second>(?:[012345]\d))?"
+                                             r"(([-_T\s]|\sat\s)(?P<hour>(?:[012]\d)))?"
+                                             r"([.\s])?(?P<minute>(?:[012345]\d))?"
+                                             r"([.\s])?(?P<second>(?:[012345]\d))?"
                                              r"(?P<suffix>.*)$",
                                              replacement,
                                              non_extension)
