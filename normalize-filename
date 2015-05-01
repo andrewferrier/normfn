@@ -40,6 +40,11 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('-a', '--all', action='store_true', dest="all",
                         help="Affect all files, including those that begin with a .")
 
+    parser.add_argument('-f', '--force', action='store_true', dest='force',
+                        help="Overwrite target files even if they already "
+                        "exist (USE WITH CAUTION, consider using --dry-run "
+                        "first)")
+
     parser.add_argument('-t', '--add-time', action='store_true', dest='add_time',
                         help='If a time is not found in the filename, add one '
                         'when adding the date prefix.')
@@ -203,7 +208,7 @@ def process_filename(filename, args):
     logger.debug("New filename " + filename)
 
     if not filename == original_filename:
-        if os.path.exists(filename):
+        if os.path.exists(filename) and not args.force:
             raise FatalException("Want to move " + original_filename + " to " + filename + ", but it already exists.")
 
         move_it = True
