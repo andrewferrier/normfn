@@ -10,6 +10,7 @@ class TestDirectArguments(NormalizeFilenameTestCase):
 
     def test_backup_directory(self):
         with tempfile.TemporaryDirectory(dir='/tmp') as backupDir:
+            self.assertEqual(0, self.directoryFileCount(backupDir))
             filename = os.path.join(self.workingDir, 'blah.txt')
             self.touch(filename)
             error = self.invokeDirectly([filename], extraParams=['--backup-directory=' + backupDir])
@@ -17,6 +18,40 @@ class TestDirectArguments(NormalizeFilenameTestCase):
             self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
             self.assertEqual(1, self.directoryFileCount(self.workingDir))
             self.assertTrue(os.path.exists(os.path.join(backupDir, 'blah.txt')))
+            self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
+            self.assertEqual(1, self.directoryFileCount(backupDir))
+            self.assertEqual('', error)
+
+    def test_backup_directory_file_exists(self):
+        with tempfile.TemporaryDirectory(dir='/tmp') as backupDir:
+            filename = os.path.join(self.workingDir, 'blah.txt')
+            filename2 = os.path.join(backupDir, 'blah.txt')
+            self.writeFile(filename, "original")
+            self.writeFile(filename2, "backup")
+            with self.assertRaisesRegex(Exception, "blah.txt.*exists in.*" + backupDir):
+                self.invokeDirectly([filename], extraParams=['--backup-directory=' + backupDir])
+            self.assertTrue(os.path.exists(filename))
+            self.assertEqual(self.readFile(filename), "original")
+            self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+            self.assertEqual(1, self.directoryFileCount(self.workingDir))
+            self.assertTrue(os.path.exists(filename2))
+            self.assertEqual(self.readFile(filename2), "backup")
+            self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
+            self.assertEqual(1, self.directoryFileCount(backupDir))
+
+    def test_backup_directory_file_exists_with_force(self):
+        with tempfile.TemporaryDirectory(dir='/tmp') as backupDir:
+            filename = os.path.join(self.workingDir, 'blah.txt')
+            filename2 = os.path.join(backupDir, 'blah.txt')
+            self.writeFile(filename, "original")
+            self.writeFile(filename2, "backup")
+            error = self.invokeDirectly([filename], extraParams=['--force', '--backup-directory=' + backupDir])
+            self.assertFalse(os.path.exists(filename))
+            self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+            self.assertEqual(self.readFile(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')), "original")
+            self.assertEqual(1, self.directoryFileCount(self.workingDir))
+            self.assertTrue(os.path.exists(filename2))
+            self.assertEqual(self.readFile(filename2), "original")
             self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
             self.assertEqual(1, self.directoryFileCount(backupDir))
             self.assertEqual('', error)

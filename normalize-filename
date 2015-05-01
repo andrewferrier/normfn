@@ -211,6 +211,13 @@ def process_filename(filename, args):
         if os.path.exists(filename) and not args.force:
             raise FatalException("Want to move " + original_filename + " to " + filename + ", but it already exists.")
 
+        original_basename = os.path.basename(original_filename)
+
+        if (args.backup_directory and
+                os.path.exists(os.path.join(args.backup_directory, original_basename)) and
+                not args.force):
+            raise FatalException(original_basename + " already exists in backup directory " + args.backup_directory + "; not renaming.")
+
         move_it = True
 
         if args.interactive:
