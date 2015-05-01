@@ -98,5 +98,13 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def touch(self, fname):
         open(fname, 'w').close()
 
+    def writeFile(self, fname, contents):
+        with open(fname, 'w') as filename:
+            filename.write(contents)
+
+    def readFile(self, fname):
+        with open(fname, 'r') as filename:
+            return filename.read()
+
     def tearDown(self):
         shutil.rmtree(self.workingDir)

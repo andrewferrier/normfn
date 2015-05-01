@@ -203,6 +203,9 @@ def process_filename(filename, args):
     logger.debug("New filename " + filename)
 
     if not filename == original_filename:
+        if os.path.exists(filename):
+            raise FatalException("Want to move " + original_filename + " to " + filename + ", but it already exists.")
+
         move_it = True
 
         if args.interactive:
