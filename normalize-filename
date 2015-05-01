@@ -167,8 +167,8 @@ def process_filename(filename, args):
                                          r"-(?P<month2>" + MONTH + ")" +
                                          r"-(?P<year2>" + YEAR + "))" +
                                          r"(([-_T\s]|\sat\s)(?P<hour>" + HOUR + ")"
-                                         r"(([-.\s])?(?P<minute>" + MINUTE + ")"
-                                         r"(([-.\s])?(?P<second>" + SECOND + "))?)?)?"
+                                         r"(([-_.\s])?(?P<minute>" + MINUTE + ")"
+                                         r"(([-_.\s])?(?P<second>" + SECOND + "))?)?)?"
                                          r"(?P<suffix>.*)$",
                                          replacement,
                                          non_extension)
