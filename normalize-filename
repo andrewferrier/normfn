@@ -221,7 +221,7 @@ def process_filename(filename, args):
         move_it = True
 
         if args.interactive:
-            move_it = ask_yes_no("Move " + original_filename + " to " + filename + " [y/n/q]?")
+            move_it = ask_yes_no("Move " + original_filename + " to .../" + basename + " [y/n/q]?")
 
         if move_it:
             if not args.dry_run:
