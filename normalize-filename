@@ -165,15 +165,15 @@ def process_filename(filename, args):
     MINUTE = SECOND = r"[012345]\d"
 
     (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
-                                         r"((?P<year>" + YEAR + ")" +
-                                         r"[-_]?(?P<month>" + MONTH + ")" +
-                                         r"([-_]?(?P<day>" + DAY + "))?|" +
-                                         r"(?P<day2>" + DAY + ")" +
-                                         r"-(?P<month2>" + MONTH + ")" +
-                                         r"-(?P<year2>" + YEAR + "))" +
-                                         r"(([-_T\s]|\sat\s)(?P<hour>" + HOUR + ")"
-                                         r"(([-_.\s])?(?P<minute>" + MINUTE + ")"
-                                         r"(([-_.\s])?(?P<second>" + SECOND + "))?)?)?"
+                                         r"((?P<year>" + YEAR + r")" +
+                                         r"[-_]?(?P<month>" + MONTH + r")" +
+                                         r"([-_]?(?P<day>" + DAY + r"))?|" +
+                                         r"(?P<day2>" + DAY + r")" +
+                                         r"-(?P<month2>" + MONTH + r")" +
+                                         r"-(?P<year2>" + YEAR + r"))" +
+                                         r"(([-_T\s]|\sat\s)(?P<hour>" + HOUR + r")"
+                                         r"(([-_.\s])?(?P<minute>" + MINUTE + r")"
+                                         r"(([-_.\s])?(?P<second>" + SECOND + r"))?)?)?"
                                          r"(?P<suffix>.*)$",
                                          replacement,
                                          non_extension)
