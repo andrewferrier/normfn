@@ -13,6 +13,8 @@ import sys
 import termios
 import tty
 
+EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r"])
+
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
 
@@ -38,7 +40,7 @@ def main(argv, sysLogHandler, sysErrHandler):
                         help="Ask about each change before it is done.")
 
     parser.add_argument('-a', '--all', action='store_true', dest="all",
-                        help="Affect all files, including those that begin with a .")
+                        help="Affect all files, including those that by default would be excluded.")
 
     parser.add_argument('-f', '--force', action='store_true', dest='force',
                         help="Overwrite target files even if they already "
@@ -138,9 +140,17 @@ def process_filename(filename, args):
     original_filename = filename
     basename = os.path.basename(filename)
 
-    if basename.startswith(".") and (not args.all):
-        logger.info("Skipping " + filename + " as it begins with .")
-        return
+    if not args.all:
+        match = False
+
+        for EXCLUDE_PATTERN in EXCLUDE_PATTERNS:
+            if re.fullmatch(EXCLUDE_PATTERN, basename):
+                match = True
+                break
+
+        if match:
+            logger.info("Skipping " + filename.strip() + " as it matches pattern " + EXCLUDE_PATTERN)
+            return
 
     def replacement(matchobj):
         year = matchobj.group('year') if matchobj.group('year') is not None else matchobj.group('year2')

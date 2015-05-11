@@ -55,23 +55,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(subDirectory))
         self.assertEqual('', error)
 
-    def test_startswith_period(self):
-        filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
-        self.touch(filename)
-        error = self.invokeDirectly([filename])
-        self.assertTrue(os.path.exists(filename))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual('', error)
-
-    def test_startswith_period_all(self):
-        filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
-        self.touch(filename)
-        error = self.invokeDirectly([filename], extraParams=['--all'])
-        self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-.blah.txt')))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual('', error)
-
     def test_directory(self):
         filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
         self.touch(filename)
@@ -272,11 +255,28 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
-    def test_with_questionmark(self):
+    def test_exclude_startswith_period(self):
+        filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertTrue(os.path.exists(filename))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_exclude_startswith_period_all(self):
+        filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--all'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-.blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_exclude_icon(self):
         filename = os.path.join(self.workingDir, 'Icon\r')
         self.touch(filename)
         error = self.invokeDirectly([filename])
-        self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Icon')))
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Icon')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
