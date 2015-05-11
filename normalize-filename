@@ -209,19 +209,19 @@ def process_filename(filename, args):
 
     if not filename == original_filename:
         if os.path.exists(filename) and not args.force:
-            raise FatalException("Want to move " + original_filename + " to " + filename + ", but it already exists.")
+            raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
 
         original_basename = os.path.basename(original_filename)
 
         if (args.backup_directory and
                 os.path.exists(os.path.join(args.backup_directory, original_basename)) and
                 not args.force):
-            raise FatalException(original_basename + " already exists in backup directory " + args.backup_directory + "; not renaming.")
+            raise FatalException(original_basename.strip() + " already exists in backup directory " + args.backup_directory + "; not renaming.")
 
         move_it = True
 
         if args.interactive:
-            move_it = ask_yes_no("Move " + original_filename + " to .../" + basename + " [y/n/q]?")
+            move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + basename + " [y/n/e/q]?")
 
         if move_it:
             if not args.dry_run:
@@ -233,12 +233,12 @@ def process_filename(filename, args):
                 logger.info(original_filename + " moved to " + filename)
             else:
                 if args.backup_directory:
-                    logger.info("Not creating a backup copy of " + original_filename +
+                    logger.info("Not creating a backup copy of " + original_filename.strip() +
                                 " to " + args.backup_directory + "; dry run.")
 
-                logger.info("Not moving " + original_filename + " to " + filename + "; dry run.")
+                logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
     else:
-        logger.info("No changes to " + original_filename)
+        logger.info("No changes to " + original_filename.strip())
 
 def ask_yes_no(prompt):
     while True:
