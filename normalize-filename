@@ -164,16 +164,20 @@ def process_filename(filename, args):
     HOUR = r"[012]\d"
     MINUTE = SECOND = r"[012345]\d"
 
+    YMD_SEPARATOR = r"[-_\s]"
+    HMS_SEPARATOR = r"[-_.\s]"
+    DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s)"
+
     (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
                                          r"((?P<year>" + YEAR + r")" +
-                                         r"[-_]?(?P<month>" + MONTH + r")" +
-                                         r"([-_]?(?P<day>" + DAY + r"))?|" +
+                                         YMD_SEPARATOR + r"?(?P<month>" + MONTH + r")" +
+                                         r"(" + YMD_SEPARATOR + r"?(?P<day>" + DAY + r"))?|" +
                                          r"(?P<day2>" + DAY + r")" +
                                          r"-(?P<month2>" + MONTH + r")" +
                                          r"-(?P<year2>" + YEAR + r"))" +
-                                         r"(([-_T\s]|\sat\s)(?P<hour>" + HOUR + r")"
-                                         r"(([-_.\s])?(?P<minute>" + MINUTE + r")"
-                                         r"(([-_.\s])?(?P<second>" + SECOND + r"))?)?)?"
+                                         r"(" + DATE_TIME_SEPARATOR + r"(?P<hour>" + HOUR + r")"
+                                         r"((" + HMS_SEPARATOR + r")?(?P<minute>" + MINUTE + r")"
+                                         r"((" + HMS_SEPARATOR + r")?(?P<second>" + SECOND + r"))?)?)?"
                                          r"(?P<suffix>.*)$",
                                          replacement,
                                          non_extension)

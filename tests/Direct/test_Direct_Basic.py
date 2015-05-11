@@ -263,6 +263,15 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_spaces(self):
+        filename = os.path.join(self.workingDir, '2008 11 08 15 35 02 xyz.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2008-11-08T15-35-02 xyz.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_with_questionmark(self):
         filename = os.path.join(self.workingDir, 'Icon\r')
         self.touch(filename)
