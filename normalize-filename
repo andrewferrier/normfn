@@ -15,7 +15,10 @@ import tty
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", ".*\.lo?ck"])
 
-FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*"])
+FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
+                                       r".*\.svn/.*",
+                                       r".*\.hg/.*",
+                                       r".*\.bzr/.*"])
 
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
