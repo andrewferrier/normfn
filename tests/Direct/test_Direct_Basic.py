@@ -298,3 +298,21 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Icon')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
+
+    def test_exclude_lock(self):
+        filename = os.path.join(self.workingDir, 'blah.lck')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.lck')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_exclude_lock_nomatch(self):
+        filename = os.path.join(self.workingDir, 'blah.lck.blah')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.lck.blah')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)

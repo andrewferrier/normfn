@@ -13,7 +13,7 @@ import sys
 import termios
 import tty
 
-EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r"])
+EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", ".*\.lo?ck"])
 
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
