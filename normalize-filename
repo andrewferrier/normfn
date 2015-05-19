@@ -169,9 +169,9 @@ def process_filename(filename, args):
     (non_extension, extension) = os.path.splitext(basename)
 
     YEAR = r"(19|20)\d\d"
-    MONTH = r"[01]\d"
-    DAY = r"[0123]\d"
-    HOUR = r"[012]\d"
+    MONTH = r"(0\d|1[012])"
+    DAY = r"([012]\d|3[01])"
+    HOUR = r"([01]\d|2[0123])"
     MINUTE = SECOND = r"[012345]\d"
 
     YMD_SEPARATOR = r"[-_\s]?"
