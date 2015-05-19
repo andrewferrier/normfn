@@ -1,0 +1,9 @@
+Package: normalize-filename
+Version: 0.1
+Section: base
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: Andrew Ferrier <andrew.ferrier@example.com>
+Description: Utility which normalizes filenames.
+ Utility which normalizes filenames.
