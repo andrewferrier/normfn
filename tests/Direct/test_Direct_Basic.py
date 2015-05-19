@@ -316,3 +316,30 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.lck.blah')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
+
+    def test_exclude_git_file(self):
+        filename = os.path.join(self.workingDir, '.git/bling/blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, '.git/bling', self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, '.git/bling')))
+        self.assertEqual('', error)
+
+    def test_exclude_nongit_file(self):
+        filename = os.path.join(self.workingDir, 'xyz/bling/blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, 'xyz/bling', self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'xyz/bling')))
+        self.assertEqual('', error)
+
+    def test_exclude_subgit_file(self):
+        filename = os.path.join(self.workingDir, 'xyz/.git/bling/blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, 'xyz/.git/bling', self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'xyz/.git/bling')))
+        self.assertEqual('', error)

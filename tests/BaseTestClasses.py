@@ -96,6 +96,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         return (p.returncode, output, error)
 
     def touch(self, fname):
+        os.makedirs(os.path.dirname(fname), exist_ok=True)
         open(fname, 'w').close()
 
     def writeFile(self, fname, contents):

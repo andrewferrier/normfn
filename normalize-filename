@@ -13,7 +13,9 @@ import sys
 import termios
 import tty
 
-EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", ".*\.lo?ck"])
+BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", ".*\.lo?ck"])
+
+FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*"])
 
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
@@ -143,10 +145,16 @@ def process_filename(filename, args):
     if not args.all:
         match = False
 
-        for EXCLUDE_PATTERN in EXCLUDE_PATTERNS:
+        for EXCLUDE_PATTERN in BASENAME_EXCLUDE_PATTERNS:
             if re.fullmatch(EXCLUDE_PATTERN, basename):
                 match = True
                 break
+
+        if not match:
+            for EXCLUDE_PATTERN in FULLNAME_EXCLUDE_PATTERNS:
+                if re.fullmatch(EXCLUDE_PATTERN, filename):
+                    match = True
+                    break
 
         if match:
             logger.info("Skipping " + filename.strip() + " as it matches pattern " + EXCLUDE_PATTERN)
