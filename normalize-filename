@@ -20,6 +20,8 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
                                        r".*\.hg/.*",
                                        r".*\.bzr/.*"])
 
+YEAR = ""
+
 def main(argv, sysLogHandler, sysErrHandler):
     logger = logging.getLogger('normalize-filename')
 
@@ -61,6 +63,12 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
                         help="Don't recurse into subdirectories of any directories specified on the command line.")
+
+    parser.add_argument('--max-years-ahead', type=int, dest='max_years_ahead', default=5,
+                        help='Consider years in filenames further ahead than this number to be invalid. Defaults to 5.')
+
+    parser.add_argument('--max-years-behind', type=int, dest='max_years_behind', default=30,
+                        help='Consider years in filenames further behind than this number to be invalid. Defaults to 30.')
 
     time_option = parser.add_mutually_exclusive_group()
 
@@ -114,6 +122,12 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     if args.backup_directory and not os.path.exists(args.backup_directory):
         raise FatalException("Backup directory " + args.backup_directory + " does not exist.")
+
+    global YEAR
+
+    year_now = datetime.now().year
+    year_list = [str(year) for year in range(year_now - args.max_years_behind, year_now + args.max_years_ahead)]
+    YEAR = r"(" + '|'.join(year_list) + r")"
 
     try:
         for filename in args.filenames:
@@ -179,7 +193,6 @@ def process_filename(filename, args):
 
     (non_extension, extension) = os.path.splitext(basename)
 
-    YEAR = r"(19|20)\d\d"
     MONTH = r"(0\d|1[012])"
     DAY = r"([012]\d|3[01])"
     HOUR = r"([01]\d|2[0123])"
