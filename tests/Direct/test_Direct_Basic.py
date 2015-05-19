@@ -18,12 +18,11 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual('', error)
 
     def test_directory_norecursive(self):
-        subDirectory = self.makeSubDirectory()
         filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
         self.touch(filename)
         filename2 = os.path.join(self.workingDir, 'xyz-2015-03-04.txt')
         self.touch(filename2)
-        filename3 = os.path.join(subDirectory, 'abc-2015-03-04.txt')
+        filename3 = os.path.join(self.workingDir, 'subdirectory', 'abc-2015-03-04.txt')
         self.touch(filename3)
         error = self.invokeDirectly([self.workingDir], extraParams=['--no-recursive'])
         self.assertFalse(os.path.exists(filename))
@@ -31,18 +30,17 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(filename2))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-03-04-xyz.txt')))
         self.assertTrue(os.path.exists(filename3))
-        self.assertFalse(os.path.exists(os.path.join(subDirectory, '2015-03-04-abc.txt')))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, 'subdirectory', '2015-03-04-abc.txt')))
         self.assertEqual(2, self.directoryFileCount(self.workingDir))
-        self.assertEqual(1, self.directoryFileCount(subDirectory))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'subdirectory')))
         self.assertEqual('', error)
 
     def test_directory_recursive(self):
-        subDirectory = self.makeSubDirectory()
         filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
         self.touch(filename)
         filename2 = os.path.join(self.workingDir, 'xyz-2015-03-04.txt')
         self.touch(filename2)
-        filename3 = os.path.join(subDirectory, 'abc-2015-03-04.txt')
+        filename3 = os.path.join(self.workingDir, 'subdirectory', 'abc-2015-03-04.txt')
         self.touch(filename3)
         error = self.invokeDirectly([self.workingDir])
         self.assertFalse(os.path.exists(filename))
@@ -50,9 +48,9 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(filename2))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-03-04-xyz.txt')))
         self.assertFalse(os.path.exists(filename3))
-        self.assertTrue(os.path.exists(os.path.join(subDirectory, '2015-03-04-abc.txt')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, 'subdirectory', '2015-03-04-abc.txt')))
         self.assertEqual(2, self.directoryFileCount(self.workingDir))
-        self.assertEqual(1, self.directoryFileCount(subDirectory))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'subdirectory')))
         self.assertEqual('', error)
 
     def test_directory(self):
