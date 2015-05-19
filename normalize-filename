@@ -55,7 +55,7 @@ def main(argv, sysLogHandler, sysErrHandler):
                         help="Put an original copy of each renamed file into a backup directory.")
 
     parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
-                        help="Don't recurse into subdirectories of the directories specified on the command line.")
+                        help="Don't recurse into subdirectories of any directories specified on the command line.")
 
     time_option = parser.add_mutually_exclusive_group()
 
@@ -113,7 +113,7 @@ def main(argv, sysLogHandler, sysErrHandler):
     try:
         for filename in args.filenames:
             if not os.path.exists(filename):
-                raise FatalException(filename + " does not exist")
+                raise FatalException(filename + " specified on the command line does not exist.")
 
             if os.path.isdir(filename):
                 if not args.no_recursive:
