@@ -9,6 +9,26 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
     def setUp(self):
         super(TestDirectFrozenTime, self).setUp()
 
+    @freeze_time("2015-02-03 10:11:12")
+    def test_basicdateprefix(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--now'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-02-03-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    @freeze_time("2015-02-03 10:11:12")
+    def test_basicdateprefix(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--add-time', '--now'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-02-03T10-11-12-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     @freeze_time("2015-02-03 10:10:10")
     def test_ok_behind(self):
         filename = os.path.join(self.workingDir, 'blah-1990-02-03.txt')
