@@ -73,6 +73,19 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('--max-years-behind', type=int, dest='max_years_behind', default=30,
                         help='Consider years in filenames further behind than this number to be invalid. Defaults to 30.')
 
+    log_option = parser.add_mutually_exclusive_group()
+
+    log_option.add_argument('--undo-log-file', type=str, dest='undo_log_file',
+                            help="Specify the name of the shell script used to log "
+                            "'undo commands' for normalize-filename; see the "
+                            "instructions at the head of this file for more "
+                            "information on use. Defaults to "
+                            "~/.normalize-file-undo.log.sh")
+
+    log_option.add_argument('--no-undo-log-file', dest='no_undo_log_file',
+                            action='store_true', help="Inverse of "
+                            "--undo-log-file; don't store any undo commands.")
+
     time_option = parser.add_mutually_exclusive_group()
 
     time_option.add_argument('--now', action='store_const', dest="time_option", const="now",
@@ -91,7 +104,8 @@ def main(argv, sysLogHandler, sysErrHandler):
                              "have a date and time. This is the default if you "
                              "don't specify --now or --latest.")
 
-    parser.set_defaults(time_option="earliest")
+    parser.set_defaults(time_option="earliest",
+                        undo_log_file=os.path.join(os.path.expanduser('~'), '.normalize-filename-undo.log.sh'))
 
     class FilenamesAction(argparse.Action):
         def __call__(self, parser, args, values, option=None):
@@ -123,8 +137,13 @@ def main(argv, sysLogHandler, sysErrHandler):
         else:
             sysErrHandler.setLevel(logging.WARNING)
 
+    logger.debug("Arguments are: " + str(args))
+
     if args.backup_directory and not os.path.exists(args.backup_directory):
         raise FatalException("Backup directory " + args.backup_directory + " does not exist.")
+
+    if args.no_undo_log_file:
+        args.undo_log_file = None
 
     global YEAR
 
@@ -264,11 +283,9 @@ def process_filename(filename, args):
             if not args.dry_run:
                 if args.backup_directory:
                     assert(not(os.path.isdir(original_filename)))
-                    shutil.copy(original_filename, args.backup_directory)
-                    logger.info(original_filename + " copied to " + filename)
+                    shiftfile(args, original_filename, args.backup_directory)
 
-                shutil.move(original_filename, filename)
-                logger.info(original_filename + " moved to " + filename)
+                shiftfile(args, original_filename, filename, move=True)
             else:
                 if args.backup_directory:
                     assert(not(os.path.isdir(original_filename)))
@@ -299,6 +316,28 @@ def rlinput(prompt, prefill=''):
         return input(prompt)
     finally:
         readline.set_startup_hook()
+
+def shiftfile(args, source, target, move=False):
+    logger = logging.getLogger("normalize-filename")
+
+    source = os.path.abspath(source)
+    target = os.path.abspath(target)
+
+    if move:
+        shutil.move(source, target)
+        if args.undo_log_file:
+            with open(args.undo_log_file, "a") as log_file:
+                log_file.write("# Was moving " + source + " to " + target + "\n")
+                log_file.write("mv " + target + " " + source + "\n")
+        logger.info(source + " moved to " + target)
+    else:
+        assert(os.path.isdir(target))
+        shutil.copy(source, target)
+        if args.undo_log_file:
+            with open(args.undo_log_file, "a") as log_file:
+                log_file.write("# Was copying " + source + " to non-existent " + target + "\n")
+                log_file.write("mv " + target + " " + source + "\n")
+        logger.info(source + " copied to " + target)
 
 def ask_yes_no(prompt):
     while True:
