@@ -100,10 +100,13 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             return (p.returncode, output, error)
 
     def executeUndoCommands(self, commands):
-        commands.reverse()
-        for command in commands:
+        maxReturnCode = 0
+        reversed_commands = commands
+        reversed_commands.reverse()
+        for command in reversed_commands:
             command = command.rstrip("\n\r")
-            return call(command, shell=True)
+            maxReturnCode = max(maxReturnCode, call(command, shell=True))
+        return maxReturnCode
 
     @contextmanager
     def invokeAsPexpect(self, inputFiles, extraParams=[], expectedExitStatus=None, expectedOutputRegex=None):
