@@ -20,7 +20,7 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
         self.assertEqual('', error)
 
     @freeze_time("2015-02-03 10:11:12")
-    def test_basicdateprefix(self):
+    def test_basicdateprefix_add_time(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
         error = self.invokeDirectly([filename], extraParams=['--add-time', '--now'])
