@@ -1,10 +1,13 @@
 from datetime import datetime
 from subprocess import Popen, PIPE
+from contextlib import contextmanager
 import inspect
 import io
 import logging
+import sys
 import os
 import os.path
+import pexpect
 import shutil
 import tempfile
 import unittest
@@ -89,6 +92,30 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             self.assertEqual("", output)
 
         return (p.returncode, output, error)
+
+    @contextmanager
+    def invokeAsPexpect(self, inputFiles, extraParams=[], expectedExitStatus=None, expectedOutputRegex=None):
+        options = [NormalizeFilenameTestCase.COMMAND]
+        options.extend(inputFiles)
+        options.extend(extraParams)
+
+        command = ' '.join(options)
+
+        stream = io.BytesIO()
+
+        child = pexpect.spawn(command)
+        child.logfile_read = stream
+
+        yield child
+
+        child.expect(pexpect.EOF)
+        child.close()
+
+        if expectedExitStatus is not None:
+            self.assertEqual(expectedExitStatus, child.exitstatus)
+
+        if expectedOutputRegex is not None:
+            self.assertRegex(str(child.logfile_read.getvalue(), 'utf-8'), expectedOutputRegex)
 
     def touch(self, fname):
         os.makedirs(os.path.dirname(fname), exist_ok=True)

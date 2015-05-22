@@ -1,4 +1,5 @@
 import os
+import pexpect
 import re
 
 from tests.BaseTestClasses import NormalizeFilenameTestCase
@@ -195,3 +196,20 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual(3, self.directoryFileCount(self.workingDir))
         self.assertRegex(output, '(?is)Move ' + re.escape(filename) + '.*Move ' + re.escape(filename2) + '.*')
         self.assertEqual('', error)
+
+    def test_basicdateprefix_interactive_edit(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        with self.invokeAsPexpect([filename], extraParams=['--interactive'],
+                                  expectedExitStatus=0,
+                                  expectedOutputRegex='Move ' + re.escape(filename) + '.*') as child:
+            child.expect(']? ')
+            child.send('e')
+            child.expect("filename\? ")
+            for i in range(19):
+                child.sendcontrol('H')
+            child.send('bling.txt\n')
+
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, 'bling.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))

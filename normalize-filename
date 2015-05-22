@@ -7,7 +7,9 @@ import coloredlogs
 import logging
 import logging.handlers
 import os.path
+import pexpect
 import re
+import readline
 import shutil
 import sys
 import termios
@@ -246,20 +248,19 @@ def process_filename(filename, args):
     logger.debug("New filename " + filename)
 
     if not filename == original_filename:
-        if os.path.exists(filename) and not args.force:
-            raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
-
-        original_basename = os.path.basename(original_filename)
-
-        if (args.backup_directory and
-                os.path.exists(os.path.join(args.backup_directory, original_basename)) and
-                not args.force):
-            raise FatalException(original_basename.strip() + " already exists in backup directory " + args.backup_directory + "; not renaming.")
+        validate_move(args, original_filename, filename)
 
         move_it = True
 
         if args.interactive:
             move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + basename + " [y/n/e/q]?")
+            if move_it == b'e':
+                new_filename = rlinput("What new filename? ", basename)
+                new_filename = os.path.join(os.path.dirname(original_filename), new_filename)
+                validate_move(args, original_filename, new_filename)
+                filename = new_filename
+            else:
+                move_it = True if move_it == b'y' else False
 
         if move_it:
             if not args.dry_run:
@@ -278,6 +279,24 @@ def process_filename(filename, args):
     else:
         logger.info("No changes to " + original_filename.strip())
 
+def validate_move(args, original_filename, filename):
+    if os.path.exists(filename) and not args.force:
+        raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
+
+    original_basename = os.path.basename(original_filename)
+
+    if (args.backup_directory and
+            os.path.exists(os.path.join(args.backup_directory, original_basename)) and
+            not args.force):
+        raise FatalException(original_basename.strip() + " already exists in backup directory " + args.backup_directory + "; not renaming.")
+
+def rlinput(prompt, prefill=''):
+    readline.set_startup_hook(lambda: readline.insert_text(prefill))
+    try:
+        return input(prompt)
+    finally:
+        readline.set_startup_hook()
+
 def ask_yes_no(prompt):
     while True:
         print(prompt, end="", flush=True)
@@ -287,9 +306,11 @@ def ask_yes_no(prompt):
             raise QuitException()
         print(str(key, "utf-8"))
         if key == b'y':
-            return True
+            return key
         elif key == b'n':
-            return False
+            return key
+        elif key == b'e':
+            return key
         elif key == b'q':
             raise QuitException()
 
