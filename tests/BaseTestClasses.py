@@ -122,6 +122,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         open(fname, 'w').close()
 
     def writeFile(self, fname, contents):
+        os.makedirs(os.path.dirname(fname), exist_ok=True)
         with open(fname, 'w') as filename:
             filename.write(contents)
 

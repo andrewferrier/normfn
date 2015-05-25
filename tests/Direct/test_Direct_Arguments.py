@@ -70,7 +70,7 @@ class TestDirectArguments(NormalizeFilenameTestCase):
             self.assertEqual(1, self.directoryFileCount(backupDir))
             self.assertEqual('', error)
 
-    def two_same_named_source_with_backup(self):
+    def test_two_same_named_source_with_backup(self):
         with tempfile.TemporaryDirectory(dir='/tmp') as backupDir:
             filename = os.path.join(self.workingDir, 'abc', 'blah.txt')
             filename2 = os.path.join(self.workingDir, 'def', 'blah.txt')
