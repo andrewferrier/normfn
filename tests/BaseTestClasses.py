@@ -4,7 +4,6 @@ from contextlib import contextmanager
 import inspect
 import io
 import logging
-import sys
 import os
 import os.path
 import pexpect

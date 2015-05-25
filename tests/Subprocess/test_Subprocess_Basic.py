@@ -1,5 +1,4 @@
 import os
-import pexpect
 import re
 
 from tests.BaseTestClasses import NormalizeFilenameTestCase
