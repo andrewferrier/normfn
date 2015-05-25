@@ -341,3 +341,12 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, 'xyz/.git/bling', self.getDatePrefix() + 'blah.txt')))
         self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'xyz/.git/bling')))
         self.assertEqual('', error)
+
+    def test_standardeuropeandate(self):
+        filename = os.path.join(self.workingDir, 'European XYZ 16052014.pptx')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2014-05-16-European XYZ.pptx')))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir)))
+        self.assertEqual('', error)

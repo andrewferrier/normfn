@@ -209,8 +209,8 @@ def process_filename(filename, args):
                                          YMD_SEPARATOR + r"(?P<month>" + MONTH + r")" +
                                          r"(" + YMD_SEPARATOR + r"(?P<day>" + DAY + r"))?|" +
                                          r"(?P<day2>" + DAY + r")" +
-                                         r"-(?P<month2>" + MONTH + r")" +
-                                         r"-(?P<year2>" + YEAR + r"))" +
+                                         YMD_SEPARATOR + r"(?P<month2>" + MONTH + r")" +
+                                         YMD_SEPARATOR + r"(?P<year2>" + YEAR + r"))" +
                                          r"(" + DATE_TIME_SEPARATOR + r"(?P<hour>" + HOUR + r")"
                                          r"(" + HMS_SEPARATOR + r"(?P<minute>" + MINUTE + r")"
                                          r"(" + HMS_SEPARATOR + r"(?P<second>" + SECOND + r"))?)?)?"
