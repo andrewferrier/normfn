@@ -350,3 +350,12 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2014-05-16-European XYZ.pptx')))
         self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir)))
         self.assertEqual('', error)
+
+    def test_basicdateprefix_dryrun(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--dry-run'])
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)

@@ -22,6 +22,20 @@ class TestDirectArguments(NormalizeFilenameTestCase):
             self.assertEqual(1, self.directoryFileCount(backupDir))
             self.assertEqual('', error)
 
+    def test_backup_directory_dryrun(self):
+        with tempfile.TemporaryDirectory(dir='/tmp') as backupDir:
+            self.assertEqual(0, self.directoryFileCount(backupDir))
+            filename = os.path.join(self.workingDir, 'blah.txt')
+            self.touch(filename)
+            error = self.invokeDirectly([filename], extraParams=['--dry-run', '--backup-directory=' + backupDir])
+            self.assertTrue(os.path.exists(filename))
+            self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+            self.assertEqual(1, self.directoryFileCount(self.workingDir))
+            self.assertFalse(os.path.exists(os.path.join(backupDir, 'blah.txt')))
+            self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
+            self.assertEqual(0, self.directoryFileCount(backupDir))
+            self.assertEqual('', error)
+
     def test_backup_directory_file_exists(self):
         with tempfile.TemporaryDirectory(dir='/tmp') as backupDir:
             filename = os.path.join(self.workingDir, 'blah.txt')

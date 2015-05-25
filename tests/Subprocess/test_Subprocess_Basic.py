@@ -20,17 +20,6 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertEqual('', output)
         self.assertEqual('', error)
 
-    def test_basicdateprefix_dryrun(self):
-        filename = os.path.join(self.workingDir, 'blah.txt')
-        self.touch(filename)
-        (rc, output, error) = self.invokeAsSubprocess([filename], extraParams=['--dry-run'])
-        self.assertEqual(0, rc)
-        self.assertTrue(os.path.exists(filename))
-        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual('', output)
-        self.assertEqual('', error)
-
     def test_basicdateprefix_cwd(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)

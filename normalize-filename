@@ -229,15 +229,9 @@ def process_filename(filename, args):
         if(args.time_option == "now"):
             timetouse = datetime.now()
         elif(args.time_option == "earliest"):
-            if(ctime < mtime):
-                timetouse = ctime
-            else:
-                timetouse = mtime
+            timetouse = min(ctime, mtime)
         else:
-            if(ctime < mtime):
-                timetouse = mtime
-            else:
-                timetouse = ctime
+            timetouse = max(ctime, mtime)
 
         if args.add_time:
             basename = timetouse.strftime("%Y-%m-%dT%H-%M-%S-") + basename
