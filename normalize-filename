@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from datetime import datetime
 from sys import platform as _platform
 import argparse
@@ -131,7 +132,7 @@ def main(argv, sysLogHandler, sysErrHandler):
     year_list = [str(year) for year in range(year_now - args.max_years_behind, year_now + args.max_years_ahead)]
     YEAR = r"(" + '|'.join(year_list) + r")"
 
-    try:
+    with suppress(QuitException):
         for filename in args.filenames:
             if not os.path.exists(filename):
                 raise FatalException(filename + " specified on the command line does not exist.")
@@ -151,8 +152,6 @@ def main(argv, sysLogHandler, sysErrHandler):
                             logger.info("Skipping subdirectory " + fullitem)
             else:
                 process_filename(filename, args)
-    except QuitException:
-        pass
 
 def process_filename(filename, args):
     logger = logging.getLogger("normalize-filename")
