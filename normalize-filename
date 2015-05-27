@@ -64,8 +64,8 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None,
                         help="Put an original copy of each renamed file into a backup directory.")
 
-    parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
-                        help="Don't recurse into subdirectories of any directories specified on the command line.")
+    parser.add_argument('-r', '--recursive', action='store_true', dest="recursive", default=False,
+                        help="Recurse into directories specified on the command line.")
 
     parser.add_argument('--max-years-ahead', type=int, dest='max_years_ahead', default=5,
                         help='Consider years in filenames further ahead than this number to be invalid. Defaults to 5.')
@@ -138,7 +138,7 @@ def main(argv, sysLogHandler, sysErrHandler):
                 raise FatalException(filename + " specified on the command line does not exist.")
 
             if os.path.isdir(filename):
-                if not args.no_recursive:
+                if args.recursive:
                     for root, dirs, files in os.walk(filename):
                         logger.debug("Walking directory tree, working in directory " + root)
                         for sub_filename in files:
