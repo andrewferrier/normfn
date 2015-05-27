@@ -107,15 +107,6 @@ class TestDirectArguments(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(os.path.join(backupDir, 'blah.txt')))
         self.assertFalse(os.path.exists(os.path.join(backupDir, self.getDatePrefix() + 'blah.txt')))
 
-    def test_addtime(self):
-        filename = os.path.join(self.workingDir, 'blah.txt')
-        self.touch(filename)
-        error = self.invokeDirectly([filename], extraParams=['--add-time'])
-        self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDateAndTimePrefix() + 'blah.txt')))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual('', error)
-
     def test_targetfile_exists_with_force(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.writeFile(filename, "original")

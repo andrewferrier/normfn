@@ -108,3 +108,13 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-04-05-blah-1930-02-03.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
+
+    @freeze_time("2015-04-05 10:11:12")
+    def test_addtime(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--add-time', '--now'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-04-05T10-11-12-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
