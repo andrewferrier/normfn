@@ -129,5 +129,11 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         with open(fname, 'r') as filename:
             return filename.read()
 
+    def assertPathDoesntExist(self, path):
+        self.assertFalse(os.path.exists(path))
+
+    def assertPathExists(self, path):
+        self.assertTrue(os.path.exists(path))
+
     def tearDown(self):
         shutil.rmtree(self.workingDir)

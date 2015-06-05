@@ -17,6 +17,12 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_path_normalization(self):
+        subdirectory = os.path.join(self.workingDir, 'subdirectory')
+        os.makedirs(subdirectory, exist_ok=True)
+        self.invokeDirectly([subdirectory + "/"])
+        self.assertPathExists(os.path.join(self.workingDir, self.getDatePrefix() + 'subdirectory'))
+
     def test_directory_norecursive(self):
         filename = os.path.join(self.workingDir, 'blah_2015_01_01_bling.txt')
         self.touch(filename)
