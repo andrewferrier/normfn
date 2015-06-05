@@ -263,6 +263,7 @@ def process_filename(filename, args):
         if move_it:
             if not args.dry_run:
                 if args.backup_directory:
+                    assert(not(os.path.isdir(original_filename)))
                     shutil.copy(original_filename, args.backup_directory)
                     logger.info(original_filename + " copied to " + filename)
 
@@ -270,6 +271,7 @@ def process_filename(filename, args):
                 logger.info(original_filename + " moved to " + filename)
             else:
                 if args.backup_directory:
+                    assert(not(os.path.isdir(original_filename)))
                     logger.info("Not creating a backup copy of " + original_filename.strip() +
                                 " to " + args.backup_directory + "; dry run.")
 
