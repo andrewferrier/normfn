@@ -64,8 +64,8 @@ def main(argv, sysLogHandler, sysErrHandler):
     parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None,
                         help="Put an original copy of each renamed file into a backup directory.")
 
-    parser.add_argument('--no-recursive', action='store_true', dest="no_recursive", default=False,
-                        help="Don't recurse into subdirectories of any directories specified on the command line.")
+    parser.add_argument('-r', '--recursive', action='store_true', dest="recursive", default=False,
+                        help="Recurse into directories specified on the command line.")
 
     parser.add_argument('--max-years-ahead', type=int, dest='max_years_ahead', default=5,
                         help='Consider years in filenames further ahead than this number to be invalid. Defaults to 5.')
@@ -134,24 +134,29 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     with suppress(QuitException):
         for filename in args.filenames:
+            filename = os.path.normpath(filename)
             if not os.path.exists(filename):
                 raise FatalException(filename + " specified on the command line does not exist.")
 
-            if os.path.isdir(filename):
-                if not args.no_recursive:
-                    for root, dirs, files in os.walk(filename):
-                        logger.debug("Walking directory tree, working in directory " + root)
-                        for sub_filename in files:
-                            process_filename(os.path.join(root, sub_filename), args)
-                else:
-                    for item in os.listdir(filename):
-                        fullitem = os.path.join(filename, item)
-                        if os.path.isfile(fullitem):
-                            process_filename(fullitem, args)
-                        else:
-                            logger.info("Skipping subdirectory " + fullitem)
+            if os.path.isdir(filename) and args.recursive:
+                new_filename = process_filename(filename, args)
+                walk_tree(new_filename, args)
             else:
                 process_filename(filename, args)
+
+def walk_tree(dirname, args):
+    logger = logging.getLogger("normalize-filename")
+
+    assert(os.path.isdir(dirname))
+    logger.debug("Walking directory tree " + dirname)
+    dirlist = sorted(os.listdir(dirname))
+
+    for entry in dirlist:
+        entry = os.path.join(dirname, entry)
+
+        entry = process_filename(entry, args)
+        if(os.path.isdir(entry)):
+            walk_tree(entry, args)
 
 def process_filename(filename, args):
     logger = logging.getLogger("normalize-filename")
@@ -258,6 +263,7 @@ def process_filename(filename, args):
         if move_it:
             if not args.dry_run:
                 if args.backup_directory:
+                    assert(not(os.path.isdir(original_filename)))
                     shutil.copy(original_filename, args.backup_directory)
                     logger.info(original_filename + " copied to " + filename)
 
@@ -265,12 +271,16 @@ def process_filename(filename, args):
                 logger.info(original_filename + " moved to " + filename)
             else:
                 if args.backup_directory:
+                    assert(not(os.path.isdir(original_filename)))
                     logger.info("Not creating a backup copy of " + original_filename.strip() +
                                 " to " + args.backup_directory + "; dry run.")
 
                 logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
+
+        return filename
     else:
         logger.info("No changes to " + original_filename.strip())
+        return original_filename
 
 def validate_move(args, original_filename, filename):
     if os.path.exists(filename) and not args.force:
