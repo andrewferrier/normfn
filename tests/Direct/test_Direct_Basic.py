@@ -302,6 +302,15 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_dots(self):
+        filename = os.path.join(self.workingDir, 'blah 02.04.2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-04-02-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_exclude_startswith_period(self):
         filename = os.path.join(self.workingDir, '.blah-2015_01_01.txt')
         self.touch(filename)

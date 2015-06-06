@@ -204,7 +204,7 @@ def process_filename(filename, args):
     HOUR = r"([01]\d|2[0123])"
     MINUTE = SECOND = r"[012345]\d"
 
-    YMD_SEPARATOR = r"[-_\s]?"
+    YMD_SEPARATOR = r"[-_.\s]?"
     HMS_SEPARATOR = r"[-_.\s]?"
     DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s)"
 
