@@ -1,5 +1,5 @@
 from datetime import datetime
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, call
 from contextlib import contextmanager
 import inspect
 import io
@@ -43,6 +43,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         options.extend(inputFiles)
         options.extend(extraParams)
+        options.extend(['--no-undo-log-file'])
 
         stream = io.StringIO()
         handler = logging.StreamHandler(stream)
@@ -64,39 +65,55 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         return error
 
-    def invokeAsSubprocess(self, inputFiles, extraParams=[], feedInput=None, cwd=None, expectOutput=False):
+    def invokeAsSubprocess(self, inputFiles, extraParams=[], feedInput=None, cwd=None, expectOutput=False, useUndoFile=False):
         if cwd is None:
             cwd = self.workingDir
 
-        options = [NormalizeFilenameTestCase.COMMAND]
+        with tempfile.NamedTemporaryFile() as undo_log_file:
+            options = [NormalizeFilenameTestCase.COMMAND]
+            options.extend(inputFiles)
+            options.extend(extraParams)
+            options.extend(['--undo-log-file=' + undo_log_file.name])
 
-        options.extend(inputFiles)
+            if feedInput:
+                p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)
+            else:
+                p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)
 
-        options.extend(extraParams)
+            output, error = p.communicate(feedInput)
+            p.wait()
 
-        if feedInput:
-            p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)
+            output = str(output, "utf-8")
+            error = str(error, "utf-8")
+
+            if expectOutput:
+                self.assertNotEqual("", output)
+            else:
+                self.assertEqual("", output)
+
+            with open(undo_log_file.name) as undo_log_file_read:
+                undo_log_file_contents = undo_log_file_read.readlines()
+
+        if useUndoFile:
+            return (p.returncode, output, error, undo_log_file_contents)
         else:
-            p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)
+            return (p.returncode, output, error)
 
-        output, error = p.communicate(feedInput)
-        p.wait()
-
-        output = str(output, "utf-8")
-        error = str(error, "utf-8")
-
-        if expectOutput:
-            self.assertNotEqual("", output)
-        else:
-            self.assertEqual("", output)
-
-        return (p.returncode, output, error)
+    def executeUndoCommands(self, commands):
+        maxReturnCode = 0
+        reversed_commands = commands
+        reversed_commands.reverse()
+        for command in reversed_commands:
+            command = command.rstrip("\n\r")
+            maxReturnCode = max(maxReturnCode, call(command, shell=True))
+        return maxReturnCode
 
     @contextmanager
     def invokeAsPexpect(self, inputFiles, extraParams=[], expectedExitStatus=None, expectedOutputRegex=None):
         options = [NormalizeFilenameTestCase.COMMAND]
         options.extend(inputFiles)
         options.extend(extraParams)
+        options.extend(['--no-undo-log-file'])
 
         command = ' '.join(options)
 
