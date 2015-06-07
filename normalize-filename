@@ -61,9 +61,6 @@ def main(argv, sysLogHandler, sysErrHandler):
                         help='If a time is not found in the filename, add one '
                         'when adding the date prefix.')
 
-    parser.add_argument('--backup-directory', type=str, dest="backup_directory", default=None,
-                        help="Put an original copy of each renamed file into a backup directory.")
-
     parser.add_argument('-r', '--recursive', action='store_true', dest="recursive", default=False,
                         help="Recurse into directories specified on the command line.")
 
@@ -138,9 +135,6 @@ def main(argv, sysLogHandler, sysErrHandler):
             sysErrHandler.setLevel(logging.WARNING)
 
     logger.debug("Arguments are: " + str(args))
-
-    if args.backup_directory and not os.path.exists(args.backup_directory):
-        raise FatalException("Backup directory " + args.backup_directory + " does not exist.")
 
     if args.no_undo_log_file:
         args.undo_log_file = None
@@ -281,17 +275,8 @@ def process_filename(filename, args):
 
         if move_it:
             if not args.dry_run:
-                if args.backup_directory:
-                    assert(not(os.path.isdir(original_filename)))
-                    shiftfile(args, original_filename, args.backup_directory)
-
                 shiftfile(args, original_filename, filename, move=True)
             else:
-                if args.backup_directory:
-                    assert(not(os.path.isdir(original_filename)))
-                    logger.info("Not creating a backup copy of " + original_filename.strip() +
-                                " to " + args.backup_directory + "; dry run.")
-
                 logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
 
         return filename
@@ -304,11 +289,6 @@ def validate_move(args, original_filename, filename):
         raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
 
     original_basename = os.path.basename(original_filename)
-
-    if (args.backup_directory and
-            os.path.exists(os.path.join(args.backup_directory, original_basename)) and
-            not args.force):
-        raise FatalException(original_basename.strip() + " already exists in backup directory " + args.backup_directory + "; not renaming.")
 
 def rlinput(prompt, prefill=''):
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
