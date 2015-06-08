@@ -10,10 +10,12 @@ import logging.handlers
 import os.path
 import re
 import readline
+import select
 import shutil
 import sys
 import termios
 import textwrap
+import traceback
 import tty
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", ".*\.lo?ck"])
