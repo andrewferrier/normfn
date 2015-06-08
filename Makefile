@@ -37,5 +37,6 @@ analysis:
 	pyflakes normalize-filename
 	# Debian version is badly packaged, make sure we are using Python 3.
 	/usr/bin/env python3 $(FLAKE8) --max-line-length=132 --max-complexity 10 .
+	pylint --reports=n --disable=line-too-long --disable=missing-docstring normalize-filename
 
 alltests: unittest analysis
