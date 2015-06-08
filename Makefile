@@ -33,8 +33,9 @@ coverage:
 	nosetests tests/Direct/*.py --with-coverage --cover-package=normalize-filename,tests --cover-erase --cover-html --cover-branches
 	open cover/index.html
 
-stylecheck:
+analysis:
+	pyflakes normalize-filename
 	# Debian version is badly packaged, make sure we are using Python 3.
 	/usr/bin/env python3 $(FLAKE8) --max-line-length=132 --max-complexity 10 .
 
-alltests: unittest stylecheck
+alltests: unittest analysis
