@@ -8,7 +8,6 @@ import coloredlogs
 import logging
 import logging.handlers
 import os.path
-import pexpect
 import re
 import readline
 import shutil
@@ -288,8 +287,6 @@ def process_filename(filename, args):
 def validate_move(args, original_filename, filename):
     if os.path.exists(filename) and not args.force:
         raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
-
-    original_basename = os.path.basename(original_filename)
 
 def rlinput(prompt, prefill=''):
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
