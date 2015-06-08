@@ -208,7 +208,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.touch(filename)
         self.touch(filename2)
         (rc, output, error, undo_log_lines) = self.invokeAsSubprocess([filename, filename2],
-                                                                       useUndoFile=True)
+                                                                      useUndoFile=True)
         self.assertEqual(0, rc)
         self.assertFalse(os.path.exists(filename))
         self.assertFalse(os.path.exists(filename2))
@@ -231,7 +231,8 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.touch(filename2)
         filename3 = os.path.join(subWorkingDir, 'subWorkingDir2', 'abc-2015-03-04.txt')
         self.touch(filename3)
-        (rc, output, error, undo_log_lines) = self.invokeAsSubprocess([subWorkingDir], extraParams=['--recursive'], useUndoFile=True)
+        (rc, output, error, undo_log_lines) = self.invokeAsSubprocess([subWorkingDir],
+                                                                      extraParams=['--recursive'], useUndoFile=True)
         self.assertEqual(0, rc)
         self.assertEqual('', error)
         newsubWorkingDir = os.path.join(self.workingDir, self.getDatePrefix() + 'subWorkingDir')
