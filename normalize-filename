@@ -108,7 +108,7 @@ def main(argv, sysLogHandler, sysErrHandler):
 
     class FilenamesAction(argparse.Action):
         def __call__(self, parser, args, values, option=None):
-            args.filenames=values
+            args.filenames = values
             if (not args.help) and len(values) < 1:
                 parser.error("You must specify some file or directory names.")
 
@@ -162,7 +162,7 @@ def main(argv, sysLogHandler, sysErrHandler):
 def walk_tree(dirname, args):
     logger = logging.getLogger("normalize-filename")
 
-    assert(os.path.isdir(dirname))
+    assert os.path.isdir(dirname)
     logger.debug("Walking directory tree " + dirname)
     dirlist = sorted(os.listdir(dirname))
 
@@ -170,7 +170,7 @@ def walk_tree(dirname, args):
         entry = os.path.join(dirname, entry)
 
         entry = process_filename(entry, args)
-        if(os.path.isdir(entry)):
+        if os.path.isdir(entry):
             walk_tree(entry, args)
 
 def process_filename(filename, args):
@@ -238,16 +238,16 @@ def process_filename(filename, args):
                                          non_extension)
     basename = basename.strip() + extension
 
-    assert(number_of_subs <= 1)
+    assert number_of_subs <= 1
 
-    if(number_of_subs == 0):
+    if number_of_subs == 0:
         logger.debug("Didn't find date or time")
         ctime = datetime.fromtimestamp(os.path.getctime(filename))
         mtime = datetime.fromtimestamp(os.path.getmtime(filename))
 
-        if(args.time_option == "now"):
+        if args.time_option == "now":
             timetouse = datetime.now()
-        elif(args.time_option == "earliest"):
+        elif args.time_option == "earliest":
             timetouse = min(ctime, mtime)
         else:
             timetouse = max(ctime, mtime)
@@ -314,7 +314,7 @@ def shiftfile(args, source, target, move=False):
                 log_file.write("mv " + target + " " + source + "\n")
         logger.info(source + " moved to " + target)
     else:
-        assert(os.path.isdir(target))
+        assert os.path.isdir(target)
         shutil.copy(source, target)
         if args.undo_log_file:
             check_undo_log_file_header(args)
@@ -359,7 +359,7 @@ def ask_yes_no(prompt):
             raise QuitException()
 
 def readchar(wait_for_char=True):
-    assert(sys.platform.startswith('linux') or sys.platform == 'darwin')
+    assert sys.platform.startswith('linux') or sys.platform == 'darwin'
     try:
         old_settings = termios.tcgetattr(sys.stdin)
         tty.setcbreak(sys.stdin.fileno())
@@ -417,8 +417,8 @@ if __name__ == "__main__":
 
     try:
         main(sys.argv, sysLogHandler, sysErrHandler)
-    except FatalException as e:
-        logger.error(e.value)
+    except FatalException as error:
+        logger.error(error.value)
         sys.exit(2)
     except:
         traceback.print_exc()
