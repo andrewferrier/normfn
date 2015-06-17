@@ -258,7 +258,7 @@ def process_filename(filename, args):
             basename = timetouse.strftime("%Y-%m-%d-") + basename
 
     filename = os.path.join(os.path.dirname(original_filename), basename)
-    logger.debug("New filename " + filename)
+    logger.debug("Potential new filename for " + original_filename + " is " + filename)
 
     if not filename == original_filename:
         validate_move(args, original_filename, filename)
