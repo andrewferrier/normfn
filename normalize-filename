@@ -18,7 +18,7 @@ import textwrap
 import traceback
 import tty
 
-BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", ".*\.lo?ck"])
+BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
 FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
                                        r".*\.svn/.*",
@@ -27,7 +27,7 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
 
 YEAR = ""
 
-def main(argv, sysLogHandler, sysErrHandler):
+def main(argv, syslog_handler, syserr_handler):
     logger = logging.getLogger('normalize-filename')
 
     class ArgumentParser(argparse.ArgumentParser):
@@ -107,6 +107,7 @@ def main(argv, sysLogHandler, sysErrHandler):
                         undo_log_file=os.path.join(os.path.expanduser('~'), '.normalize-filename-undo.log.sh'))
 
     class FilenamesAction(argparse.Action):
+        # pylint: disable=too-few-public-methods
         def __call__(self, parser, args, values, option=None):
             args.filenames = values
             if (not args.help) and len(values) < 1:
@@ -120,21 +121,21 @@ def main(argv, sysLogHandler, sysErrHandler):
         parser.print_help()
         return
 
-    if sysLogHandler:
+    if syslog_handler:
         if args.verbose > 1:
-            sysLogHandler.setLevel(logging.DEBUG)
+            syslog_handler.setLevel(logging.DEBUG)
         elif args.verbose == 1:
-            sysLogHandler.setLevel(logging.DEBUG)
+            syslog_handler.setLevel(logging.DEBUG)
         else:
-            sysLogHandler.setLevel(logging.INFO)
+            syslog_handler.setLevel(logging.INFO)
 
-    if sysErrHandler:
+    if syserr_handler:
         if args.verbose > 1:
-            sysErrHandler.setLevel(logging.DEBUG)
+            syserr_handler.setLevel(logging.DEBUG)
         elif args.verbose == 1:
-            sysErrHandler.setLevel(logging.INFO)
+            syserr_handler.setLevel(logging.INFO)
         else:
-            sysErrHandler.setLevel(logging.WARNING)
+            syserr_handler.setLevel(logging.WARNING)
 
     logger.debug("Arguments are: " + str(args))
 
@@ -382,6 +383,7 @@ def warning(message):
 
 class FatalException(Exception):
     def __init__(self, value):
+        Exception.__init__(self, value)
         self.value = value
 
     def __str__(self):
@@ -391,9 +393,9 @@ class QuitException(Exception):
     pass
 
 if __name__ == "__main__":
-    logger = logging.getLogger("normalize-filename")
-    logger.propagate = False
-    logger.setLevel(logging.DEBUG)
+    logger_setup = logging.getLogger("normalize-filename")
+    logger_setup.propagate = False
+    logger_setup.setLevel(logging.DEBUG)
 
     coloredlogs.install(level=logging.DEBUG)
 
@@ -409,16 +411,16 @@ if __name__ == "__main__":
     sysLogHandler.setLevel(logging.INFO)
     sysLogFormatter = logging.Formatter('%(pathname)s[%(process)d] %(levelname)s %(lineno)d %(message)s')
     sysLogHandler.setFormatter(sysLogFormatter)
-    logger.addHandler(sysLogHandler)
+    logger_setup.addHandler(sysLogHandler)
 
     sysErrHandler = coloredlogs.ColoredStreamHandler(stream=sys.stderr, show_timestamps=False, show_hostname=False, show_name=False, show_severity=False)
     sysErrHandler.setLevel(logging.WARNING)
-    logger.addHandler(sysErrHandler)
+    logger_setup.addHandler(sysErrHandler)
 
     try:
         main(sys.argv, sysLogHandler, sysErrHandler)
     except FatalException as error:
-        logger.error(error.value)
+        logger_setup.error(error.value)
         sys.exit(2)
     except:
         traceback.print_exc()
