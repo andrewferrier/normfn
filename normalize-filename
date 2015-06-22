@@ -243,15 +243,8 @@ def process_filename(filename, args):
 
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
-        ctime = datetime.fromtimestamp(os.path.getctime(filename))
-        mtime = datetime.fromtimestamp(os.path.getmtime(filename))
 
-        if args.time_option == "now":
-            timetouse = datetime.now()
-        elif args.time_option == "earliest":
-            timetouse = min(ctime, mtime)
-        else:
-            timetouse = max(ctime, mtime)
+        timetouse = get_timetouse(args, filename)
 
         if args.add_time:
             basename = timetouse.strftime("%Y-%m-%dT%H-%M-%S-") + basename
@@ -287,9 +280,25 @@ def process_filename(filename, args):
         logger.info("No changes to " + original_filename.strip())
         return original_filename
 
+
+def get_timetouse(args, filename):
+    ctime = datetime.fromtimestamp(os.path.getctime(filename))
+    mtime = datetime.fromtimestamp(os.path.getmtime(filename))
+
+    if args.time_option == "now":
+        timetouse = datetime.now()
+    elif args.time_option == "earliest":
+        timetouse = min(ctime, mtime)
+    else:
+        timetouse = max(ctime, mtime)
+
+    return timetouse
+
+
 def validate_move(args, original_filename, filename):
     if os.path.exists(filename) and not args.force:
         raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
+
 
 def rlinput(prompt, prefill=''):
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
@@ -297,6 +306,7 @@ def rlinput(prompt, prefill=''):
         return input(prompt)
     finally:
         readline.set_startup_hook()
+
 
 def shiftfile(args, source, target, move=False):
     logger = logging.getLogger("normalize-filename")
