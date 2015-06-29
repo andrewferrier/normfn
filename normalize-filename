@@ -156,7 +156,7 @@ def main(argv, syslog_handler, syserr_handler):
 
             if os.path.isdir(filename) and args.recursive:
                 new_filename = process_filename(filename, args)
-                assert(new_filename is not None)
+                assert new_filename is not None
                 walk_tree(new_filename, args)
             else:
                 process_filename(filename, args)
@@ -172,7 +172,7 @@ def walk_tree(dirname, args):
         entry = os.path.join(dirname, entry)
 
         entry = process_filename(entry, args)
-        assert(entry is not None)
+        assert entry is not None
         if os.path.isdir(entry):
             walk_tree(entry, args)
 

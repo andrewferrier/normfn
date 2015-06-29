@@ -41,7 +41,9 @@ class TestSubprocessArguments(NormalizeFilenameTestCase):
         subWorkingDir = os.path.join(self.workingDir, 'subWorkingDir')
         filename = os.path.join(subWorkingDir, 'foobar.txt')
         self.touch(filename)
-        (rc, output, error) = self.invokeAsSubprocess(['.'], feedInput=b'ny', extraParams=['--interactive', '--recursive'], cwd=subWorkingDir, expectOutput=True)
+        (rc, output, error) = self.invokeAsSubprocess(['.'], feedInput=b'ny',
+                                                      extraParams=['--interactive', '--recursive'],
+                                                      cwd=subWorkingDir, expectOutput=True)
         self.assertEqual(0, rc)
         self.assertEqual('', error)
         self.assertPathDoesntExist(filename)
@@ -55,7 +57,9 @@ class TestSubprocessArguments(NormalizeFilenameTestCase):
         filename2 = os.path.join(subWorkingDir, 'foo.txt')
         self.touch(filename)
         self.touch(filename2)
-        (rc, output, error) = self.invokeAsSubprocess(['.'], feedInput=b'ny', extraParams=['--interactive', '--recursive'], cwd=subWorkingDir, expectOutput=True)
+        (rc, output, error) = self.invokeAsSubprocess(['.'], feedInput=b'ny',
+                                                      extraParams=['--interactive', '--recursive'],
+                                                      cwd=subWorkingDir, expectOutput=True)
         self.assertEqual(0, rc)
         self.assertEqual('', error)
         self.assertPathExists(filename)
