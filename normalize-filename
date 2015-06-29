@@ -275,7 +275,7 @@ def process_filename(filename, args):
 
     if move_it:
         if not args.dry_run:
-            shiftfile(args, original_filename, filename, move=True)
+            shiftfile(args, original_filename, filename)
             return filename
         else:
             logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
@@ -312,7 +312,7 @@ def rlinput(prompt, prefill=''):
         readline.set_startup_hook()
 
 
-def shiftfile(args, source, target, move=False):
+def shiftfile(args, source, target):
     logger = logging.getLogger("normalize-filename")
 
     source = os.path.abspath(source)
@@ -320,23 +320,13 @@ def shiftfile(args, source, target, move=False):
 
     dt_now = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
-    if move:
-        shutil.move(source, target)
-        if args.undo_log_file:
-            check_undo_log_file_header(args)
-            with open(args.undo_log_file, "a") as log_file:
-                log_file.write("# " + dt_now + ": moving " + source + " to " + target + "\n")
-                log_file.write("mv " + shell_escape_filename(target) + " " + shell_escape_filename(source) + "\n")
-        logger.info(source + " moved to " + target)
-    else:
-        assert os.path.isdir(target)
-        shutil.copy(source, target)
-        if args.undo_log_file:
-            check_undo_log_file_header(args)
-            with open(args.undo_log_file, "a") as log_file:
-                log_file.write("# " + dt_now + ": copying " + source + " to non-existent " + target + "\n")
-                log_file.write("mv " + shell_escape_filename(target) + " " + shell_escape_filename(source) + "\n")
-        logger.info(source + " copied to " + target)
+    shutil.move(source, target)
+    if args.undo_log_file:
+        check_undo_log_file_header(args)
+        with open(args.undo_log_file, "a") as log_file:
+            log_file.write("# " + dt_now + ": moving " + source + " to " + target + "\n")
+            log_file.write("mv " + shell_escape_filename(target) + " " + shell_escape_filename(source) + "\n")
+    logger.info(source + " moved to " + target)
 
 def check_undo_log_file_header(args):
     if not os.path.exists(args.undo_log_file):
