@@ -150,7 +150,7 @@ def main(argv, syslog_handler, syserr_handler):
 
     with suppress(QuitException):
         for filename in args.filenames:
-            filename = os.path.normpath(filename)
+            filename = os.path.abspath(filename)
             if not os.path.exists(filename):
                 raise FatalException(filename + " specified on the command line does not exist.")
 
