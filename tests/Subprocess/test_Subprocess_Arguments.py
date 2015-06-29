@@ -48,3 +48,18 @@ class TestSubprocessArguments(NormalizeFilenameTestCase):
         self.assertPathExists(subWorkingDir)
         self.assertPathExists(os.path.join(subWorkingDir, self.getDatePrefix() + 'foobar.txt'))
         self.assertEqual(1, self.directoryFileCount(subWorkingDir))
+
+    def test_recursive_current_directory_interactive_with_dotfile(self):
+        subWorkingDir = os.path.join(self.workingDir, 'subWorkingDir')
+        filename = os.path.join(subWorkingDir, '.bar.txt')
+        filename2 = os.path.join(subWorkingDir, 'foo.txt')
+        self.touch(filename)
+        self.touch(filename2)
+        (rc, output, error) = self.invokeAsSubprocess(['.'], feedInput=b'ny', extraParams=['--interactive', '--recursive'], cwd=subWorkingDir, expectOutput=True)
+        self.assertEqual(0, rc)
+        self.assertEqual('', error)
+        self.assertPathExists(filename)
+        self.assertPathExists(subWorkingDir)
+        self.assertPathDoesntExist(filename2)
+        self.assertPathExists(os.path.join(subWorkingDir, self.getDatePrefix() + 'foo.txt'))
+        self.assertEqual(2, self.directoryFileCount(subWorkingDir))

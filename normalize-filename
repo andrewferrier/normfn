@@ -172,6 +172,7 @@ def walk_tree(dirname, args):
         entry = os.path.join(dirname, entry)
 
         entry = process_filename(entry, args)
+        assert(entry is not None)
         if os.path.isdir(entry):
             walk_tree(entry, args)
 
@@ -198,7 +199,7 @@ def process_filename(filename, args):
 
         if match:
             logger.info("Skipping " + filename.strip() + " as it matches pattern " + EXCLUDE_PATTERN)
-            return
+            return original_filename
 
     def replacement(matchobj):
         year = matchobj.group('year') if matchobj.group('year') is not None else matchobj.group('year2')
@@ -280,6 +281,7 @@ def process_filename(filename, args):
             logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
             return original_filename
     else:
+        logger.info("Not moving " + original_filename.strip())
         return original_filename
 
 
