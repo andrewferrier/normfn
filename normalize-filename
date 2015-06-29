@@ -322,7 +322,7 @@ def shiftfile(args, source, target, move=False):
             check_undo_log_file_header(args)
             with open(args.undo_log_file, "a") as log_file:
                 log_file.write("# " + dt_now + ": moving " + source + " to " + target + "\n")
-                log_file.write("mv " + target + " " + source + "\n")
+                log_file.write("mv " + shell_escape_filename(target) + " " + shell_escape_filename(source) + "\n")
         logger.info(source + " moved to " + target)
     else:
         assert os.path.isdir(target)
@@ -331,7 +331,7 @@ def shiftfile(args, source, target, move=False):
             check_undo_log_file_header(args)
             with open(args.undo_log_file, "a") as log_file:
                 log_file.write("# " + dt_now + ": copying " + source + " to non-existent " + target + "\n")
-                log_file.write("mv " + target + " " + source + "\n")
+                log_file.write("mv " + shell_escape_filename(target) + " " + shell_escape_filename(source) + "\n")
         logger.info(source + " copied to " + target)
 
 def check_undo_log_file_header(args):
@@ -382,6 +382,9 @@ def readchar(wait_for_char=True):
     except termios.error:
         return os.read(sys.stdin.fileno(), 1)
     return None
+
+def shell_escape_filename(filename):
+    return "'" + filename + "'"
 
 warning_pending = False
 
