@@ -156,6 +156,7 @@ def main(argv, syslog_handler, syserr_handler):
 
             if os.path.isdir(filename) and args.recursive:
                 new_filename = process_filename(filename, args)
+                assert(new_filename is not None)
                 walk_tree(new_filename, args)
             else:
                 process_filename(filename, args)
@@ -254,30 +255,31 @@ def process_filename(filename, args):
     filename = os.path.join(os.path.dirname(original_filename), basename)
     logger.debug("Potential new filename for " + original_filename + " is " + filename)
 
-    if not filename == original_filename:
-        validate_move(args, original_filename, filename)
+    if filename == original_filename:
+        return original_filename
 
-        move_it = True
+    validate_move(args, original_filename, filename)
 
-        if args.interactive:
-            move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + basename + " [y/n/e/q]?")
-            if move_it == b'e':
-                new_filename = rlinput("What new filename? ", basename)
-                new_filename = os.path.join(os.path.dirname(original_filename), new_filename)
-                validate_move(args, original_filename, new_filename)
-                filename = new_filename
-            else:
-                move_it = True if move_it == b'y' else False
+    move_it = True
 
-        if move_it:
-            if not args.dry_run:
-                shiftfile(args, original_filename, filename, move=True)
-            else:
-                logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
+    if args.interactive:
+        move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + basename + " [y/n/e/q]?")
+        if move_it == b'e':
+            new_filename = rlinput("What new filename? ", basename)
+            new_filename = os.path.join(os.path.dirname(original_filename), new_filename)
+            validate_move(args, original_filename, new_filename)
+            filename = new_filename
+        else:
+            move_it = True if move_it == b'y' else False
 
-        return filename
+    if move_it:
+        if not args.dry_run:
+            shiftfile(args, original_filename, filename, move=True)
+            return filename
+        else:
+            logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
+            return original_filename
     else:
-        logger.info("No changes to " + original_filename.strip())
         return original_filename
 
 
