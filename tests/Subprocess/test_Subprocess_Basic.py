@@ -238,6 +238,21 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, 'sub dir', self.getDatePrefix() + 'foo bar.txt')))
         self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'sub dir')))
 
+    def test_logfile_with_single_quotes(self):
+        filename = os.path.join(self.workingDir, 'sub\'dir', 'foo\'bar.txt')
+        self.touch(filename)
+        (rc, output, error, undo_log_lines) = self.invokeAsSubprocess([filename],
+                                                                      useUndoFile=True)
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, 'sub\'dir', self.getDatePrefix() + 'foo\'bar.txt')))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'sub\'dir')))
+        self.assertEqual('', error)
+        self.assertEqual(0, self.executeUndoCommands(undo_log_lines))
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, 'sub\'dir', self.getDatePrefix() + 'foo\'bar.txt')))
+        self.assertEqual(1, self.directoryFileCount(os.path.join(self.workingDir, 'sub\'dir')))
+
     def test_directory_withfiles_recursive_logfile(self):
         subWorkingDir = os.path.join(self.workingDir, 'subWorkingDir')
         filename = os.path.join(subWorkingDir, 'blah_2015_01_01_bling.txt')

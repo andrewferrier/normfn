@@ -11,6 +11,7 @@ import os.path
 import re
 import readline
 import select
+import shlex
 import shutil
 import sys
 import termios
@@ -325,7 +326,7 @@ def shiftfile(args, source, target):
         check_undo_log_file_header(args)
         with open(args.undo_log_file, "a") as log_file:
             log_file.write("# " + dt_now + ": moving " + source + " to " + target + "\n")
-            log_file.write("mv " + shell_escape_filename(target) + " " + shell_escape_filename(source) + "\n")
+            log_file.write("mv " + shlex.quote(target) + " " + shlex.quote(source) + "\n")
     logger.info(source + " moved to " + target)
 
 def check_undo_log_file_header(args):
@@ -376,9 +377,6 @@ def readchar(wait_for_char=True):
     except termios.error:
         return os.read(sys.stdin.fileno(), 1)
     return None
-
-def shell_escape_filename(filename):
-    return "'" + filename + "'"
 
 warning_pending = False
 
