@@ -13,6 +13,11 @@ builddeb:
 	fakeroot chmod -R u+x $(TEMPDIR)/usr/bin
 	fakeroot dpkg-deb --build $(TEMPDIR) .
 
+install_osx:
+	cp normalize-filename osx/services/normalize-filename-finder.workflow/Contents/
+	rm -Rv ~/Library/Services/normalize-filename-finder.workflow/
+	cp -R osx/services/normalize-filename-finder.workflow ~/Library/Services
+
 builddocker:
 	docker build -t andrewferrier/normalize-filename .
 
