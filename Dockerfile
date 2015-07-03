@@ -20,5 +20,5 @@ RUN pip3 install coloredlogs freezegun
 RUN wget -O /etc/vim/vimrc.local https://raw.githubusercontent.com/tpope/vim-sensible/master/plugin/sensible.vim
 COPY . /tmp/normalize-filename/
 WORKDIR /tmp/normalize-filename
-RUN make builddeb && sh -c 'ls -1 /tmp/normalize-filename/*.deb | xargs -L 1 gdebi -n' && cp /tmp/normalize-filename/*.deb /tmp
+RUN make builddeb_real && sh -c 'ls -1 /tmp/normalize-filename/*.deb | xargs -L 1 gdebi -n' && cp /tmp/normalize-filename/*.deb /tmp
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*

@@ -1,5 +1,5 @@
 Package: normalize-filename
-Version: 0.1
+Version: <version_goes_here>
 Section: base
 Priority: optional
 Architecture: all
