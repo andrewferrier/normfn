@@ -21,8 +21,9 @@ builddeb_real:
 
 install_osx:
 	cp normalize-filename osx/services/normalize-filename-finder.workflow/Contents/
-	rm -Rv ~/Library/Services/normalize-filename-finder.workflow/
+	rm -Rfv ~/Library/Services/normalize-filename-finder.workflow/
 	cp -R osx/services/normalize-filename-finder.workflow ~/Library/Services
+	killall Finder
 
 builddocker:
 	docker build -t andrewferrier/normalize-filename .
