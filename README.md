@@ -8,4 +8,4 @@ Project hosted at https://github.com/andrewferrier/normalize-filename.
 
 ## Installation on OS X
 
-* `pip3 install coloredlogs`
+* `pip3 install coloredlogs pexpect`
