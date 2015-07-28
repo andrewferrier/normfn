@@ -196,6 +196,17 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_oldest(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        os.utime(filename, (datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp(),
+                            datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp()))
+        error = self.invokeDirectly([filename], extraParams=['--oldest'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1980-01-02-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_earliest_default(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
@@ -213,6 +224,17 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         os.utime(filename, (datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp(),
                             datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp()))
         error = self.invokeDirectly([filename], extraParams=['--latest'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_newest(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        os.utime(filename, (datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp(),
+                            datetime.datetime(1980, 1, 2, 3, 4, 5).timestamp()))
+        error = self.invokeDirectly([filename], extraParams=['--newest'])
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
