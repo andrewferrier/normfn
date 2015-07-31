@@ -328,7 +328,17 @@ def shiftfile(args, source, target):
 
     dt_now = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
-    shutil.move(source, target)
+    try:
+        shutil.move(source, target)
+    except PermissionError as e:
+        filename = e.filename
+        if filename == source:
+            raise FatalException("Permission denied on source: " + filename)
+        elif filename == target:
+            raise FatalException("Permission denied on target: " + filename)
+        else:
+            raise
+
     if args.undo_log_file:
         check_undo_log_file_header(args)
         with open(args.undo_log_file, "a") as log_file:

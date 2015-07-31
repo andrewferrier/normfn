@@ -1,6 +1,7 @@
-from datetime import datetime
-from subprocess import Popen, PIPE, call
 from contextlib import contextmanager
+from datetime import datetime
+from stat import *
+from subprocess import Popen, PIPE, call
 import inspect
 import io
 import logging
@@ -131,6 +132,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         os.makedirs(os.path.dirname(fname), exist_ok=True)
         open(fname, 'w').close()
 
+    def remove_dir_write_permissions(self, fname):
+        os.chmod(fname, S_IRUSR | S_IXUSR)
+
     def writeFile(self, fname, contents):
         os.makedirs(os.path.dirname(fname), exist_ok=True)
         with open(fname, 'w') as filename:
@@ -147,4 +151,10 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
 
     def tearDown(self):
+        # Give everything write permissions before rmtree'ing.
+        for root, dirs, files in os.walk(self.workingDir):
+            dirs_and_files = dirs + files
+            for dir_and_file in dirs_and_files:
+                os.chmod(os.path.join(root, dir_and_file), S_IRUSR | S_IWUSR | S_IXUSR)
+
         shutil.rmtree(self.workingDir)

@@ -27,3 +27,13 @@ class TestDirectErrors(NormalizeFilenameTestCase):
         self.assertEqual(self.readFile(filename), "original")
         self.assertEqual(self.readFile(filename2), "new")
         self.assertEqual(2, self.directoryFileCount(self.workingDir))
+
+    def test_rename_nopermissions(self):
+        subdirectory = os.path.join(self.workingDir, 'subdirectory')
+        filename = os.path.join(subdirectory, 'blah.txt')
+        self.touch(filename)
+        self.remove_dir_write_permissions(subdirectory)
+        with self.assertRaisesRegex(Exception, "(?i).*permission denied.*"):
+            self.invokeDirectly([filename])
+        self.assertTrue(os.path.exists(filename))
+        self.assertEqual(1, self.directoryFileCount(subdirectory))
