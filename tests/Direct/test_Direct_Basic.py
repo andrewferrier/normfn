@@ -428,4 +428,4 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(filename))
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual('', error)
+        self.assertRegex(error, '(?i)not moving.*dry run')

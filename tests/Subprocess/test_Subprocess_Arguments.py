@@ -24,6 +24,17 @@ class TestSubprocessArguments(NormalizeFilenameTestCase):
         self.assertEqual('', output)
         self.assertRegex(error, 'moved to')
 
+    def test_verbose_impliedby_dryrun(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], extraParams=['--dry-run'])
+        self.assertEqual(0, rc)
+        self.assertTrue(os.path.exists(filename))
+        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertRegex(error, '(?i)not moving.*dry run')
+
     def test_recursive_current_directory(self):
         subWorkingDir = os.path.join(self.workingDir, 'subWorkingDir')
         filename = os.path.join(subWorkingDir, 'foobar.txt')

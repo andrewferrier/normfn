@@ -47,7 +47,8 @@ def main(argv, syslog_handler, syserr_handler):
                         help="Show some basic help information about how to use normalize-filename.")
 
     parser.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
-                        help="Don't actually make any changes, just show them.")
+                        help="Don't actually make any changes, just show them. Forces a minimum of "
+                        "a single level of verbosity (-v).")
 
     parser.add_argument('-i', '--interactive', action='store_true', dest="interactive",
                         help="Ask about each change before it is done.")
@@ -123,6 +124,10 @@ def main(argv, syslog_handler, syserr_handler):
     if args.help:
         parser.print_help()
         return
+
+    if args.dry_run:
+        if args.verbose < 1:
+            args.verbose = 1
 
     if syslog_handler:
         if args.verbose > 1:
