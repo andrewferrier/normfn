@@ -96,7 +96,9 @@ def main(argv, syslog_handler, syserr_handler):
     time_option.add_argument('--latest', '--newest', action='store_const', dest="time_option", const="latest",
                              help="Use the latest of ctime and mtime on a file "
                              "to find a date prefix for files that don't already "
-                             "have a date and time.")
+                             "have a date and time. Note that ctime is *not* "
+                             "file creation time on Linux/OS X; see "
+                             "http://lwn.net/Articles/397442/.")
 
     time_option.add_argument('--earliest', '--oldest', action='store_const', dest="time_option", const="earliest",
                              help="Use the earliest of ctime and mtime on a file "
