@@ -59,20 +59,23 @@ def main(argv, syslog_handler, syserr_handler):
     parser.add_argument('-f', '--force', action='store_true', dest='force',
                         help="Overwrite target files even if they already "
                         "exist (USE WITH CAUTION, consider using --dry-run "
-                        "first)")
+                        "first).")
 
     parser.add_argument('-t', '--add-time', action='store_true', dest='add_time',
                         help='If a time is not found in the filename, add one '
                         'when adding the date prefix.')
 
     parser.add_argument('-r', '--recursive', action='store_true', dest="recursive", default=False,
-                        help="Recurse into directories specified on the command line.")
+                        help="Recurse into directories specified on the command line. The default is "
+                        "not to do this, and simply look at the name of the directory itself.")
 
     parser.add_argument('--max-years-ahead', type=int, dest='max_years_ahead', default=5,
-                        help='Consider years in filenames further ahead than this number to be invalid. Defaults to 5.')
+                        help='Consider years in filenames further ahead than this number not '
+                        'to be valid years. Defaults to 5.')
 
     parser.add_argument('--max-years-behind', type=int, dest='max_years_behind', default=30,
-                        help='Consider years in filenames further behind than this number to be invalid. Defaults to 30.')
+                        help='Consider years in filenames further behind than this number not '
+                        'to be valid years. Defaults to 30.')
 
     log_option = parser.add_mutually_exclusive_group()
 
