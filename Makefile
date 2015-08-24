@@ -30,7 +30,7 @@ install_osx:
 	cp -R osx/services/normalize-filename-finder.workflow ~/Library/Services
 	killall Finder
 
-builddocker:
+builddocker: determineversion
 	docker build -t andrewferrier/normalize-filename .
 
 rundocker_testing: builddocker
