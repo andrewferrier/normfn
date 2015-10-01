@@ -78,3 +78,17 @@ class TestSubprocessArguments(NormalizeFilenameTestCase):
         self.assertPathDoesntExist(filename2)
         self.assertPathExists(os.path.join(subWorkingDir, self.getDatePrefix() + 'foo.txt'))
         self.assertEqual(2, self.directoryFileCount(subWorkingDir))
+
+    def test_loads_of_files(self):
+        TOTAL_FILES = 100
+        filenames = [('filename' + str(i) + '.txt') for i in range(TOTAL_FILES)]
+        for filename in filenames:
+            self.touch(os.path.join(self.workingDir, filename))
+        self.assertEqual(TOTAL_FILES, self.directoryFileCount(self.workingDir))
+        (rc, output, error) = self.invokeAsSubprocess(filenames, extraParams=['-vv'])
+        self.assertEqual(0, rc)
+        self.assertNotRegex(error, 'exception')
+        self.assertEqual(TOTAL_FILES, self.directoryFileCount(self.workingDir))
+        for filename in filenames:
+            self.assertPathDoesntExist(os.path.join(self.workingDir, filename))
+            self.assertPathExists(os.path.join(self.workingDir, self.getDatePrefix() + filename))
