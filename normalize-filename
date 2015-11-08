@@ -4,7 +4,6 @@ from contextlib import suppress
 from datetime import datetime
 from sys import platform as _platform
 import argparse
-import coloredlogs
 import logging
 import logging.handlers
 import os.path
@@ -19,6 +18,8 @@ import textwrap
 import traceback
 import tty
 
+import coloredlogs
+
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
 FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
@@ -28,10 +29,12 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
 
 YEAR = ""
 
+
 def main(argv, syslog_handler, syserr_handler):
     logger = logging.getLogger('normalize-filename')
 
     class ArgumentParser(argparse.ArgumentParser):
+
         def error(self, message):
             parser.print_help()
             raise FatalException(message)
@@ -115,6 +118,7 @@ def main(argv, syslog_handler, syserr_handler):
 
     class FilenamesAction(argparse.Action):
         # pylint: disable=too-few-public-methods
+
         def __call__(self, parser, args, values, option=None):
             args.filenames = values
             if (not args.help) and len(values) < 1:
@@ -172,6 +176,7 @@ def main(argv, syslog_handler, syserr_handler):
             else:
                 process_filename(filename, args)
 
+
 def walk_tree(dirname, args):
     logger = logging.getLogger("normalize-filename")
 
@@ -186,6 +191,7 @@ def walk_tree(dirname, args):
         assert entry is not None
         if os.path.isdir(entry):
             walk_tree(entry, args)
+
 
 def process_filename(filename, args):
     logger = logging.getLogger("normalize-filename")
@@ -333,8 +339,8 @@ def shiftfile(args, source, target):
 
     try:
         shutil.move(source, target)
-    except PermissionError as e:
-        filename = e.filename
+    except PermissionError as permission_error:
+        filename = permission_error.filename
         if filename == source:
             raise FatalException("Permission denied on source: " + filename)
         elif filename == target:
@@ -348,6 +354,7 @@ def shiftfile(args, source, target):
             log_file.write("# " + dt_now + ": moving " + source + " to " + target + "\n")
             log_file.write("mv " + shlex.quote(target) + " " + shlex.quote(source) + "\n")
     logger.info(source + " moved to " + target)
+
 
 def check_undo_log_file_header(args):
     if not os.path.exists(args.undo_log_file):
@@ -367,6 +374,7 @@ def check_undo_log_file_header(args):
                                         "http://brew.sh/ - installed)") + "\n")
             log_file.write("\n")
 
+
 def ask_yes_no(prompt):
     while True:
         print(prompt, end="", flush=True)
@@ -384,6 +392,7 @@ def ask_yes_no(prompt):
         elif key == b'q':
             raise QuitException()
 
+
 def readchar(wait_for_char=True):
     assert sys.platform.startswith('linux') or sys.platform == 'darwin'
     try:
@@ -400,19 +409,23 @@ def readchar(wait_for_char=True):
 
 warning_pending = False
 
+
 def warning(message):
     global warning_pending
     logger = logging.getLogger("normalize-filename")
     logger.warning(message)
     warning_pending = True
 
+
 class FatalException(Exception):
+
     def __init__(self, value):
         Exception.__init__(self, value)
         self.value = value
 
     def __str__(self):
         return repr(self.value)
+
 
 class QuitException(Exception):
     pass
@@ -438,7 +451,12 @@ if __name__ == "__main__":
     sysLogHandler.setFormatter(sysLogFormatter)
     logger_setup.addHandler(sysLogHandler)
 
-    sysErrHandler = coloredlogs.ColoredStreamHandler(stream=sys.stderr, show_timestamps=False, show_hostname=False, show_name=False, show_severity=False)
+    sysErrHandler = coloredlogs.ColoredStreamHandler(
+        stream=sys.stderr,
+        show_timestamps=False,
+        show_hostname=False,
+        show_name=False,
+        show_severity=False)
     sysErrHandler.setLevel(logging.WARNING)
     logger_setup.addHandler(sysErrHandler)
 

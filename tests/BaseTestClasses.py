@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from datetime import datetime
-from stat import *
+from stat import S_IRUSR, S_IWUSR, S_IXUSR
 from subprocess import Popen, PIPE, call
 import inspect
 import io
