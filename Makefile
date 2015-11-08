@@ -1,5 +1,6 @@
 TEMPDIR := $(shell mktemp -t tmp.XXXXXX -d)
 FLAKE8 := $(shell which flake8)
+PYLINT := $(shell which pylint3 || which pylint)
 
 determineversion:
 	$(eval GITDESCRIBE := $(shell git describe --dirty))
@@ -54,6 +55,6 @@ analysis:
 	pyflakes normalize-filename
 	# Debian version is badly packaged, make sure we are using Python 3.
 	/usr/bin/env python3 $(FLAKE8) --max-line-length=132 --max-complexity 10 normalize-filename .
-	pylint --reports=n --disable=line-too-long --disable=missing-docstring --disable=locally-disabled normalize-filename
+	$(PYLINT) --reports=n --disable=line-too-long --disable=missing-docstring --disable=locally-disabled normalize-filename
 
 alltests: unittest analysis
