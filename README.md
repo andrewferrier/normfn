@@ -27,7 +27,7 @@ time *now* - i.e.  the time at which normalize-filename is run. Using the
 earliest (oldest).
 
 For safety, by default, normalize-filename keeps a log file in
-~/.normalize-file-undo.log.sh of all the actions it takes, in shell format to
+`~/.normalize-file-undo.log.sh` of all the actions it takes, in shell format to
 make it easier to undo them. See the comment at the head of that file (once
 it's been generated) for more information.
 
