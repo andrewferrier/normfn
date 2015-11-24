@@ -10,8 +10,8 @@ like. It prefers `YYYY-MM-DD-rest-of-the-filename.ext`, where `Y`, `M`, and
 the moment, this pattern cannot be changed, although there is a long-term goal
 to make the pattern configurable.
 
-This is the default pattern because it is the ISO-8601 pattern, which is the
-superior for many reasons. However, in particular, with respect to filenames,
+This is the default pattern because it is the ISO-8601 pattern, which is
+[superior for many reasons](https://xkcd.com/1179/). However, in particular, with respect to filenames,
 it's useful because it sorts naturally when listing files, browsing them with
 a file manager, etc. In this respect, I respectfully disagree with Mark's
 standard approach in his book, which is American-centric.
