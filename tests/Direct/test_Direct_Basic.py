@@ -185,6 +185,42 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_single_digit_day(self):
+        filename = os.path.join(self.workingDir, 'blah-2015-01-2.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-02-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_single_digit_month(self):
+        filename = os.path.join(self.workingDir, 'blah-2015-3-02.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-03-02-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_two_single_digits(self):
+        filename = os.path.join(self.workingDir, 'blah-2015-3-2.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-03-02-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_two_single_digits_extra(self):
+        filename = os.path.join(self.workingDir, 'blah-2015-3-2-xyz.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-03-02-blah-xyz.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_earliest(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
