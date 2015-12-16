@@ -1,3 +1,4 @@
+ROOTDIR :=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TEMPDIR := $(shell mktemp -t tmp.XXXXXX -d)
 FLAKE8 := $(shell which flake8)
 PYLINT := $(shell which pylint3 || which pylint)
@@ -5,6 +6,10 @@ PYLINT := $(shell which pylint3 || which pylint)
 determineversion:
 	$(eval GITDESCRIBE := $(shell git describe --dirty))
 	sed 's/Version: .*/Version: $(GITDESCRIBE)/' debian/DEBIAN/control_template > debian/DEBIAN/control
+
+determineversion_brew:
+	$(eval GITDESCRIBE := $(shell git describe --abbrev=0))
+	sed 's/X\.Y/$(GITDESCRIBE)/' brew/normalize-filename_template.rb > brew/normalize-filename.rb
 
 builddeb: determineversion builddeb_real
 
@@ -30,6 +35,15 @@ install_osx:
 	rm -Rfv ~/Library/Services/normalize-filename-finder.workflow/
 	cp -R osx/services/normalize-filename-finder.workflow ~/Library/Services
 	killall Finder
+
+makebrewlinks:
+	ln -sf $(ROOTDIR)/brew/normalize-filename.rb /usr/local/Library/Formula
+
+installbrew: makebrewlinks determineversion_brew
+	brew install -f normalize-filename
+
+reinstallbrew: makebrewlinks determineversion_brew
+	brew reinstall normalize-filename
 
 builddocker: determineversion
 	docker build -t andrewferrier/normalize-filename .
