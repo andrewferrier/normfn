@@ -39,4 +39,4 @@ github](https://github.com/andrewferrier/normalize-filename).
 
 ## Installation on OS X
 
-* `pip3 install coloredlogs freezegun pexpect`
+* `pip3 install -r requirements_hacking.txt`
