@@ -1,6 +1,8 @@
 import os
 import re
 
+import time
+
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 
@@ -193,6 +195,9 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
                                   expectedOutputRegex='Move ' + re.escape(filename) + '.*') as child:
             child.expect(']? ')
             child.send('e')
+            time.sleep(2)
+            print(child)
+            print(str(child.logfile_read.getvalue()))
             child.expect("filename\? ")
             for i in range(19):
                 child.sendcontrol('H')
