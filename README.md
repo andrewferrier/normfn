@@ -39,6 +39,10 @@ For more information on all the options available, run `normalize-filename
 Project hosted [on
 github](https://github.com/andrewferrier/normalize-filename).
 
-## Installation on OS X
+## Requirements
+
+`normalize-filename` requires at least Python 3.4.
+
+## Hacking - Installation on OS X
 
 * `pip3 install -r requirements_hacking.txt`
