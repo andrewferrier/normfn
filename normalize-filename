@@ -30,7 +30,7 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
 YEAR = ""
 
 
-def main(argv, syslog_handler, syserr_handler):
+def main(argv, syserr_handler):
     logger = logging.getLogger('normalize-filename')
 
     class ArgumentParser(argparse.ArgumentParser):
@@ -43,8 +43,8 @@ def main(argv, syslog_handler, syserr_handler):
                             "See https://github.com/andrewferrier/normalize-filename for more information.", add_help=False)
 
     parser.add_argument('-v', '--verbose', action='count', default=0,
-                        help="Make the output more verbose. This affects both the output logged to "
-                        "syslog, as well as output to the console. Using this twice makes it doubly verbose.")
+                        help="Make the output more verbose. This affects the output to the console. "
+                        "Using this twice makes it doubly verbose.")
 
     parser.add_argument('-h', '--help', action='store_true',
                         help="Show some basic help information about how to use normalize-filename.")
@@ -135,14 +135,6 @@ def main(argv, syslog_handler, syserr_handler):
     if args.dry_run:
         if args.verbose < 1:
             args.verbose = 1
-
-    if syslog_handler:
-        if args.verbose > 1:
-            syslog_handler.setLevel(logging.DEBUG)
-        elif args.verbose == 1:
-            syslog_handler.setLevel(logging.DEBUG)
-        else:
-            syslog_handler.setLevel(logging.INFO)
 
     if syserr_handler:
         if args.verbose > 1:
@@ -441,20 +433,6 @@ if __name__ == "__main__":
     logger_setup.propagate = False
     logger_setup.setLevel(logging.DEBUG)
 
-    if _platform == "linux" or _platform == "linux2":
-        sysLogAddress = '/dev/log'
-    elif _platform == "darwin":
-        sysLogAddress = '/var/run/syslog'
-    else:
-        print("Unsupported platform.")
-        sys.exit(3)
-
-    sysLogHandler = logging.handlers.SysLogHandler(address=sysLogAddress)
-    sysLogHandler.setLevel(logging.INFO)
-    sysLogFormatter = logging.Formatter('%(pathname)s[%(process)d] %(levelname)s %(lineno)d %(message).1900s')
-    sysLogHandler.setFormatter(sysLogFormatter)
-    logger_setup.addHandler(sysLogHandler)
-
     sysErrHandler = logging.StreamHandler(stream=sys.stderr)
     sysErrHandler.setLevel(logging.WARNING)
     sysErrFormatter = coloredlogs.ColoredFormatter('%(levelname)s: %(message)s')
@@ -462,7 +440,7 @@ if __name__ == "__main__":
     logger_setup.addHandler(sysErrHandler)
 
     try:
-        main(sys.argv, sysLogHandler, sysErrHandler)
+        main(sys.argv, sysErrHandler)
     except FatalException as error:
         logger_setup.error(error.value)
         sys.exit(2)

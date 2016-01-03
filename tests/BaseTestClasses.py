@@ -51,7 +51,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         log.addHandler(handler)
 
         try:
-            normalize_filename.main(options, None, handler)
+            normalize_filename.main(options, handler)
         finally:
             log.removeHandler(handler)
             handler.close()
