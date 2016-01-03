@@ -441,19 +441,19 @@ if __name__ == "__main__":
     logger_setup.propagate = False
     logger_setup.setLevel(logging.DEBUG)
 
-    # if _platform == "linux" or _platform == "linux2":
-    #     sysLogAddress = '/dev/log'
-    # elif _platform == "darwin":
-    #     sysLogAddress = '/var/run/syslog'
-    # else:
-    #     print("Unsupported platform.")
-    #     sys.exit(3)
+    if _platform == "linux" or _platform == "linux2":
+        sysLogAddress = '/dev/log'
+    elif _platform == "darwin":
+        sysLogAddress = '/var/run/syslog'
+    else:
+        print("Unsupported platform.")
+        sys.exit(3)
 
-    # sysLogHandler = logging.handlers.SysLogHandler(address=sysLogAddress)
-    # sysLogHandler.setLevel(logging.INFO)
-    # sysLogFormatter = logging.Formatter('%(pathname)s[%(process)d] %(levelname)s %(lineno)d %(message).1900s')
-    # sysLogHandler.setFormatter(sysLogFormatter)
-    # logger_setup.addHandler(sysLogHandler)
+    sysLogHandler = logging.handlers.SysLogHandler(address=sysLogAddress)
+    sysLogHandler.setLevel(logging.INFO)
+    sysLogFormatter = logging.Formatter('%(pathname)s[%(process)d] %(levelname)s %(lineno)d %(message).1900s')
+    sysLogHandler.setFormatter(sysLogFormatter)
+    logger_setup.addHandler(sysLogHandler)
 
     sysErrHandler = logging.StreamHandler(stream=sys.stderr)
     sysErrHandler.setLevel(logging.WARNING)
@@ -462,7 +462,7 @@ if __name__ == "__main__":
     logger_setup.addHandler(sysErrHandler)
 
     try:
-        main(sys.argv, None, sysErrHandler)
+        main(sys.argv, sysLogHandler, sysErrHandler)
     except FatalException as error:
         logger_setup.error(error.value)
         sys.exit(2)
