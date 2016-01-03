@@ -2,7 +2,6 @@
 
 from contextlib import suppress
 from datetime import datetime
-from sys import platform as _platform
 import argparse
 import logging
 import logging.handlers
