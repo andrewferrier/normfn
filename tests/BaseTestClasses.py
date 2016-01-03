@@ -150,6 +150,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def assertPathExists(self, path):
         self.assertTrue(os.path.exists(path))
 
+    def isRoot(self):
+        return os.geteuid() == 0
+
     def tearDown(self):
         # Give everything write permissions before rmtree'ing.
         for root, dirs, files in os.walk(self.workingDir):
