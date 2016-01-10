@@ -238,7 +238,7 @@ def process_filename(filename, args):
 
     YMD_SEPARATOR = r"[-_.\s]?"
     HMS_SEPARATOR = r"[-_.\s]?"
-    DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s)"
+    DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s|,\s)"
 
     (basename, number_of_subs) = re.subn(r"^(?P<prefix>.*?)[-_]?" +
                                          r"((?P<year>" + YEAR + r")" +

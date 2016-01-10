@@ -305,6 +305,15 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_photo_dropbox(self):
+        filename = os.path.join(self.workingDir, 'Photo 03-04-2015, 12 34 56.png')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-04-03T12-34-56-Photo.png')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_video(self):
         filename = os.path.join(self.workingDir, 'Video 03-04-2015 12 34 56.mov')
         self.touch(filename)
