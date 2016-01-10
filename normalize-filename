@@ -367,7 +367,7 @@ def check_undo_log_file_header(args):
                                         "the file first to control which actions are undone.") + "\n")
             log_file.write("#\n")
             log_file.write(wrapper.fill("(Specific note for MacOS: tac may not be installed. You can install gtac, the "
-                                        "equivalent command, using `brew install coreutils` (you will need Homebrew - "
+                                        "equivalent command, using `brew install coreutils`. You will need Homebrew - "
                                         "http://brew.sh/ - installed)") + "\n")
             log_file.write("\n")
 
