@@ -1,8 +1,6 @@
 os:
     - linux
 matrix:
-    allow_failures:
-        - os: osx
     include:
         - os: osx
           language: generic
