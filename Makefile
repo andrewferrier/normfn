@@ -55,10 +55,10 @@ rundocker_interactive: builddocker
 	docker run -i -t andrewferrier/normalize-filename /sbin/my_init -- bash -l
 
 unittest:
-	python3 -m unittest discover
+	python3 -m unittest discover -s tests/
 
 unittest_verbose:
-	python3 -m unittest discover -f -v
+	python3 -m unittest discover -s tests/ -f -v
 
 coverage:
 	rm -rf cover/
