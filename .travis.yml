@@ -23,5 +23,5 @@ before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source terryfy/travis_tools.sh; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then get_python_environment homebrew $TRAVIS_PYTHON_VERSION; fi
 install:
-    - "pip install -r requirements-hacking.txt"
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then "pip3 install -r requirements-hacking.txt"; else "pip install -r requirements-hacking.txt"; fi
 script: make unittest
