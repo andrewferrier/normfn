@@ -39,10 +39,12 @@ For more information on all the options available, run `normalize-filename
 Project hosted [on
 github](https://github.com/andrewferrier/normalize-filename).
 
-## Requirements
+## Installation Requirements
 
 `normalize-filename` requires at least Python 3.4.
 
-## Hacking - Installation on OS X
-
-* `pip3 install -r requirements_hacking.txt`
+`normalize-filename` requires the `coloredlogs` python module. On OS X, this
+can be installed using `pip3 install -r requirements.txt`. For Debian/Ubuntu,
+there is support in my sister project
+[python-deb](https://github.com/andrewferrier/python-deb) for building the
+`coloredlogs` module as a Debian package.

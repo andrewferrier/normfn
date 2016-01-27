@@ -8,6 +8,7 @@ matrix:
               - TOXENV=py34
               - TRAVIS_PYTHON_VERSION=3.4
           install:
+              - "pip3 install -r requirements.txt"
               - "pip3 install -r requirements-hacking.txt"
         - os: osx
           language: generic
@@ -15,6 +16,7 @@ matrix:
               - TOXENV=py35
               - TRAVIS_PYTHON_VERSION=3.5
           install:
+              - "pip3 install -r requirements.txt"
               - "pip3 install -r requirements-hacking.txt"
 language: python
 python:
@@ -26,4 +28,5 @@ before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then get_python_environment macports $TRAVIS_PYTHON_VERSION env/; fi
 script: make unittest
 install:
+    - "pip install -r requirements.txt"
     - "pip install -r requirements-hacking.txt"

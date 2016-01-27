@@ -25,11 +25,6 @@ builddeb_real:
 	fakeroot chmod -R u+x $(TEMPDIR)/usr/bin
 	fakeroot dpkg-deb --build $(TEMPDIR) .
 
-buildprereqs:
-	-sudo pip3 uninstall -y coloredlogs
-	cd /tmp && sudo checkinstall --pkgname=python3-coloredlogs --pkgversion=0.1 -y --fstrans=no --install=yes pip3 install --upgrade coloredlogs
-	cp /tmp/python3-coloredlogs*.deb .
-
 install_osx:
 	cp normalize-filename osx/services/normalize-filename-finder.workflow/Contents/
 	rm -Rfv ~/Library/Services/normalize-filename-finder.workflow/

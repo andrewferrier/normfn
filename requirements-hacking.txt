@@ -1,3 +1,2 @@
-coloredlogs>=5.0
 freezegun
 pexpect
