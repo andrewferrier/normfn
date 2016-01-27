@@ -3,6 +3,7 @@
 from contextlib import suppress
 from datetime import datetime
 import argparse
+import calendar
 import logging
 import logging.handlers
 import os.path
@@ -214,6 +215,14 @@ def process_filename(filename, args):
         month = matchobj.group('month') if matchobj.group('month') is not None else matchobj.group('month2')
         day = matchobj.group('day') if matchobj.group('day') is not None else matchobj.group('day2')
 
+        if not month.isdigit():
+            try:
+                monthDigit = list(calendar.month_abbr).index(month)
+            except ValueError:
+                monthDigit = list(calendar.month_name).index(month)
+
+            month = str(monthDigit)
+
         if len(month) == 1:
             month = "0" + month
 
@@ -231,7 +240,7 @@ def process_filename(filename, args):
 
     (non_extension, extension) = os.path.splitext(basename)
 
-    MONTH = r"(0\d|1[012]|\d(?!\d))"
+    MONTH = r"(0\d|1[012]|\d(?!\d)|" + '|'.join(calendar.month_name[1:13]) + "|" + '|'.join(calendar.month_abbr[1:13]) + ")"
     DAY = r"([012]\d|3[01]|\d(?!\d))"
     HOUR = r"([01]\d|2[0123])"
     MINUTE = SECOND = r"[012345]\d"
