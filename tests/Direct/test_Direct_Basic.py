@@ -221,6 +221,33 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_full_month_name(self):
+        filename = os.path.join(self.workingDir, 'Blah 25 January 2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-25-Blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_full_month_name2(self):
+        filename = os.path.join(self.workingDir, 'Blah 25 March 2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-03-25-Blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_abbr_month_name(self):
+        filename = os.path.join(self.workingDir, 'Blah 25 Jan 2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-25-Blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_earliest(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
