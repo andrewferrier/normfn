@@ -153,6 +153,7 @@ def main(argv, syserr_handler):
 
     year_now = datetime.now().year
     year_list = [str(year) for year in range(year_now - args.max_years_behind, year_now + args.max_years_ahead)]
+    logger.debug("Valid years are: " + str(year_list))
     YEAR = r"(" + '|'.join(year_list) + r")"
 
     with suppress(QuitException):
@@ -211,6 +212,8 @@ def process_filename(filename, args):
             return original_filename
 
     def replacement(matchobj):
+        logger.debug("replacement() called, matchobj = " + str(matchobj))
+
         year = matchobj.group('year') if matchobj.group('year') is not None else matchobj.group('year2')
         month = matchobj.group('month') if matchobj.group('month') is not None else matchobj.group('month2')
         day = matchobj.group('day') if matchobj.group('day') is not None else matchobj.group('day2')
