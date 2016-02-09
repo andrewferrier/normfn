@@ -30,3 +30,7 @@ script: make unittest
 install:
     - "pip install -r requirements.txt"
     - "pip install -r requirements-hacking.txt"
+notifications:
+    email:
+        recipients:
+            - secure: "N6jmTaSU8J7Nr9Z8M3fz3086LiJd6mwkDjze6JdZz9K5w9XrenmIiwAMsN4v8QBTmmWMWfKhFnWk/v5yEg8MxClod+fmKqj1jy8qt3XcRE7UblbUssCyb15k9MvrHjMcorWcbihEV1WB6MI34RIKN70S2AyKk6k+KroAvHmTVguVpIohNTmQUtkStPJVG1Ab7r/pYb3jyVUN6NeEAvGeBtWJggA5pj1jfVgfAB18LcF/JtpHo35YQssX2GmpF6FC+WOCb5S5Novq7PHL1httSkRrW3Mlt6/v3qLadTsrgJjBrpFBGMWKa1JWM+l87TcDVu2uJLQAoIE8F2pfFBQS8L2yUcJsBUIwVVkOwF5x4/+OWlvKiSmFsFIwQYwm7sCXckoGUrl/aMlkf7iHm6buhy7eWHcR6WRbAxU6pz8WlmBB7s8uRyXn5yNKJUccxSK7oxOA6vOb3dTSzkR9Hxl/AMsh4qG7uNd+BYeLj/bv2KP+OMMuMF+jhCX2lqSXPXSh7N/ST2LguwVTBnFYpovIDlUWU7iVasPdVyWJBCNe+dk0pQOp7GDq4OiblY0hXH3Pd73p1BH+OsaWDD0E/9r4b74+nEXYjNEr+DtEWbCXmTUdfbvY7AIo9iFAlvkuAktfOenLhyKrAnh42KEBO/4PLWLN0+mqmp81j8QlV08MpIg="
