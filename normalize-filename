@@ -215,9 +215,9 @@ def process_filename(filename, args):
 
         if not month.isdigit():
             try:
-                monthDigit = list(calendar.month_abbr).index(month)
+                monthDigit = list(map(str.lower, calendar.month_abbr)).index(month.lower())
             except ValueError:
-                monthDigit = list(calendar.month_name).index(month)
+                monthDigit = list(map(str.lower, calendar.month_name)).index(month.lower())
 
             month = str(monthDigit)
 
@@ -238,7 +238,7 @@ def process_filename(filename, args):
 
     (non_extension, extension) = os.path.splitext(basename)
 
-    MONTH_NAMES_ONLY = '|'.join(calendar.month_name[1:13]) + "|" + '|'.join(calendar.month_abbr[1:13])
+    MONTH_NAMES_ONLY = '|'.join(map(insensitiveize, calendar.month_name[1:13])) + "|" + '|'.join(map(insensitiveize, calendar.month_abbr[1:13]))
     MONTH = r"(0\d|1[012]|[1-9](?!\d)|" + MONTH_NAMES_ONLY + ")"
     DAY = r"([012]\d|3[01]|[1-9](?!\d))"
     HOUR = r"([01]\d|2[0123])"
@@ -451,6 +451,11 @@ def readchar(wait_for_char=True):
     except termios.error:
         return os.read(sys.stdin.fileno(), 1)
     return None
+
+
+def insensitiveize(string):
+    return ''.join(map(lambda char: ("[" + char.lower() + char.upper() + "]"), string))
+
 
 warning_pending = False
 

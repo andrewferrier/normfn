@@ -257,6 +257,24 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_abbr_month_insensitive_name(self):
+        filename = os.path.join(self.workingDir, 'Blah 25 jan 2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-25-Blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
+    def test_abbr_month_insensitive_hyphen_name(self):
+        filename = os.path.join(self.workingDir, 'Blah_25-feb-2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-02-25-Blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_earliest(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
