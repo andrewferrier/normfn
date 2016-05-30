@@ -283,6 +283,7 @@ def process_filename(filename, args):
     logger.debug("Potential new filename for " + original_filename + " is " + filename)
 
     if filename == original_filename:
+        logger.debug("New filename would be identical, skipping.")
         return original_filename
 
     validate_move(args, original_filename, filename)
