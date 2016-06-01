@@ -370,6 +370,7 @@ def shiftfile(args, source, target):
             log_file.write("mv " + shlex.quote(target) + " " + shlex.quote(source) + "\n")
     logger.info(source + " moved to " + target)
 
+
 def check_undo_log_file_header(args):
     if not os.path.exists(args.undo_log_file):
         with open(args.undo_log_file, "w") as log_file:
