@@ -510,3 +510,12 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Overview 3.0 May 2016.pptx')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
+
+    def test_zero_month(self):
+        filename = os.path.join(self.workingDir, 'Overview 5-0-2016.pptx')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Overview 5-0-2016.pptx')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
