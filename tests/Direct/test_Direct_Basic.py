@@ -501,3 +501,12 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertRegex(error, '(?i)not moving.*dry run')
+
+    def test_realworld_failure1(self):
+        filename = os.path.join(self.workingDir, 'Overview 3.0 May 2016.pptx')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Overview 3.0 May 2016.pptx')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
