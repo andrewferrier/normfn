@@ -194,21 +194,9 @@ def process_filename(filename, args):
     basename = os.path.basename(filename)
 
     if not args.all:
-        match = False
-
-        for EXCLUDE_PATTERN in BASENAME_EXCLUDE_PATTERNS:
-            if re.fullmatch(EXCLUDE_PATTERN, basename):
-                match = True
-                break
-
-        if not match:
-            for EXCLUDE_PATTERN in FULLNAME_EXCLUDE_PATTERNS:
-                if re.fullmatch(EXCLUDE_PATTERN, filename):
-                    match = True
-                    break
-
-        if match:
-            logger.info("Skipping " + filename.strip() + " as it matches pattern " + EXCLUDE_PATTERN)
+        (exclude, why) = should_exclude(filename, basename)
+        if exclude:
+            logger.info("Skipping " + filename.strip() + " as it matches pattern " + why)
             return original_filename
 
     def replacement(matchobj):
@@ -310,6 +298,23 @@ def process_filename(filename, args):
     else:
         logger.info("Not moving " + original_filename.strip())
         return original_filename
+
+
+def should_exclude(filename, basename):
+    match = False
+
+    for EXCLUDE_PATTERN in BASENAME_EXCLUDE_PATTERNS:
+        if re.fullmatch(EXCLUDE_PATTERN, basename):
+            match = True
+            break
+
+    if not match:
+        for EXCLUDE_PATTERN in FULLNAME_EXCLUDE_PATTERNS:
+            if re.fullmatch(EXCLUDE_PATTERN, filename):
+                match = True
+                break
+
+    return (match, EXCLUDE_PATTERN)
 
 
 def get_timetouse(args, filename):
