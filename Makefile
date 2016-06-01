@@ -40,15 +40,6 @@ installbrew: makebrewlinks determineversion_brew
 reinstallbrew: makebrewlinks determineversion_brew
 	brew reinstall normalize-filename
 
-builddocker: determineversion
-	docker build -t andrewferrier/normalize-filename .
-
-rundocker_testing: builddocker
-	docker run -t andrewferrier/normalize-filename /sbin/my_init -- bash -c 'cd /tmp/normalize-filename && make unittest && make stylecheck'
-
-rundocker_interactive: builddocker
-	docker run -i -t andrewferrier/normalize-filename /sbin/my_init -- bash -l
-
 unittest:
 	python3 -m unittest discover -s tests/
 
