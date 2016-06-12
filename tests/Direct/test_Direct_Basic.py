@@ -248,6 +248,15 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_month_name_year_reversed(self):
+        filename = os.path.join(self.workingDir, 'Blah May 2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-05-Blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_earliest(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)
@@ -502,12 +511,12 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertRegex(error, '(?i)not moving.*dry run')
 
-    def test_realworld_failure1(self):
+    def test_realworld_failure1_now_fixed(self):
         filename = os.path.join(self.workingDir, 'Overview 3.0 May 2016.pptx')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Overview 3.0 May 2016.pptx')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2016-05-Overview 3.0.pptx')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
