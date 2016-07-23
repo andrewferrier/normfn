@@ -25,7 +25,7 @@ builddeb_real:
 	fakeroot chmod -R u+x $(TEMPDIR)/usr/bin
 	fakeroot dpkg-deb --build $(TEMPDIR) .
 
-install_osx:
+install_osx_finder:
 	cp normalize-filename osx/services/normalize-filename-finder.workflow/Contents/
 	rm -Rfv ~/Library/Services/normalize-filename-finder.workflow/
 	cp -R osx/services/normalize-filename-finder.workflow ~/Library/Services
@@ -34,10 +34,10 @@ install_osx:
 makebrewlinks:
 	ln -sf $(ROOTDIR)/brew/normalize-filename.rb /usr/local/Library/Formula
 
-installbrew: makebrewlinks determineversion_brew
+install_osx_brew: makebrewlinks determineversion_brew
 	brew install -f normalize-filename
 
-reinstallbrew: makebrewlinks determineversion_brew
+reinstall_osx_brew: makebrewlinks determineversion_brew
 	brew reinstall normalize-filename
 
 unittest:
