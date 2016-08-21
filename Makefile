@@ -29,6 +29,8 @@ install_osx_finder:
 	cp normalize-filename osx/services/normalize-filename-finder.workflow/Contents/
 	rm -Rfv ~/Library/Services/normalize-filename-finder.workflow/
 	cp -R osx/services/normalize-filename-finder.workflow ~/Library/Services
+	# The following shortcut is Alt-Command-r
+	defaults write com.apple.finder NSUserKeyEquivalents '{"Normalize Filename"="@~r";}'
 	killall Finder
 
 makebrewlinks:
