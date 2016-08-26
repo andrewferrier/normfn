@@ -20,6 +20,8 @@ import tty
 
 import coloredlogs
 
+assert sys.version_info >= (3,4)
+
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
 FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
