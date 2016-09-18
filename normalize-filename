@@ -20,7 +20,7 @@ import tty
 
 import coloredlogs
 
-assert sys.version_info >= (3,4)
+assert sys.version_info >= (3, 4)
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
@@ -240,7 +240,8 @@ def process_filename(filename, args):
 
     (non_extension, extension) = os.path.splitext(basename)
 
-    MONTH_NAMES_ONLY = '|'.join(map(insensitiveize, calendar.month_name[1:13])) + "|" + '|'.join(map(insensitiveize, calendar.month_abbr[1:13]))
+    MONTH_NAMES_ONLY = '|'.join(map(insensitiveize, calendar.month_name[1:13])) + "|" + '|'.join(
+        map(insensitiveize, calendar.month_abbr[1:13]))
     MONTH = r"(0\d|1[012]|[1-9](?!\d)|" + MONTH_NAMES_ONLY + ")"
     DAY = r"([012]\d|3[01]|[1-9](?!\d))"
     HOUR = r"([01]\d|2[0123])"
