@@ -4,7 +4,10 @@
 
 `normalize-filename` is a utility designed to make it easier to get filenames
 (in the broadest sense, this also includes directory names) to follow a
-modified version of Mark Hurst's file naming strategy (including dates).
+modified version of Mark Hurst's file naming strategy (including dates). It
+also makes other modifications to filenames, listed below.
+
+## Modifications to Filenames to Prefix with Normalized Dates
 
 `normalize-filename` has an opinionated sense of what a filename should look
 like. It prefers `YYYY-MM-DD-rest-of-the-filename.ext`, where `Y`, `M`, and
@@ -28,13 +31,23 @@ time *now* - i.e.  the time at which normalize-filename is run. Using the
 `--earliest` option - the default - will pick whichever of these times is
 earliest (oldest).
 
+## Other Modifications to Filenames
+
+`normalize-filename` will also:
+
+* Lowercase filename extensions (I'm not aware of any good reasons for
+  uppercase ones, and they look ugly).
+
+## Logging and Other Information
+
 For safety, by default, normalize-filename keeps a log file in
 `~/.normalize-file-undo.log.sh` of all the actions it takes, in shell format to
 make it easier to undo them. See the comment at the head of that file (once
 it's been generated) for more information.
 
 For more information on all the options available, run `normalize-filename
---help`.
+--help`. Most `normalize-filename` behavior can be altered or disabled using
+these options.
 
 Project hosted [on
 github](https://github.com/andrewferrier/normalize-filename).

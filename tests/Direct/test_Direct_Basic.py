@@ -546,3 +546,26 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Overview 5-0-2016.pptx')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
+
+    def test_disable_datetime_prefixing(self):
+        filename = os.path.join(self.workingDir, 'blah 01-01-2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--disable-datetime-prefixing'])
+        self.assertTrue(os.path.exists(filename))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+
+    def test_extension_lowercasing(self):
+        filename = os.path.join(self.workingDir, 'blah 01-01-2015.TXT')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+
+    def test_disable_extension_lowercasing(self):
+        filename = os.path.join(self.workingDir, 'blah 01-01-2015.TXT')
+        self.touch(filename)
+        error = self.invokeDirectly([filename], extraParams=['--disable-extension-lowercasing'])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.TXT')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))

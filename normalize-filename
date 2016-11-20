@@ -66,6 +66,13 @@ def main(argv, syserr_handler):
                         "exist (USE WITH CAUTION, consider using --dry-run "
                         "first).")
 
+    parser.add_argument('--disable-datetime-prefixing', action='store_false', dest='datetime_prefixing',
+                        default=True, help='Disable the standardisation and movement of dates/times to '
+                        'the beginning of the filename.')
+
+    parser.add_argument('--disable-extension-lowercasing', action='store_false', dest='extension_lowercasing',
+                        default=True, help='Disable the lowercasing of file extensions')
+
     parser.add_argument('-t', '--add-time', action='store_true', dest='add_time',
                         help='If a time is not found in the filename, add one '
                         'when adding the date prefix.')
@@ -188,18 +195,8 @@ def walk_tree(dirname, args):
             walk_tree(entry, args)
 
 
-def process_filename(filename, args):
+def datetime_prefix(args, non_extension, filename):
     logger = logging.getLogger("normalize-filename")
-
-    logger.debug("Processing filename " + filename)
-    original_filename = filename
-    basename = os.path.basename(filename)
-
-    if not args.all:
-        (exclude, why) = should_exclude(filename, basename)
-        if exclude:
-            logger.info("Skipping " + filename.strip() + " as it matches pattern " + why)
-            return original_filename
 
     def first_not_none(list):
         for item in list:
@@ -237,8 +234,6 @@ def process_filename(filename, args):
                 (("-" + matchobj.group('second')) if matchobj.group('second') is not None else '') +
                 (("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
                 (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
-
-    (non_extension, extension) = os.path.splitext(basename)
 
     MONTH_NAMES_ONLY = '|'.join(map(insensitiveize, calendar.month_name[1:13])) + "|" + '|'.join(
         map(insensitiveize, calendar.month_abbr[1:13]))
@@ -282,10 +277,9 @@ def process_filename(filename, args):
 
     logger.debug("Complete regex used: " + REGEX)
 
-    (basename, number_of_subs) = re.subn(REGEX,
-                                         replacement,
-                                         non_extension)
-    basename = basename.strip() + extension
+    (newname, number_of_subs) = re.subn(REGEX,
+                                        replacement,
+                                        non_extension)
 
     assert number_of_subs <= 1
 
@@ -295,11 +289,37 @@ def process_filename(filename, args):
         timetouse = get_timetouse(args, filename)
 
         if args.add_time:
-            basename = timetouse.strftime("%Y-%m-%dT%H-%M-%S-") + basename
+            newname = timetouse.strftime("%Y-%m-%dT%H-%M-%S-") + newname
         else:
-            basename = timetouse.strftime("%Y-%m-%d-") + basename
+            newname = timetouse.strftime("%Y-%m-%d-") + newname
 
-    filename = os.path.join(os.path.dirname(original_filename), basename)
+    return newname
+
+
+def process_filename(filename, args):
+    logger = logging.getLogger("normalize-filename")
+
+    logger.debug("Processing filename " + filename)
+    original_filename = filename
+    basename = os.path.basename(filename)
+
+    if not args.all:
+        (exclude, why) = should_exclude(filename, basename)
+        if exclude:
+            logger.info("Skipping " + filename.strip() + " as it matches pattern " + why)
+            return original_filename
+
+    (non_extension, extension) = os.path.splitext(basename)
+
+    if(args.datetime_prefixing):
+        non_extension = datetime_prefix(args, non_extension, filename)
+
+    if(args.extension_lowercasing):
+        extension = extension.lower()
+
+    newname = non_extension.strip() + extension
+
+    filename = os.path.join(os.path.dirname(original_filename), newname)
     logger.debug("Potential new filename for " + original_filename + " is " + filename)
 
     if filename == original_filename:
@@ -311,9 +331,9 @@ def process_filename(filename, args):
     move_it = True
 
     if args.interactive:
-        move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + basename + " [y/n/e/q]?")
+        move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + newname + " [y/n/e/q]?")
         if move_it == b'e':
-            new_filename = rlinput("What new filename? ", basename)
+            new_filename = rlinput("What new filename? ", newname)
             new_filename = os.path.join(os.path.dirname(original_filename), new_filename)
             validate_move(args, original_filename, new_filename)
             filename = new_filename
