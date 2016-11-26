@@ -33,14 +33,11 @@ install_osx_finder:
 	defaults write com.apple.finder NSUserKeyEquivalents '{"Normalize Filename"="@~r";}'
 	killall Finder
 
-makebrewlinks:
-	ln -sf $(ROOTDIR)/brew/normalize-filename.rb /usr/local/Library/Formula
+install_osx_brew: determineversion_brew
+	brew install -f file://$(ROOTDIR)/brew/normalize-filename.rb
 
-install_osx_brew: makebrewlinks determineversion_brew
-	brew install -f normalize-filename
-
-reinstall_osx_brew: makebrewlinks determineversion_brew
-	brew reinstall normalize-filename
+reinstall_osx_brew: determineversion_brew
+	brew reinstall file://$(ROOTDIR)/brew/normalize-filename.rb
 
 unittest:
 	python3 -m unittest discover -s tests/
