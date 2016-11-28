@@ -300,25 +300,25 @@ def process_filename(filename, args):
     logger = logging.getLogger("normalize-filename")
 
     logger.debug("Processing filename " + filename)
-    original_filename = filename
     basename = os.path.basename(filename)
 
     if not args.all:
         (exclude, why) = should_exclude(filename, basename)
         if exclude:
             logger.info("Skipping " + filename.strip() + " as it matches pattern " + why)
-            return original_filename
+            return filename
 
     (non_extension, extension) = os.path.splitext(basename)
 
     if(args.datetime_prefixing):
         non_extension = datetime_prefix(args, non_extension, filename)
 
-    if(args.extension_lowercasing):
+    if(args.extension_lowercasing and not os.path.isdir(filename)):
         extension = extension.lower()
 
     newname = non_extension.strip() + extension
 
+    original_filename = filename
     filename = os.path.join(os.path.dirname(original_filename), newname)
     logger.debug("Potential new filename for " + original_filename + " is " + filename)
 

@@ -25,6 +25,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def directoryFileCount(self, directory):
         return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
 
+    def directoryDirCount(self, directory):
+        return len([item for item in os.listdir(directory) if os.path.isdir(os.path.join(directory, item))])
+
     def getOriginalScriptPath(self):
         module_path = inspect.getfile(inspect.currentframe())
         module_path = os.path.join(os.path.dirname(os.path.dirname(module_path)), 'normalize-filename')
