@@ -451,11 +451,7 @@ def ask_yes_no(prompt):
         except KeyboardInterrupt:
             raise QuitException()
         print(str(key, "utf-8"))
-        if key == b'y':
-            return key
-        elif key == b'n':
-            return key
-        elif key == b'e':
+        if key in [b'y', b'n', b'e']:
             return key
         elif key == b'q':
             raise QuitException()
