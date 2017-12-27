@@ -9,7 +9,6 @@ import logging.handlers
 import os.path
 import re
 import readline
-import select
 import shlex
 import shutil
 import sys
