@@ -65,16 +65,21 @@ def main(argv, syserr_handler):
                         "exist (USE WITH CAUTION, consider using --dry-run "
                         "first).")
 
-    parser.add_argument('--disable-datetime-prefixing', action='store_false', dest='datetime_prefixing',
-                        default=True, help='Disable the standardisation and movement of dates/times to '
-                        'the beginning of the filename.')
-
     parser.add_argument('--disable-extension-lowercasing', action='store_false', dest='extension_lowercasing',
                         default=True, help='Disable the lowercasing of file extensions')
 
     parser.add_argument('-t', '--add-time', action='store_true', dest='add_time',
                         help='If a time is not found in the filename, add one '
                         'when adding the date prefix.')
+
+    datetime_prefixing_options = parser.add_mutually_exclusive_group()
+
+    datetime_prefixing_options.add_argument('--disable-datetime-prefixing', action='store_false', dest='datetime_prefixing',
+                                            default=True, help='Disable the standardisation and movement of dates/times to '
+                                            'the beginning of the filename.')
+
+    datetime_prefixing_options.add_argument('-d', '--discard-existing-name', action='store_true', dest='discard_existing_name',
+                                            help='Discard existing name and just use a prefix.')
 
     parser.add_argument('-r', '--recursive', action='store_true', dest="recursive", default=False,
                         help="Recurse into directories specified on the command line. The default is "
@@ -225,14 +230,19 @@ def datetime_prefix(args, non_extension, filename):
         if day is not None and len(day) == 1:
             day = "0" + day
 
-        return (year + "-" +
-                month +
-                (("-" + day) if day is not None else '') +
-                (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
-                (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
-                (("-" + matchobj.group('second')) if matchobj.group('second') is not None else '') +
-                (("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
-                (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
+        replaceValue = (year + "-" +
+                        month +
+                        (("-" + day) if day is not None else '') +
+                        (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
+                        (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
+                        (("-" + matchobj.group('second')) if matchobj.group('second') is not None else ''))
+
+        if not args.discard_existing_name:
+            replaceValue = replaceValue + ((("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
+                                           (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
+
+        logger.debug("replacement() returned: " + replaceValue)
+        return replaceValue
 
     MONTH_NAMES_ONLY = '|'.join(map(insensitiveize, calendar.month_name[1:13])) + "|" + '|'.join(
         map(insensitiveize, calendar.month_abbr[1:13]))
@@ -274,7 +284,7 @@ def datetime_prefix(args, non_extension, filename):
              r"(" + HMS_SEPARATOR + r"(?P<second>" + SECOND + r"))?)?)?"
              r"(?P<suffix>.*)$")
 
-    logger.debug("Complete regex used: " + REGEX)
+    logger.debug("Complete regex used against " + non_extension + ": " + REGEX)
 
     (newname, number_of_subs) = re.subn(REGEX,
                                         replacement,
@@ -287,10 +297,12 @@ def datetime_prefix(args, non_extension, filename):
 
         timetouse = get_timetouse(args, filename)
 
+        newname_with_dash_if_needed = (("-" + newname) if not args.discard_existing_name else "")
+
         if args.add_time:
-            newname = timetouse.strftime("%Y-%m-%dT%H-%M-%S-") + newname
+            newname = timetouse.strftime("%Y-%m-%dT%H-%M-%S") + newname_with_dash_if_needed
         else:
-            newname = timetouse.strftime("%Y-%m-%d-") + newname
+            newname = timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
 
     return newname
 

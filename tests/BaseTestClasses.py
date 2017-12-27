@@ -19,8 +19,11 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def setUp(self):
         self.workingDir = tempfile.mkdtemp(dir='/tmp')
 
-    def getDatePrefix(self):
-        return datetime.now().strftime("%Y-%m-%d-")
+    def getDatePrefix(self, postfixDash=True):
+        if(postfixDash is True):
+            return datetime.now().strftime("%Y-%m-%d-")
+        else:
+            return datetime.now().strftime("%Y-%m-%d")
 
     def directoryFileCount(self, directory):
         return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])

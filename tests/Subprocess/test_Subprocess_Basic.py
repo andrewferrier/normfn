@@ -281,3 +281,25 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         self.assertPathExists(filename3)
         self.assertEqual(2, self.directoryFileCount(subWorkingDir))
         self.assertEqual(1, self.directoryFileCount(os.path.join(subWorkingDir, 'subWorkingDir2')))
+
+    def test_discardprevioussuffix(self):
+        filename = os.path.join(self.workingDir, 'blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], extraParams=['--discard-existing-name'])
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix(postfixDash=False) + '.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
+
+    def test_discardprevioussuffix_existingdate(self):
+        filename = os.path.join(self.workingDir, '2015-01-01-blah.txt')
+        self.touch(filename)
+        (rc, output, error) = self.invokeAsSubprocess([filename], extraParams=['--discard-existing-name'])
+        self.assertEqual(0, rc)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', output)
+        self.assertEqual('', error)
