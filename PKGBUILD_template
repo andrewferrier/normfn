@@ -1,0 +1,17 @@
+pkgbase='normalize-filename'
+pkgname=(normalize-filename)
+pkgver=X
+pkgrel=0
+pkgdesc="normalize-filename"
+arch=(any)
+url=""
+license=(MIT)
+groups=(ajf)
+
+source=(
+        normalize-filename
+       )
+
+package_normalize-filename() {
+        install -Dm 755 normalize-filename "$pkgdir"/usr/bin/normalize-filename
+}

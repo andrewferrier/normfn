@@ -4,12 +4,11 @@ FLAKE8 := $(shell which flake8)
 PYLINT := $(shell which pylint3 || which pylint)
 
 determineversion:
-	$(eval GITDESCRIBE := $(shell git describe --dirty))
-	sed 's/Version: .*/Version: $(GITDESCRIBE)/' debian/DEBIAN/control_template > debian/DEBIAN/control
-
-determineversion_brew:
-	$(eval GITDESCRIBE := $(shell git describe --abbrev=0))
-	sed 's/X\.Y/$(GITDESCRIBE)/' brew/normalize-filename_template.rb > brew/normalize-filename.rb
+	$(eval GITDESCRIBE_DIRTY := $(shell git describe --dirty))
+	sed 's/Version: .*/Version: $(GITDESCRIBE_DIRTY)/' debian/DEBIAN/control_template > debian/DEBIAN/control
+	$(eval GITDESCRIBE_ABBREV := $(shell git describe --abbrev=0))
+	sed 's/X\.Y/$(GITDESCRIBE_ABBREV)/' brew/normalize-filename_template.rb > brew/normalize-filename.rb
+	sed 's/pkgver=X/pkgver=$(GITDESCRIBE_ABBREV)/' PKGBUILD_template > PKGBUILD
 
 builddeb: determineversion builddeb_real
 
@@ -25,6 +24,9 @@ builddeb_real:
 	fakeroot chmod -R u+x $(TEMPDIR)/usr/bin
 	fakeroot dpkg-deb --build $(TEMPDIR) .
 
+buildarch: determineversion
+	makepkg --skipinteg
+
 install_osx_finder:
 	cp normalize-filename osx/services/normalize-filename-finder.workflow/Contents/
 	rm -Rfv ~/Library/Services/normalize-filename-finder.workflow/
@@ -33,10 +35,10 @@ install_osx_finder:
 	defaults write com.apple.finder NSUserKeyEquivalents '{"Normalize Filename"="@~r";}'
 	killall Finder
 
-install_osx_brew: determineversion_brew
+install_osx_brew: determineversion
 	brew install -f file://$(ROOTDIR)/brew/normalize-filename.rb
 
-reinstall_osx_brew: determineversion_brew
+reinstall_osx_brew: determineversion
 	brew reinstall file://$(ROOTDIR)/brew/normalize-filename.rb
 
 unittest:
