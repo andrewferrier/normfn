@@ -4,7 +4,7 @@ class NormalizeFilename < Formula
   url "https://github.com/andrewferrier/normalize-filename/archive/X.Y.zip"
   version "X.Y"
 
-  depends_on :python3
+  depends_on "python@3"
 
   def install
       bin.install "normalize-filename"
