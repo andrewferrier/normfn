@@ -17,7 +17,7 @@ import textwrap
 import traceback
 import tty
 
-import coloredlogs
+import coloredlogs  # type: ignore
 
 assert sys.version_info >= (3, 4)
 
@@ -508,6 +508,7 @@ class FatalException(Exception):
 
 class QuitException(Exception):
     pass
+
 
 if __name__ == "__main__":
     logger_setup = logging.getLogger("normalize-filename")
