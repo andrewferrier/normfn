@@ -5,7 +5,7 @@ PKGBUILD
 cover/
 pkg/
 src/
-*.pkg.tar.xz
+*.pkg.tar.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
