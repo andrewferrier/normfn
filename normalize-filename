@@ -2,7 +2,6 @@
 
 from contextlib import suppress
 from datetime import datetime
-from xdg import xdg_state_home
 import argparse
 import calendar
 import logging
@@ -17,6 +16,7 @@ import termios
 import textwrap
 import traceback
 import tty
+import xdg.BaseDirectory
 
 import coloredlogs  # type: ignore
 
@@ -183,7 +183,7 @@ def main(argv, syserr_handler):
 
 
 def get_default_log_file():
-    return os.path.join(xdg_state_home(), 'normalize-file-undo.log.sh')
+    return os.path.join(xdg.BaseDirectory.xdg_state_home, 'normalize-file-undo.log.sh')
 
 
 def walk_tree(dirname, args):
