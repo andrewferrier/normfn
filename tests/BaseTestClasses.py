@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from datetime import datetime
+from importlib.util import spec_from_loader, module_from_spec
 from stat import S_IRUSR, S_IWUSR, S_IXUSR
 from subprocess import Popen, PIPE, call
 import inspect
@@ -10,6 +11,7 @@ import os.path
 import pexpect
 import shutil
 import tempfile
+import types
 import unittest
 
 
@@ -41,7 +43,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         import importlib.machinery
         module_path = self.getOriginalScriptPath()
         loader = importlib.machinery.SourceFileLoader('normalize-filename', module_path)
-        normalize_filename = loader.load_module()
+        spec = spec_from_loader(os.path.basename(module_path), loader)
+        normalize_filename = module_from_spec(spec)
+        spec.loader.exec_module(normalize_filename)
 
         options = [module_path]
 
