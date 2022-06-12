@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from xdg import xdg_state_home
 import argparse
 import calendar
 import logging
@@ -99,8 +100,7 @@ def main(argv, syserr_handler):
                             help="Specify the name of the shell script used to log "
                             "'undo commands' for normalize-filename; see the "
                             "instructions at the head of this file for more "
-                            "information on use. Defaults to "
-                            "~/.normalize-file-undo.log.sh")
+                            f"information on use. Defaults to {get_default_log_file()}")
 
     log_option.add_argument('--no-undo-log-file', dest='no_undo_log_file',
                             action='store_true', help="Inverse of "
@@ -126,8 +126,7 @@ def main(argv, syserr_handler):
                              "have a date and time. This is the default if you "
                              "don't specify --now or --latest.")
 
-    parser.set_defaults(time_option="earliest",
-                        undo_log_file=os.path.join(os.path.expanduser('~'), '.normalize-filename-undo.log.sh'))
+    parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
 
     class FilenamesAction(argparse.Action):
         # pylint: disable=too-few-public-methods
@@ -181,6 +180,10 @@ def main(argv, syserr_handler):
                 walk_tree(new_filename, args)
             else:
                 process_filename(filename, args)
+
+
+def get_default_log_file():
+    return os.path.join(xdg_state_home(), 'normalize-file-undo.log.sh')
 
 
 def walk_tree(dirname, args):

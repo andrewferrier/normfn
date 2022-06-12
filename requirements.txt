@@ -1,1 +1,2 @@
 coloredlogs>=5.0
+xdg
