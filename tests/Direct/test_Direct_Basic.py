@@ -123,38 +123,38 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual('', error)
 
     def test_invaliddate1(self):
-        filename = os.path.join(self.workingDir, 'blah-1990-20-01.txt')
+        filename = os.path.join(self.workingDir, 'blah-1998-20-01.txt')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1990-20-01.txt')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1998-20-01.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_invaliddate2(self):
-        filename = os.path.join(self.workingDir, 'blah-1990-01-41.txt')
+        filename = os.path.join(self.workingDir, 'blah-1998-01-41.txt')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1990-01-blah-41.txt')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1998-01-blah-41.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_invaliddate3(self):
-        filename = os.path.join(self.workingDir, 'blah-1990-01-35.txt')
+        filename = os.path.join(self.workingDir, 'blah-1998-01-35.txt')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1990-01-blah-35.txt')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '1998-01-blah-35.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
     def test_invaliddate4(self):
-        filename = os.path.join(self.workingDir, 'blah-1990-13-35.txt')
+        filename = os.path.join(self.workingDir, 'blah-1998-13-35.txt')
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1990-13-35.txt')))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'blah-1998-13-35.txt')))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
