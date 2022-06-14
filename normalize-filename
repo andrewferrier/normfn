@@ -16,7 +16,6 @@ import termios
 import textwrap
 import traceback
 import tty
-import xdg.BaseDirectory
 
 import coloredlogs  # type: ignore
 
@@ -183,7 +182,9 @@ def main(argv, syserr_handler):
 
 
 def get_default_log_file():
-    return os.path.join(xdg.BaseDirectory.xdg_state_home, 'normalize-file-undo.log.sh')
+    home = os.path.expanduser('~')
+    xdg_state_home = os.environ.get('XDG_STATE_HOME') or os.path.join(home, '.local', 'state')
+    return os.path.join(xdg_state_home, 'normalize-file-undo.log.sh')
 
 
 def walk_tree(dirname, args):

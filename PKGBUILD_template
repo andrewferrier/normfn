@@ -15,7 +15,6 @@ source=(
 package_normalize-filename() {
         depends=(
                 python-coloredlogs
-                python-pyxdg
         )
 
         install -Dm 755 normalize-filename "$pkgdir"/usr/bin/normalize-filename
