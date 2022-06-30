@@ -1,7 +1,5 @@
 # normalize-filename
 
-[![Travis CI Status](https://travis-ci.org/andrewferrier/normalize-filename.svg?branch=master)](https://travis-ci.org/andrewferrier/normalize-filename)
-
 `normalize-filename` is a utility designed to make it easier to get filenames
 (in the broadest sense, this also includes directory names) to follow a
 modified version of Mark Hurst's file naming strategy (including dates). It
