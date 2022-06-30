@@ -31,14 +31,6 @@ earliest (oldest).
 *   Lowercase filename extensions (I'm not aware of any good reasons for
     uppercase ones, and they look ugly).
 
-## Installation
-
-`normalize-filename` requires at least Python 3.4.
-
-## More Information on How to Use normalize-filename
-
-*   Run `normalize-filename --help`.
-
 ## Logging and Other Information
 
 For safety, by default, normalize-filename keeps a log file in
