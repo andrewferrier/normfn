@@ -6,6 +6,7 @@ from contextlib import suppress
 from datetime import datetime
 import logging
 import logging.handlers
+import os
 import os.path
 import re
 import readline
@@ -220,7 +221,7 @@ def main(argv, syserr_handler):
     class FilenamesAction(argparse.Action):
         # pylint: disable=too-few-public-methods
 
-        def __call__(self, parser, args, values, option=None):
+        def __call__(self, parser, args, values, _):
             args.filenames = values
             if (not args.help) and len(values) < 1:
                 parser.error("You must specify some file or directory names.")
@@ -321,20 +322,20 @@ def datetime_prefix(args, non_extension, filename):
     def replacement(matchobj):
         logger.debug("replacement() called, matchobj = " + str(matchobj))
 
-        year = first_not_none(
+        year = str(first_not_none(
             [
                 matchobj.group("year1"),
                 matchobj.group("year2"),
                 matchobj.group("year3"),
             ]
-        )
-        month = first_not_none(
+        ))
+        month = str(first_not_none(
             [
                 matchobj.group("month1"),
                 matchobj.group("month2"),
                 matchobj.group("month3"),
             ]
-        )
+        ))
         day = first_not_none([matchobj.group("day1"), matchobj.group("day2")])
 
         if not month.isdigit():
@@ -565,6 +566,7 @@ def process_filename(filename, args):
 
 def should_exclude(filename, basename):
     match = False
+    EXCLUDE_PATTERN = ''
 
     for EXCLUDE_PATTERN in BASENAME_EXCLUDE_PATTERNS:
         if re.fullmatch(EXCLUDE_PATTERN, basename):
@@ -708,7 +710,6 @@ def readchar():
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
     except termios.error:
         return os.read(sys.stdin.fileno(), 1)
-    return None
 
 
 def insensitiveize(string):
