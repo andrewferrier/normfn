@@ -1,5 +1,8 @@
 # normfn
 
+(`normfn` used to be known as `normalize-filename`; it's been renamed 
+for simplicity).
+
 `normfn` is a utility designed to rename files and directories to
 follow a normalized pattern including a leading date. This is a modified version
 of Mark Hurst's file naming strategy from the book [Bit
