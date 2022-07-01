@@ -1,4 +1,4 @@
-class NormFN < Formula
+class Normfn < Formula
   desc "normfn --- filename normalizer"
   homepage "http://github.com/andrewferrier/normfn"
   url "https://github.com/andrewferrier/normfn/archive/X.Y.zip"
