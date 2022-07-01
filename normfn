@@ -748,7 +748,7 @@ if __name__ == "__main__":
 
     sysErrHandler = logging.StreamHandler(stream=sys.stderr)
     sysErrHandler.setLevel(logging.WARNING)
-    sysErrFormatter = logging.Formatter("%(levelnme)s: %(message)s")
+    sysErrFormatter = logging.Formatter("%(levelname)s: %(message)s")
     sysErrHandler.setFormatter(sysErrFormatter)
     logger_setup.addHandler(sysErrHandler)
 
