@@ -1,4 +1,4 @@
-# normalize-filename - Hacking
+# normfn - Hacking
 
 To get started, run:
 

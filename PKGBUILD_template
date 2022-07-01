@@ -1,17 +1,21 @@
-pkgbase='normalize-filename'
-pkgname=(normalize-filename)
+pkgbase='normfn'
+pkgname=(normfn)
 pkgver=X
 pkgrel=0
-pkgdesc="normalize-filename"
+pkgdesc="normfn"
 arch=(any)
 url=""
 license=(MIT)
 groups=(ajf)
 
 source=(
-        normalize-filename
+        normfn
        )
 
-package_normalize-filename() {
-        install -Dm 755 normalize-filename "$pkgdir"/usr/bin/normalize-filename
+package_normfn() {
+        replaces=(
+                normalize-filename
+        )
+
+        install -Dm 755 normfn "$pkgdir"/usr/bin/normfn
 }

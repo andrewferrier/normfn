@@ -64,7 +64,7 @@
 for f in "$@"
 do
 	echo "$f"
-        ~/Library/Services/normalize-filename-finder.workflow/Contents/normalize-filename "$f"
+        ~/Library/Services/normfn-finder.workflow/Contents/normfn "$f"
 done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>

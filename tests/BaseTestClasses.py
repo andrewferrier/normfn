@@ -16,7 +16,7 @@ import pexpect
 
 
 class NormalizeFilenameTestCase(unittest.TestCase):
-    COMMAND = os.path.normpath(os.path.join(os.getcwd(), 'normalize-filename'))
+    COMMAND = os.path.normpath(os.path.join(os.getcwd(), 'normfn'))
 
     def setUp(self):
         self.workingDir = tempfile.mkdtemp(dir='/tmp')
@@ -35,14 +35,14 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
     def getOriginalScriptPath(self):
         module_path = inspect.getfile(inspect.currentframe())
-        module_path = os.path.join(os.path.dirname(os.path.dirname(module_path)), 'normalize-filename')
+        module_path = os.path.join(os.path.dirname(os.path.dirname(module_path)), 'normfn')
 
         return module_path
 
     def invokeDirectly(self, inputFiles, extraParams=[]):
         import importlib.machinery
         module_path = self.getOriginalScriptPath()
-        loader = importlib.machinery.SourceFileLoader('normalize-filename', module_path)
+        loader = importlib.machinery.SourceFileLoader('normfn', module_path)
         spec = spec_from_loader(os.path.basename(module_path), loader)
         normalize_filename = module_from_spec(spec)
         spec.loader.exec_module(normalize_filename)
@@ -55,7 +55,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         stream = io.StringIO()
         handler = logging.StreamHandler(stream)
-        log = logging.getLogger('normalize-filename')
+        log = logging.getLogger('normfn')
         log.propagate = False
         log.setLevel(logging.DEBUG)
         log.addHandler(handler)
