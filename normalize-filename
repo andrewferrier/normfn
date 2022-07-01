@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
-from datetime import datetime
 import argparse
 import calendar
+from contextlib import suppress
+from datetime import datetime
 import logging
 import logging.handlers
 import os.path
@@ -21,109 +21,201 @@ assert sys.version_info >= (3, 4)
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
-FULLNAME_EXCLUDE_PATTERNS = frozenset([r".*\.git/.*",
-                                       r".*\.svn/.*",
-                                       r".*\.hg/.*",
-                                       r".*\.bzr/.*"])
+FULLNAME_EXCLUDE_PATTERNS = frozenset(
+    [r".*\.git/.*", r".*\.svn/.*", r".*\.hg/.*", r".*\.bzr/.*"]
+)
 
 YEAR = ""
 
 
 def main(argv, syserr_handler):
-    logger = logging.getLogger('normalize-filename')
+    logger = logging.getLogger("normalize-filename")
 
     class ArgumentParser(argparse.ArgumentParser):
-
         def error(self, message):
             parser.print_help()
             raise FatalException(message)
 
-    parser = ArgumentParser(description="Normalizes filenames in a variety of ways. "
-                            "See https://github.com/andrewferrier/normalize-filename for more information.", add_help=False)
+    parser = ArgumentParser(
+        description="Normalizes filenames in a variety of ways. "
+        "See https://github.com/andrewferrier/normalize-filename for more information.",
+        add_help=False,
+    )
 
-    parser.add_argument('-v', '--verbose', action='count', default=0,
-                        help="Make the output more verbose. This affects the output to the console. "
-                        "Using this twice makes it doubly verbose.")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Make the output more verbose. This affects the output to the console. "
+        "Using this twice makes it doubly verbose.",
+    )
 
-    parser.add_argument('-h', '--help', action='store_true',
-                        help="Show some basic help information about how to use normalize-filename.")
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        help="Show some basic help information about how to use normalize-filename.",
+    )
 
-    parser.add_argument('-n', '--dry-run', action='store_true', dest="dry_run",
-                        help="Don't actually make any changes, just show them. Forces a minimum of "
-                        "a single level of verbosity (-v).")
+    parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        dest="dry_run",
+        help="Don't actually make any changes, just show them. Forces a minimum of "
+        "a single level of verbosity (-v).",
+    )
 
-    parser.add_argument('-i', '--interactive', action='store_true', dest="interactive",
-                        help="Ask about each change before it is done.")
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        dest="interactive",
+        help="Ask about each change before it is done.",
+    )
 
-    parser.add_argument('-a', '--all', action='store_true', dest="all",
-                        help="Affect all files, including those that by default would be excluded.")
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        dest="all",
+        help="Affect all files, including those that by default would be excluded.",
+    )
 
-    parser.add_argument('-f', '--force', action='store_true', dest='force',
-                        help="Overwrite target files even if they already "
-                        "exist (USE WITH CAUTION, consider using --dry-run "
-                        "first).")
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        dest="force",
+        help="Overwrite target files even if they already "
+        "exist (USE WITH CAUTION, consider using --dry-run "
+        "first).",
+    )
 
-    parser.add_argument('--disable-extension-lowercasing', action='store_false', dest='extension_lowercasing',
-                        default=True, help='Disable the lowercasing of file extensions')
+    parser.add_argument(
+        "--disable-extension-lowercasing",
+        action="store_false",
+        dest="extension_lowercasing",
+        default=True,
+        help="Disable the lowercasing of file extensions",
+    )
 
-    parser.add_argument('-t', '--add-time', action='store_true', dest='add_time',
-                        help='If a time is not found in the filename, add one '
-                        'when adding the date prefix.')
+    parser.add_argument(
+        "-t",
+        "--add-time",
+        action="store_true",
+        dest="add_time",
+        help="If a time is not found in the filename, add one "
+        "when adding the date prefix.",
+    )
 
     datetime_prefixing_options = parser.add_mutually_exclusive_group()
 
-    datetime_prefixing_options.add_argument('--disable-datetime-prefixing', action='store_false', dest='datetime_prefixing',
-                                            default=True, help='Disable the standardisation and movement of dates/times to '
-                                            'the beginning of the filename.')
+    datetime_prefixing_options.add_argument(
+        "--disable-datetime-prefixing",
+        action="store_false",
+        dest="datetime_prefixing",
+        default=True,
+        help="Disable the standardisation and movement of dates/times to "
+        "the beginning of the filename.",
+    )
 
-    datetime_prefixing_options.add_argument('-d', '--discard-existing-name', action='store_true', dest='discard_existing_name',
-                                            help='Discard existing name and just use a prefix.')
+    datetime_prefixing_options.add_argument(
+        "-d",
+        "--discard-existing-name",
+        action="store_true",
+        dest="discard_existing_name",
+        help="Discard existing name and just use a prefix.",
+    )
 
-    parser.add_argument('-r', '--recursive', action='store_true', dest="recursive", default=False,
-                        help="Recurse into directories specified on the command line. The default is "
-                        "not to do this, and simply look at the name of the directory itself.")
+    parser.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        dest="recursive",
+        default=False,
+        help="Recurse into directories specified on the command line. The default is "
+        "not to do this, and simply look at the name of the directory itself.",
+    )
 
-    parser.add_argument('--max-years-ahead', type=int, dest='max_years_ahead', default=5,
-                        help='Consider years in filenames further ahead than this number not '
-                        'to be valid years. Defaults to 5.')
+    parser.add_argument(
+        "--max-years-ahead",
+        type=int,
+        dest="max_years_ahead",
+        default=5,
+        help="Consider years in filenames further ahead than this number not "
+        "to be valid years. Defaults to 5.",
+    )
 
-    parser.add_argument('--max-years-behind', type=int, dest='max_years_behind', default=30,
-                        help='Consider years in filenames further behind than this number not '
-                        'to be valid years. Defaults to 30.')
+    parser.add_argument(
+        "--max-years-behind",
+        type=int,
+        dest="max_years_behind",
+        default=30,
+        help="Consider years in filenames further behind than this number not "
+        "to be valid years. Defaults to 30.",
+    )
 
     log_option = parser.add_mutually_exclusive_group()
 
-    log_option.add_argument('--undo-log-file', type=str, dest='undo_log_file',
-                            help="Specify the name of the shell script used to log "
-                            "'undo commands' for normalize-filename; see the "
-                            "instructions at the head of this file for more "
-                            f"information on use. Defaults to {get_default_log_file()}")
+    log_option.add_argument(
+        "--undo-log-file",
+        type=str,
+        dest="undo_log_file",
+        help="Specify the name of the shell script used to log "
+        "'undo commands' for normalize-filename; see the "
+        "instructions at the head of this file for more "
+        f"information on use. Defaults to {get_default_log_file()}",
+    )
 
-    log_option.add_argument('--no-undo-log-file', dest='no_undo_log_file',
-                            action='store_true', help="Inverse of "
-                            "--undo-log-file; don't store any undo commands.")
+    log_option.add_argument(
+        "--no-undo-log-file",
+        dest="no_undo_log_file",
+        action="store_true",
+        help="Inverse of " "--undo-log-file; don't store any undo commands.",
+    )
 
     time_option = parser.add_mutually_exclusive_group()
 
-    time_option.add_argument('--now', action='store_const', dest="time_option", const="now",
-                             help="Use the date and time now as the default "
-                             "prefix for files that don't already have a date "
-                             "and time.")
+    time_option.add_argument(
+        "--now",
+        action="store_const",
+        dest="time_option",
+        const="now",
+        help="Use the date and time now as the default "
+        "prefix for files that don't already have a date "
+        "and time.",
+    )
 
-    time_option.add_argument('--latest', '--newest', action='store_const', dest="time_option", const="latest",
-                             help="Use the latest of ctime and mtime on a file "
-                             "to find a date prefix for files that don't already "
-                             "have a date and time. Note that ctime is *not* "
-                             "file creation time on Linux/OS X; see "
-                             "http://lwn.net/Articles/397442/.")
+    time_option.add_argument(
+        "--latest",
+        "--newest",
+        action="store_const",
+        dest="time_option",
+        const="latest",
+        help="Use the latest of ctime and mtime on a file "
+        "to find a date prefix for files that don't already "
+        "have a date and time. Note that ctime is *not* "
+        "file creation time on Linux/OS X; see "
+        "http://lwn.net/Articles/397442/.",
+    )
 
-    time_option.add_argument('--earliest', '--oldest', action='store_const', dest="time_option", const="earliest",
-                             help="Use the earliest of ctime and mtime on a file "
-                             "to find a date prefix for files that don't already "
-                             "have a date and time. This is the default if you "
-                             "don't specify --now or --latest.")
+    time_option.add_argument(
+        "--earliest",
+        "--oldest",
+        action="store_const",
+        dest="time_option",
+        const="earliest",
+        help="Use the earliest of ctime and mtime on a file "
+        "to find a date prefix for files that don't already "
+        "have a date and time. This is the default if you "
+        "don't specify --now or --latest.",
+    )
 
-    parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
+    parser.set_defaults(
+        time_option="earliest", undo_log_file=get_default_log_file()
+    )
 
     class FilenamesAction(argparse.Action):
         # pylint: disable=too-few-public-methods
@@ -133,7 +225,13 @@ def main(argv, syserr_handler):
             if (not args.help) and len(values) < 1:
                 parser.error("You must specify some file or directory names.")
 
-    parser.add_argument('filenames', metavar="filename", nargs='*', help='Filenames', action=FilenamesAction)
+    parser.add_argument(
+        "filenames",
+        metavar="filename",
+        nargs="*",
+        help="Filenames",
+        action=FilenamesAction,
+    )
 
     args = parser.parse_args(argv[1:])
 
@@ -161,15 +259,22 @@ def main(argv, syserr_handler):
     global YEAR
 
     year_now = datetime.now().year
-    year_list = [str(year) for year in range(year_now - args.max_years_behind, year_now + args.max_years_ahead)]
+    year_list = [
+        str(year)
+        for year in range(
+            year_now - args.max_years_behind, year_now + args.max_years_ahead
+        )
+    ]
     logger.debug("Valid years are: " + str(year_list))
-    YEAR = r"(" + '|'.join(year_list) + r")"
+    YEAR = r"(" + "|".join(year_list) + r")"
 
     with suppress(QuitException):
         for filename in args.filenames:
             filename = os.path.abspath(filename)
             if not os.path.exists(filename):
-                raise FatalException(filename + " specified on the command line does not exist.")
+                raise FatalException(
+                    filename + " specified on the command line does not exist."
+                )
 
             if os.path.isdir(filename) and args.recursive:
                 new_filename = process_filename(filename, args)
@@ -180,9 +285,11 @@ def main(argv, syserr_handler):
 
 
 def get_default_log_file():
-    home = os.path.expanduser('~')
-    xdg_state_home = os.environ.get('XDG_STATE_HOME') or os.path.join(home, '.local', 'state')
-    return os.path.join(xdg_state_home, 'normalize-file-undo.log.sh')
+    home = os.path.expanduser("~")
+    xdg_state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(
+        home, ".local", "state"
+    )
+    return os.path.join(xdg_state_home, "normalize-file-undo.log.sh")
 
 
 def walk_tree(dirname, args):
@@ -214,15 +321,31 @@ def datetime_prefix(args, non_extension, filename):
     def replacement(matchobj):
         logger.debug("replacement() called, matchobj = " + str(matchobj))
 
-        year = first_not_none([matchobj.group('year1'), matchobj.group('year2'), matchobj.group('year3')])
-        month = first_not_none([matchobj.group('month1'), matchobj.group('month2'), matchobj.group('month3')])
-        day = first_not_none([matchobj.group('day1'), matchobj.group('day2')])
+        year = first_not_none(
+            [
+                matchobj.group("year1"),
+                matchobj.group("year2"),
+                matchobj.group("year3"),
+            ]
+        )
+        month = first_not_none(
+            [
+                matchobj.group("month1"),
+                matchobj.group("month2"),
+                matchobj.group("month3"),
+            ]
+        )
+        day = first_not_none([matchobj.group("day1"), matchobj.group("day2")])
 
         if not month.isdigit():
             try:
-                monthDigit = list(map(str.lower, calendar.month_abbr)).index(month.lower())
+                monthDigit = list(map(str.lower, calendar.month_abbr)).index(
+                    month.lower()
+                )
             except ValueError:
-                monthDigit = list(map(str.lower, calendar.month_name)).index(month.lower())
+                monthDigit = list(map(str.lower, calendar.month_name)).index(
+                    month.lower()
+                )
 
             month = str(monthDigit)
 
@@ -232,22 +355,50 @@ def datetime_prefix(args, non_extension, filename):
         if day is not None and len(day) == 1:
             day = "0" + day
 
-        replaceValue = (year + "-" +
-                        month +
-                        (("-" + day) if day is not None else '') +
-                        (("T" + matchobj.group('hour')) if matchobj.group('hour') is not None else '') +
-                        (("-" + matchobj.group('minute')) if matchobj.group('minute') is not None else '') +
-                        (("-" + matchobj.group('second')) if matchobj.group('second') is not None else ''))
+        replaceValue = (
+            year
+            + "-"
+            + month
+            + (("-" + day) if day is not None else "")
+            + (
+                ("T" + matchobj.group("hour"))
+                if matchobj.group("hour") is not None
+                else ""
+            )
+            + (
+                ("-" + matchobj.group("minute"))
+                if matchobj.group("minute") is not None
+                else ""
+            )
+            + (
+                ("-" + matchobj.group("second"))
+                if matchobj.group("second") is not None
+                else ""
+            )
+        )
 
         if not args.discard_existing_name:
-            replaceValue = replaceValue + ((("-" + matchobj.group('prefix')) if matchobj.group('prefix') != '' else '') +
-                                           (matchobj.group('suffix') if matchobj.group('suffix') != '' else ''))
+            replaceValue = replaceValue + (
+                (
+                    ("-" + matchobj.group("prefix"))
+                    if matchobj.group("prefix") != ""
+                    else ""
+                )
+                + (
+                    matchobj.group("suffix")
+                    if matchobj.group("suffix") != ""
+                    else ""
+                )
+            )
 
         logger.debug("replacement() returned: " + replaceValue)
         return replaceValue
 
-    MONTH_NAMES_ONLY = '|'.join(map(insensitiveize, calendar.month_name[1:13])) + "|" + '|'.join(
-        map(insensitiveize, calendar.month_abbr[1:13]))
+    MONTH_NAMES_ONLY = (
+        "|".join(map(insensitiveize, calendar.month_name[1:13]))
+        + "|"
+        + "|".join(map(insensitiveize, calendar.month_abbr[1:13]))
+    )
     MONTH = r"(0\d|1[012]|[1-9](?!\d)|" + MONTH_NAMES_ONLY + ")"
     DAY = r"([012]\d|3[01]|[1-9](?!\d))"
     HOUR = r"([01]\d|2[0123])"
@@ -257,40 +408,59 @@ def datetime_prefix(args, non_extension, filename):
     HMS_SEPARATOR = r"[-_.\s]?"
     DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s|,\s)"
 
-    REGEX = (r"^(?P<prefix>.*?)[-_]?" +
-
-             r"(" +
-
-             # Y-M-D style
-             r"(?P<year1>" + YEAR + r")" +
-             YMD_SEPARATOR + r"(?P<month1>" + MONTH + r")" +
-             r"(" + YMD_SEPARATOR + r"(?P<day1>" + DAY + r"))?" +
-
-             r"|" +
-
-             # D-M-Y style
-             r"(?P<day2>" + DAY + r")" +
-             YMD_SEPARATOR + r"(?P<month2>" + MONTH + r")" +
-             YMD_SEPARATOR + r"(?P<year2>" + YEAR + r")" +
-
-             r"|" +
-
-             # M-Y style, with months in name only
-             r"(?P<month3>" + MONTH_NAMES_ONLY + r")" +
-             YMD_SEPARATOR + r"(?P<year3>" + YEAR + r")" +
-
-             r")" +
-
-             r"(" + DATE_TIME_SEPARATOR + r"(?P<hour>" + HOUR + r")"
-             r"(" + HMS_SEPARATOR + r"(?P<minute>" + MINUTE + r")"
-             r"(" + HMS_SEPARATOR + r"(?P<second>" + SECOND + r"))?)?)?"
-             r"(?P<suffix>.*)$")
+    REGEX = (
+        r"^(?P<prefix>.*?)[-_]?" + r"(" +
+        # Y-M-D style
+        r"(?P<year1>"
+        + YEAR
+        + r")"
+        + YMD_SEPARATOR
+        + r"(?P<month1>"
+        + MONTH
+        + r")"
+        + r"("
+        + YMD_SEPARATOR
+        + r"(?P<day1>"
+        + DAY
+        + r"))?"
+        + r"|"
+        +
+        # D-M-Y style
+        r"(?P<day2>"
+        + DAY
+        + r")"
+        + YMD_SEPARATOR
+        + r"(?P<month2>"
+        + MONTH
+        + r")"
+        + YMD_SEPARATOR
+        + r"(?P<year2>"
+        + YEAR
+        + r")"
+        + r"|"
+        +
+        # M-Y style, with months in name only
+        r"(?P<month3>"
+        + MONTH_NAMES_ONLY
+        + r")"
+        + YMD_SEPARATOR
+        + r"(?P<year3>"
+        + YEAR
+        + r")"
+        + r")"
+        + r"("
+        + DATE_TIME_SEPARATOR
+        + r"(?P<hour>"
+        + HOUR
+        + r")"
+        r"(" + HMS_SEPARATOR + r"(?P<minute>" + MINUTE + r")"
+        r"(" + HMS_SEPARATOR + r"(?P<second>" + SECOND + r"))?)?)?"
+        r"(?P<suffix>.*)$"
+    )
 
     logger.debug("Complete regex used against " + non_extension + ": " + REGEX)
 
-    (newname, number_of_subs) = re.subn(REGEX,
-                                        replacement,
-                                        non_extension)
+    (newname, number_of_subs) = re.subn(REGEX, replacement, non_extension)
 
     assert number_of_subs <= 1
 
@@ -299,12 +469,19 @@ def datetime_prefix(args, non_extension, filename):
 
         timetouse = get_timetouse(args, filename)
 
-        newname_with_dash_if_needed = (("-" + newname) if not args.discard_existing_name else "")
+        newname_with_dash_if_needed = (
+            ("-" + newname) if not args.discard_existing_name else ""
+        )
 
         if args.add_time:
-            newname = timetouse.strftime("%Y-%m-%dT%H-%M-%S") + newname_with_dash_if_needed
+            newname = (
+                timetouse.strftime("%Y-%m-%dT%H-%M-%S")
+                + newname_with_dash_if_needed
+            )
         else:
-            newname = timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
+            newname = (
+                timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
+            )
 
     return newname
 
@@ -318,22 +495,29 @@ def process_filename(filename, args):
     if not args.all:
         (exclude, why) = should_exclude(filename, basename)
         if exclude:
-            logger.info("Skipping " + filename.strip() + " as it matches pattern " + why)
+            logger.info(
+                "Skipping "
+                + filename.strip()
+                + " as it matches pattern "
+                + why
+            )
             return filename
 
     (non_extension, extension) = os.path.splitext(basename)
 
-    if(args.datetime_prefixing):
+    if args.datetime_prefixing:
         non_extension = datetime_prefix(args, non_extension, filename)
 
-    if(args.extension_lowercasing and not os.path.isdir(filename)):
+    if args.extension_lowercasing and not os.path.isdir(filename):
         extension = extension.lower()
 
     newname = non_extension.strip() + extension
 
     original_filename = filename
     filename = os.path.join(os.path.dirname(original_filename), newname)
-    logger.debug("Potential new filename for " + original_filename + " is " + filename)
+    logger.debug(
+        "Potential new filename for " + original_filename + " is " + filename
+    )
 
     if filename == original_filename:
         logger.debug("New filename would be identical, skipping.")
@@ -344,21 +528,35 @@ def process_filename(filename, args):
     move_it = True
 
     if args.interactive:
-        move_it = ask_yes_no("Move " + original_filename.strip() + " to .../" + newname + " [y/n/e/q]?")
-        if move_it == b'e':
+        move_it = ask_yes_no(
+            "Move "
+            + original_filename.strip()
+            + " to .../"
+            + newname
+            + " [y/n/e/q]?"
+        )
+        if move_it == b"e":
             new_filename = rlinput("What new filename? ", newname)
-            new_filename = os.path.join(os.path.dirname(original_filename), new_filename)
+            new_filename = os.path.join(
+                os.path.dirname(original_filename), new_filename
+            )
             validate_move(args, original_filename, new_filename)
             filename = new_filename
         else:
-            move_it = True if move_it == b'y' else False
+            move_it = True if move_it == b"y" else False
 
     if move_it:
         if not args.dry_run:
             shiftfile(args, original_filename, filename)
             return filename
         else:
-            logger.info("Not moving " + original_filename.strip() + " to " + filename + "; dry run.")
+            logger.info(
+                "Not moving "
+                + original_filename.strip()
+                + " to "
+                + filename
+                + "; dry run."
+            )
             return original_filename
     else:
         logger.info("Not moving " + original_filename.strip())
@@ -398,10 +596,16 @@ def get_timetouse(args, filename):
 
 def validate_move(args, original_filename, filename):
     if os.path.exists(filename) and not args.force:
-        raise FatalException("Want to move " + original_filename.strip() + " to " + filename + ", but it already exists.")
+        raise FatalException(
+            "Want to move "
+            + original_filename.strip()
+            + " to "
+            + filename
+            + ", but it already exists."
+        )
 
 
-def rlinput(prompt, prefill=''):
+def rlinput(prompt, prefill=""):
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
     try:
         return input(prompt)
@@ -430,29 +634,52 @@ def shiftfile(args, source, target):
 
     if args.undo_log_file:
         check_undo_log_file_header(args)
-        with open(args.undo_log_file, "a", encoding='utf-8') as log_file:
-            log_file.write("# " + dt_now + ": moving " + source + " to " + target + "\n")
-            log_file.write("mv " + shlex.quote(target) + " " + shlex.quote(source) + "\n")
+        with open(args.undo_log_file, "a", encoding="utf-8") as log_file:
+            log_file.write(
+                "# " + dt_now + ": moving " + source + " to " + target + "\n"
+            )
+            log_file.write(
+                "mv " + shlex.quote(target) + " " + shlex.quote(source) + "\n"
+            )
     logger.info(source + " moved to " + target)
 
 
 def check_undo_log_file_header(args):
     if not os.path.exists(args.undo_log_file):
         with open(args.undo_log_file, "w") as log_file:
-            wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
+            wrapper = textwrap.TextWrapper(
+                initial_indent="# ", subsequent_indent="# "
+            )
             log_file.write("#!/bin/sh\n")
-            log_file.write(wrapper.fill("File generated by normalize-filename "
-                                        "(see http://www.github.com/andrewferrier/normalize-filename). This file is "
-                                        "utf-8 encoded)") + "\n")
+            log_file.write(
+                wrapper.fill(
+                    "File generated by normalize-filename "
+                    "(see http://www.github.com/andrewferrier/normalize-filename). This file is "
+                    "utf-8 encoded)"
+                )
+                + "\n"
+            )
             log_file.write("#\n")
-            log_file.write(wrapper.fill("This file contains shell commands which can be run to invert (undo) the effects of "
-                                        "running normalize-filename. They must be run in *reverse order*. You can achieve "
-                                        "this by running `tac " + args.undo_log_file + " | sh`. If you wish, you can edit "
-                                        "the file first to control which actions are undone.") + "\n")
+            log_file.write(
+                wrapper.fill(
+                    "This file contains shell commands which can be run to invert (undo) the effects of "
+                    "running normalize-filename. They must be run in *reverse order*. You can achieve "
+                    "this by running `tac "
+                    + args.undo_log_file
+                    + " | sh`. If you wish, you can edit "
+                    "the file first to control which actions are undone."
+                )
+                + "\n"
+            )
             log_file.write("#\n")
-            log_file.write(wrapper.fill("(Specific note for MacOS: tac may not be installed. You can install gtac, the "
-                                        "equivalent command, using `brew install coreutils`. You will need Homebrew - "
-                                        "http://brew.sh/ - installed)") + "\n")
+            log_file.write(
+                wrapper.fill(
+                    "(Specific note for MacOS: tac may not be installed. You can install gtac, the "
+                    "equivalent command, using `brew install coreutils`. You will need Homebrew - "
+                    "http://brew.sh/ - installed)"
+                )
+                + "\n"
+            )
             log_file.write("\n")
 
 
@@ -464,14 +691,14 @@ def ask_yes_no(prompt):
         except KeyboardInterrupt:
             raise QuitException()
         print(str(key, "utf-8"))
-        if key in [b'y', b'n', b'e']:
+        if key in [b"y", b"n", b"e"]:
             return key
-        elif key == b'q':
+        elif key == b"q":
             raise QuitException()
 
 
 def readchar():
-    assert sys.platform.startswith('linux') or sys.platform == 'darwin'
+    assert sys.platform.startswith("linux") or sys.platform == "darwin"
     try:
         old_settings = termios.tcgetattr(sys.stdin)
         tty.setcbreak(sys.stdin.fileno())
@@ -485,7 +712,9 @@ def readchar():
 
 
 def insensitiveize(string):
-    return ''.join(map(lambda char: ("[" + char.lower() + char.upper() + "]"), string))
+    return "".join(
+        map(lambda char: ("[" + char.lower() + char.upper() + "]"), string)
+    )
 
 
 warning_pending = False
@@ -499,7 +728,6 @@ def warning(message):
 
 
 class FatalException(Exception):
-
     def __init__(self, value):
         Exception.__init__(self, value)
         self.value = value
@@ -519,7 +747,7 @@ if __name__ == "__main__":
 
     sysErrHandler = logging.StreamHandler(stream=sys.stderr)
     sysErrHandler.setLevel(logging.WARNING)
-    sysErrFormatter = logging.Formatter('%(levelnme)s: %(message)s')
+    sysErrFormatter = logging.Formatter("%(levelnme)s: %(message)s")
     sysErrHandler.setFormatter(sysErrFormatter)
     logger_setup.addHandler(sysErrHandler)
 
