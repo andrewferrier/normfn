@@ -290,7 +290,7 @@ def get_default_log_file():
     xdg_state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(
         home, ".local", "state"
     )
-    return os.path.join(xdg_state_home, "normalize-file-undo.log.sh")
+    return os.path.join(xdg_state_home, "normfn-undo.log.sh")
 
 
 def walk_tree(dirname, args):

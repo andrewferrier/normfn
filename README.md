@@ -45,7 +45,7 @@ earliest (oldest).
 ## Logging and Other Information
 
 For safety, by default, `normfn` keeps a log file in
-`~/.local/state/normalize-file-undo.log.sh` of all the actions it takes, in
+`~/.local/state/normfn-undo.log.sh` of all the actions it takes, in
 shell format to make it easier to undo them. See the comment at the head of that
 file (once normfn has generated it) for more information. You can
 configure this with the `--undo-log-file` and `--no-undo-log-file` options.
