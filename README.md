@@ -1,4 +1,4 @@
-# normfn
+# normfn 
 
 (`normfn` used to be known as `normalize-filename`; it's been renamed 
 for simplicity).
