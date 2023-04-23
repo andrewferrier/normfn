@@ -13,7 +13,7 @@ jobs:
       - name: Set proper repository url in PKGBUILD
         run: sed -i "s|%URL%|${{ github.server_url }}/${{ github.repository }}|" PKGBUILD_template
       - name: Build Arch Linux package
-        uses: ./
+        uses: FFY00/build-arch-package@v1
         with:
           BUILD_SCRIPT: extra-x86_64-build
           PKGBUILD: $GITHUB_WORKSPACE/PKGBUILD_template
