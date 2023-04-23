@@ -54,3 +54,4 @@ For more information on all the options available, run `normfn --help`. You can
 alter or disable most `normfn` behaviour using these options.
 
 Project hosted [on github](https://github.com/andrewferrier/normfn).
+
