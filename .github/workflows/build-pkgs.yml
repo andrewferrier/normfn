@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install make
-        run: pacman -Syu make
+        run: pacman -Syu --noconfirm make
       - name: Build Arch package
         run: make buildarch
   build-deb:
