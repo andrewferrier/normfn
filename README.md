@@ -36,7 +36,7 @@ earliest (oldest).
 
 ## Installation
 
-`normfn` requires at least Python 3.4.
+`normfn` requires at least Python 3.8.
 
 ## More Information on How to Use normfn
 
