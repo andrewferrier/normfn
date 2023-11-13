@@ -18,7 +18,7 @@ import textwrap
 import traceback
 import tty
 
-assert sys.version_info >= (3, 4)
+assert sys.version_info >= (3, 8)
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
