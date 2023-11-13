@@ -4,9 +4,9 @@ FLAKE8 := $(shell which flake8)
 PYLINT := $(shell which pylint3 || which pylint)
 
 determineversion:
-	$(eval GITDESCRIBE_DIRTY := $(shell git describe --dirty))
+	$(eval GITDESCRIBE_DIRTY := $(shell git describe --tags --dirty))
 	sed 's/Version: .*/Version: $(GITDESCRIBE_DIRTY)/' debian/DEBIAN/control_template > debian/DEBIAN/control
-	$(eval GITDESCRIBE_ABBREV := $(shell git describe --abbrev=0))
+	$(eval GITDESCRIBE_ABBREV := $(shell git describe --tags --abbrev=0))
 	sed 's/X\.Y/$(GITDESCRIBE_ABBREV)/' brew/normfn_template.rb > brew/normfn.rb
 	sed 's/pkgver=X/pkgver=$(GITDESCRIBE_ABBREV)/' PKGBUILD_template > PKGBUILD
 
