@@ -257,6 +257,15 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_day_month_name_year(self):
+        filename = os.path.join(self.workingDir, 'Blah46_002004_XYZ_20_November_2015.txt')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-11-20-Blah46_002004_XYZ.txt')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_abbr_month_insensitive_name(self):
         filename = os.path.join(self.workingDir, 'Blah 25 jan 2015.txt')
         self.touch(filename)
