@@ -718,16 +718,6 @@ def insensitiveize(string):
     )
 
 
-warning_pending = False
-
-
-def warning(message):
-    global warning_pending
-    logger = logging.getLogger("normfn")
-    logger.warning(message)
-    warning_pending = True
-
-
 class FatalException(Exception):
     def __init__(self, value):
         Exception.__init__(self, value)
@@ -760,6 +750,3 @@ if __name__ == "__main__":
     except:
         traceback.print_exc()
         sys.exit(3)
-
-    if warning_pending:
-        sys.exit(1)
