@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/andrewferrier/normfn/compare/0.8.0...0.8.1) (2023-11-13)
+
+
+### Bug Fixes
+
+* Corner case where month was detected as 00 ([6aa39aa](https://github.com/andrewferrier/normfn/commit/6aa39aaf3e25bfd076c1cc81fa2b501a07fd51fa))
+
 ## [0.8.0](https://github.com/andrewferrier/normfn/compare/0.7.2...0.8.0) (2023-04-23)
 
 
