@@ -47,11 +47,6 @@ unittest:
 unittest_verbose:
 	python3 -m unittest discover -s tests/ -f -v
 
-coverage:
-	rm -rf cover/
-	nosetests tests/Direct/*.py --with-coverage --cover-package=normfn,tests --cover-erase --cover-html --cover-branches
-	open cover/index.html
-
 analysis:
 	pyflakes normfn
 	# Debian version is badly packaged, make sure we are using Python 3.

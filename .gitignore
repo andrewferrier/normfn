@@ -2,7 +2,6 @@
 tags
 PKGBUILD
 *.deb
-cover/
 pkg/
 src/
 *.pkg.tar.*
