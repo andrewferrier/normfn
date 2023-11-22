@@ -284,6 +284,15 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual('', error)
 
+    def test_ensure_common_separator_used(self):
+        filename = os.path.join(self.workingDir, 'T 1234 2023-11-22.pdf')
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2023-11-22-T 1234.pdf')))
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual('', error)
+
     def test_earliest(self):
         filename = os.path.join(self.workingDir, 'blah.txt')
         self.touch(filename)

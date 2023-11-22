@@ -405,7 +405,12 @@ def datetime_prefix(args, non_extension: str, filename: str):
     HOUR = r"([01]\d|2[0123])"
     MINUTE = SECOND = r"[012345]\d"
 
-    YMD_SEPARATOR = r"[-_.\s]?"
+    DATE_SEPARATOR = r"[-_.\s]?"
+    YMD_SEPARATOR_FIRST = r"(?P<ymdsep>" + DATE_SEPARATOR + r")"
+    YMD_SEPARATOR_FOLLOWING = r"(?P=ymdsep)"
+    DMY_SEPARATOR_FIRST = r"(?P<dmysep>" + DATE_SEPARATOR + r")"
+    DMY_SEPARATOR_FOLLOWING = r"(?P=dmysep)"
+    MY_SEPARATOR = DATE_SEPARATOR
     HMS_SEPARATOR = r"[-_.\s]?"
     DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s|,\s)"
 
@@ -415,12 +420,12 @@ def datetime_prefix(args, non_extension: str, filename: str):
         r"(?P<year1>"
         + YEAR
         + r")"
-        + YMD_SEPARATOR
+        + YMD_SEPARATOR_FIRST
         + r"(?P<month1>"
         + MONTH
         + r")"
         + r"("
-        + YMD_SEPARATOR
+        + YMD_SEPARATOR_FOLLOWING
         + r"(?P<day1>"
         + DAY
         + r"))?"
@@ -430,11 +435,11 @@ def datetime_prefix(args, non_extension: str, filename: str):
         r"(?P<day2>"
         + DAY
         + r")"
-        + YMD_SEPARATOR
+        + DMY_SEPARATOR_FIRST
         + r"(?P<month2>"
         + MONTH
         + r")"
-        + YMD_SEPARATOR
+        + DMY_SEPARATOR_FOLLOWING
         + r"(?P<year2>"
         + YEAR
         + r")"
@@ -444,7 +449,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
         r"(?P<month3>"
         + MONTH_NAMES_ONLY
         + r")"
-        + YMD_SEPARATOR
+        + MY_SEPARATOR
         + r"(?P<year3>"
         + YEAR
         + r")"
