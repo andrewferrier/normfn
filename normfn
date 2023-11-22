@@ -411,7 +411,8 @@ def datetime_prefix(args, non_extension: str, filename: str):
     DMY_SEPARATOR_FIRST = r"(?P<dmysep>" + DATE_SEPARATOR + r")"
     DMY_SEPARATOR_FOLLOWING = r"(?P=dmysep)"
     MY_SEPARATOR = DATE_SEPARATOR
-    HMS_SEPARATOR = r"[-_.\s]?"
+    HMS_SEPARATOR_FIRST = r"(?P<hmssep>[-_.\s]?)"
+    HMS_SEPARATOR_FOLLOWING = r"(?P=hmssep)"
     DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s|,\s)"
 
     REGEX = (
@@ -459,8 +460,8 @@ def datetime_prefix(args, non_extension: str, filename: str):
         + r"(?P<hour>"
         + HOUR
         + r")"
-        r"(" + HMS_SEPARATOR + r"(?P<minute>" + MINUTE + r")"
-        r"(" + HMS_SEPARATOR + r"(?P<second>" + SECOND + r"))?)?)?"
+        r"(" + HMS_SEPARATOR_FIRST + r"(?P<minute>" + MINUTE + r")"
+        r"(" + HMS_SEPARATOR_FOLLOWING + r"(?P<second>" + SECOND + r"))?)?)?"
         r"(?P<suffix>.*)$"
     )
 
