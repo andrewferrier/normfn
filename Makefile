@@ -4,11 +4,12 @@ FLAKE8 := $(shell which flake8)
 PYLINT := $(shell which pylint3 || which pylint)
 
 determineversion:
-	$(eval GITDESCRIBE_DIRTY := $(shell git describe --tags --dirty))
-	sed 's/Version: .*/Version: $(GITDESCRIBE_DIRTY)/' debian/DEBIAN/control_template > debian/DEBIAN/control
-	$(eval GITDESCRIBE_ABBREV := $(shell git describe --tags --abbrev=0))
-	sed 's/X\.Y/$(GITDESCRIBE_ABBREV)/' brew/normfn_template.rb > brew/normfn.rb
-	sed 's/pkgver=X/pkgver=$(GITDESCRIBE_ABBREV)/' PKGBUILD_template > PKGBUILD
+	$(eval GITDESCRIBE_DEBIAN := $(shell git describe --tags --dirty))
+	sed 's/Version: .*/Version: $(GITDESCRIBE_DEBIAN)/' debian/DEBIAN/control_template > debian/DEBIAN/control
+	$(eval GITDESCRIBE_BREW := $(shell git describe --tags --abbrev=0))
+	sed 's/X\.Y/$(GITDESCRIBE_BREW)/' brew/normfn_template.rb > brew/normfn.rb
+	$(eval GITDESCRIBE_ARCH := $(shell git describe --tags | sed 's/-/_/g'))
+	sed 's/pkgver=X/pkgver=$(GITDESCRIBE_ARCH)/' PKGBUILD_template > PKGBUILD
 
 builddeb: determineversion builddeb_real
 
