@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.0.0](https://github.com/andrewferrier/normfn/compare/0.8.1...1.0.0) (2023-11-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove --disable-datetime-prefixing
+
+### Features
+
+* Improve Arch package version ([27ea28d](https://github.com/andrewferrier/normfn/commit/27ea28db24eb4e49b6c5022d3979bbeb0be2d8a3))
+* Remove --disable-datetime-prefixing ([bbdf200](https://github.com/andrewferrier/normfn/commit/bbdf200c3ec8e45aaff6414d229129b37bde228d))
+* Update README with normfn --help ([e54fd7c](https://github.com/andrewferrier/normfn/commit/e54fd7ccf33024ff7ab9cb5987d0f72ed4678402))
+
+
+### Bug Fixes
+
+* Add backticks ([7f276b4](https://github.com/andrewferrier/normfn/commit/7f276b4d287bd6e09269eed73623824d5b98cbe0))
+* Don't use Unix-like tmpdir ([d1a00a5](https://github.com/andrewferrier/normfn/commit/d1a00a52f7d552db61477ec84e01b75aba9c4f43))
+* Enforce Python 3.8+ ([3dd98b7](https://github.com/andrewferrier/normfn/commit/3dd98b77aa0a73665f66cf57eb3c11a988cd1563))
+* Ensure that a common separator is used for dates ([13d6b82](https://github.com/andrewferrier/normfn/commit/13d6b82fa1f07ab8183ace7926264f542dde2991))
+* Ensure we use a common time separator ([0fb4c60](https://github.com/andrewferrier/normfn/commit/0fb4c6018460aca4b58444d5059600c6ca8a5fe1))
+* Handle readchar() on Windows ([99b0c2c](https://github.com/andrewferrier/normfn/commit/99b0c2c94ae12eb896890abb3b2f7a80d55e1d0f))
+* Handle readline on Windows ([849b7a8](https://github.com/andrewferrier/normfn/commit/849b7a8bdfc6338b24fec96f4bc5331dc8246b7a))
+* Handle tty on Windows ([d590bd7](https://github.com/andrewferrier/normfn/commit/d590bd7b405c8bfbb94938f247be2d92c6e6a1eb))
+* Handling of GITHUB_OUTPUT ([4a877a2](https://github.com/andrewferrier/normfn/commit/4a877a2c9a25b5ff68570b36a809eec63f44df18))
+* Syntax for setting variable ([3255775](https://github.com/andrewferrier/normfn/commit/325577536ba7927166d486bfdd8adfa3e2a54dd4))
+* Try command-output ([95b083c](https://github.com/andrewferrier/normfn/commit/95b083cc8e229f745b6363530e2cfb6b8618678c))
+* Try syntax [#2](https://github.com/andrewferrier/normfn/issues/2) ([20b84c3](https://github.com/andrewferrier/normfn/commit/20b84c3dc7e31dd0ee2e16a8daf7c348bc3a76b0))
+* Use --tags for 'git describe' ([7bc1538](https://github.com/andrewferrier/normfn/commit/7bc15381c73bac4682a99ef40b5c4af789d53d7d))
+* Use os.sep for Windows excludes ([f5f8158](https://github.com/andrewferrier/normfn/commit/f5f8158b0df261866737487e14a8eacceeec38a9))
+* Various aspects of README update ([85d77ca](https://github.com/andrewferrier/normfn/commit/85d77ca33dfc699ad0aac3477649f50a6f99cb95))
+
 ## [0.8.1](https://github.com/andrewferrier/normfn/compare/0.8.0...0.8.1) (2023-11-13)
 
 
