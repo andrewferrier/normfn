@@ -95,14 +95,6 @@ def main(argv, syserr_handler):
     )
 
     parser.add_argument(
-        "--disable-extension-lowercasing",
-        action="store_false",
-        dest="extension_lowercasing",
-        default=True,
-        help="Disable the lowercasing of file extensions",
-    )
-
-    parser.add_argument(
         "-t",
         "--add-time",
         action="store_true",
@@ -514,9 +506,6 @@ def process_filename(filename: str, args):
 
     if args.datetime_prefixing:
         non_extension = datetime_prefix(args, non_extension, filename)
-
-    if args.extension_lowercasing and not os.path.isdir(filename):
-        extension = extension.lower()
 
     newname = non_extension.strip() + extension
 

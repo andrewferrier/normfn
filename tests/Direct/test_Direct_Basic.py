@@ -580,34 +580,3 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         error = self.invokeDirectly([filename], extraParams=['--disable-datetime-prefixing'])
         self.assertTrue(os.path.exists(filename))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
-
-    def test_extension_lowercasing(self):
-        filename = os.path.join(self.workingDir, 'blah 01-01-2015.TXT')
-        self.touch(filename)
-        error = self.invokeDirectly([filename])
-        self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.txt')))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-
-    def test_disable_extension_lowercasing(self):
-        filename = os.path.join(self.workingDir, 'blah 01-01-2015.TXT')
-        self.touch(filename)
-        error = self.invokeDirectly([filename], extraParams=['--disable-extension-lowercasing'])
-        self.assertFalse(os.path.exists(filename))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, '2015-01-01-blah.TXT')))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-
-    def test_dontapply_extension_lowercasing_on_directory(self):
-        directory = os.path.join(self.workingDir, '2015-01-01-6.1-PDF')
-        os.mkdir(directory)
-        error = self.invokeDirectly([directory])
-        self.assertTrue(os.path.exists(directory))
-        self.assertEqual(1, self.directoryDirCount(self.workingDir))
-
-    def test_dontapply_extension_lowercasing_on_directory_without_date(self):
-        directory = os.path.join(self.workingDir, '6.1-PDF')
-        os.mkdir(directory)
-        error = self.invokeDirectly([directory])
-        self.assertFalse(os.path.exists(directory))
-        self.assertTrue(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + '6.1-PDF')))
-        self.assertEqual(1, self.directoryDirCount(self.workingDir))

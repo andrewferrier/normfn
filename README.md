@@ -28,9 +28,6 @@ platforms), there are three: the ctime, the mtime, and the time *now* --- i.e.
 the time when you run `normfn`. Using the `--earliest` option --- the default
 --- will pick whichever of these times is earliest (oldest).
 
-`normfn` will also lowercase filename extensions (I'm not aware of any good
-reasons for uppercase ones, and they look ugly).
-
 ## Installation
 
 `normfn` requires at least Python 3.8.
