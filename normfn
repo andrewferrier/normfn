@@ -14,7 +14,6 @@ import shutil
 import sys
 import textwrap
 import traceback
-import tty
 
 assert sys.version_info >= (3, 8)
 
@@ -688,6 +687,8 @@ def readchar():
         return msvcrt.getch()
     else:
         import termios
+        import tty
+
         try:
             old_settings = termios.tcgetattr(sys.stdin)
             tty.setcbreak(sys.stdin.fileno())
