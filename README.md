@@ -32,6 +32,11 @@ for simplicity).
 
 `normfn` requires at least Python 3.8.
 
+## Usage
+
+<!-- [START AUTO UPDATE] -->
+<!-- [END AUTO UPDATE] -->
+
 ## More Information on How to Use normfn
 
 Run `normfn --help`.

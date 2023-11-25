@@ -1,0 +1,20 @@
+---
+name: Update File
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get help
+        id: vars
+        run: echo "content=$(./normfn --help)"
+      - name: Update file
+        uses: wow-actions/update-file@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: README.md
+          content: "${{ steps.vars.outputs.content }}"
