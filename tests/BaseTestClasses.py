@@ -19,7 +19,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     COMMAND = os.path.normpath(os.path.join(os.getcwd(), 'normfn'))
 
     def setUp(self):
-        self.workingDir = tempfile.mkdtemp(dir='/tmp')
+        self.workingDir = tempfile.mkdtemp()
 
     def getDatePrefix(self, postfixDash=True):
         if(postfixDash is True):
