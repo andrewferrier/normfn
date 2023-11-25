@@ -38,7 +38,7 @@ def main(argv, syserr_handler):
             raise FatalException(message)
 
     parser = ArgumentParser(
-        description="Normalizes filenames in a variety of ways. "
+        description="Normalizes filenames by prefixing a date to them. "
         "See https://github.com/andrewferrier/normfn for more information.",
         add_help=False,
     )
@@ -48,7 +48,7 @@ def main(argv, syserr_handler):
         "--verbose",
         action="count",
         default=0,
-        help="Make the output more verbose. This affects the output to the console. "
+        help="Add debugging output. "
         "Using this twice makes it doubly verbose.",
     )
 
@@ -56,7 +56,7 @@ def main(argv, syserr_handler):
         "-h",
         "--help",
         action="store_true",
-        help="Show some basic help information about how to use normfn.",
+        help="Show help information for normfn.",
     )
 
     parser.add_argument(
@@ -64,7 +64,7 @@ def main(argv, syserr_handler):
         "--dry-run",
         action="store_true",
         dest="dry_run",
-        help="Don't actually make any changes, just show them. Forces a minimum of "
+        help="Don't actually make any changes, just show them. Forces "
         "a single level of verbosity (-v).",
     )
 
@@ -81,7 +81,7 @@ def main(argv, syserr_handler):
         "--all",
         action="store_true",
         dest="all",
-        help="Affect all files, including those that by default would be excluded.",
+        help="Affect all files, including those in default exclude lists.",
     )
 
     parser.add_argument(
@@ -89,7 +89,7 @@ def main(argv, syserr_handler):
         "--force",
         action="store_true",
         dest="force",
-        help="Overwrite target files even if they already "
+        help="Overwrite target files if they already "
         "exist (USE WITH CAUTION, consider using --dry-run "
         "first).",
     )
@@ -99,8 +99,7 @@ def main(argv, syserr_handler):
         "--add-time",
         action="store_true",
         dest="add_time",
-        help="If a time is not found in the filename, add one "
-        "when adding the date prefix.",
+        help="If a time is not found in the filename, add one."
     )
 
     datetime_prefixing_options = parser.add_mutually_exclusive_group()
@@ -119,7 +118,7 @@ def main(argv, syserr_handler):
         "--discard-existing-name",
         action="store_true",
         dest="discard_existing_name",
-        help="Discard existing name and just use a prefix.",
+        help="Discard existing name and just use the date/time prefix.",
     )
 
     parser.add_argument(
@@ -137,7 +136,7 @@ def main(argv, syserr_handler):
         type=int,
         dest="max_years_ahead",
         default=5,
-        help="Consider years in filenames further ahead than this number not "
+        help="Consider years further ahead from now than this not "
         "to be valid years. Defaults to 5.",
     )
 
@@ -146,7 +145,7 @@ def main(argv, syserr_handler):
         type=int,
         dest="max_years_behind",
         default=30,
-        help="Consider years in filenames further behind than this number not "
+        help="Consider years further behind from now than this not "
         "to be valid years. Defaults to 30.",
     )
 
@@ -156,17 +155,18 @@ def main(argv, syserr_handler):
         "--undo-log-file",
         type=str,
         dest="undo_log_file",
-        help="Specify the name of the shell script used to log "
+        help="The name of the shell script to log "
         "'undo commands' for normfn; see the "
-        "instructions at the head of this file for more "
-        f"information on use. Defaults to {get_default_log_file()}",
+        "instructions in the file to use. "
+        f"Defaults to {get_default_log_file()}",
     )
 
     log_option.add_argument(
         "--no-undo-log-file",
         dest="no_undo_log_file",
         action="store_true",
-        help="Inverse of " "--undo-log-file; don't store any undo commands.",
+        help="Inverse of --undo-log-file; "
+        "don't store undo commands.",
     )
 
     time_option = parser.add_mutually_exclusive_group()
@@ -176,9 +176,8 @@ def main(argv, syserr_handler):
         action="store_const",
         dest="time_option",
         const="now",
-        help="Use the date and time now as the default "
-        "prefix for files that don't already have a date "
-        "and time.",
+        help="Use date and time now as the default "
+        "file prefix for filenames without them."
     )
 
     time_option.add_argument(
@@ -187,10 +186,10 @@ def main(argv, syserr_handler):
         action="store_const",
         dest="time_option",
         const="latest",
-        help="Use the latest of ctime and mtime on a file "
-        "to find a date prefix for files that don't already "
-        "have a date and time. Note that ctime is *not* "
-        "file creation time on Linux/OS X; see "
+        help="Use the latest of ctime and mtime "
+        "to define a file prefix for files without them. "
+        "Note: ctime is *not* "
+        "file creation on Linux/OS X; see "
         "http://lwn.net/Articles/397442/.",
     )
 
@@ -200,10 +199,9 @@ def main(argv, syserr_handler):
         action="store_const",
         dest="time_option",
         const="earliest",
-        help="Use the earliest of ctime and mtime on a file "
-        "to find a date prefix for files that don't already "
-        "have a date and time. This is the default if you "
-        "don't specify --now or --latest.",
+        help="Use earliest of ctime and mtime "
+        "to define a file prefix for files without them. "
+        "This is the default."
     )
 
     parser.set_defaults(
