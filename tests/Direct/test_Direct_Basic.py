@@ -577,6 +577,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
     def test_disable_datetime_prefixing(self):
         filename = os.path.join(self.workingDir, 'blah 01-01-2015.txt')
         self.touch(filename)
-        error = self.invokeDirectly([filename], extraParams=['--disable-datetime-prefixing'])
+        self.invokeDirectly([filename], extraParams=['--disable-datetime-prefixing'])
         self.assertTrue(os.path.exists(filename))
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
