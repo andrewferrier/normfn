@@ -36,6 +36,7 @@ for simplicity).
 
 <!-- [START AUTO UPDATE] -->
 <!-- Please keep comment here to allow auto-update -->
+```
 usage: normfn [-v] [-h] [-n] [-i] [-a] [-f] [-t]
               [--disable-datetime-prefixing | -d] [-r]
               [--max-years-ahead MAX_YEARS_AHEAD]
@@ -96,6 +97,8 @@ options:
                         a date prefix for files that don't already have a date
                         and time. This is the default if you don't specify
                         --now or --latest.
+
+```
 <!-- [END AUTO UPDATE] -->
 
 ## More Information on How to Use normfn
