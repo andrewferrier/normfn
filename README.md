@@ -36,7 +36,7 @@ for simplicity).
 
 <!-- [START AUTO UPDATE] -->
 <!-- Please keep comment here to allow auto-update -->
-
+"$(./normfn --help)"
 <!-- [END AUTO UPDATE] -->
 
 ## More Information on How to Use normfn
