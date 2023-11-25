@@ -9,7 +9,6 @@ import logging.handlers
 import os
 import os.path
 import re
-import readline
 import shlex
 import shutil
 import sys
@@ -589,11 +588,15 @@ def validate_move(args, original_filename: str, filename: str):
 
 
 def rlinput(prompt: str, prefill=""):
-    readline.set_startup_hook(lambda: readline.insert_text(prefill))
-    try:
+    if os.name == 'nt':
         return input(prompt)
-    finally:
-        readline.set_startup_hook()
+    else:
+        import readline
+        readline.set_startup_hook(lambda: readline.insert_text(prefill))
+        try:
+            return input(prompt)
+        finally:
+            readline.set_startup_hook()
 
 
 def shiftfile(args, source: str, target: str):
