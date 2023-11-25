@@ -11,12 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Get help
+        uses: mathiasvr/command-output@v2.0.0
         id: vars
-        run: echo "content='$(./normfn --help)'" >> $GITHUB_OUTPUT
+        with:
+          run: ./normfn --help
       - name: Update file
         uses: wow-actions/update-file@v1
         with:
           commit_message: 'chore: update README [skip ci]'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path: README.md
-          content: "${{ steps.vars.outputs.content }}"
+          content: "${{ steps.vars.outputs.stdout }}"
