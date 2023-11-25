@@ -232,7 +232,7 @@ def main(argv, syserr_handler):
         else:
             syserr_handler.setLevel(logging.WARNING)
 
-    logger.debug("Arguments are: " + str(args))
+    logger.debug(f"Arguments are: {args}")
 
     if args.no_undo_log_file:
         args.undo_log_file = None
@@ -246,7 +246,7 @@ def main(argv, syserr_handler):
             year_now - args.max_years_behind, year_now + args.max_years_ahead
         )
     ]
-    logger.debug("Valid years are: " + str(year_list))
+    logger.debug(f"Valid years are: {year_list}")
     YEAR = r"(" + "|".join(year_list) + r")"
 
     with suppress(QuitException):
@@ -300,7 +300,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
         return None
 
     def replacement(matchobj):
-        logger.debug("replacement() called, matchobj = " + str(matchobj))
+        logger.debug(f"replacement() called, matchobj = {matchobj}")
 
         year = str(
             first_not_none(
@@ -480,17 +480,14 @@ def datetime_prefix(args, non_extension: str, filename: str):
 def process_filename(filename: str, args):
     logger = logging.getLogger("normfn")
 
-    logger.debug("Processing filename " + filename)
+    logger.debug(f"Processing filename {filename}")
     basename = os.path.basename(filename)
 
     if not args.all:
         (exclude, why) = should_exclude(filename, basename)
         if exclude:
             logger.info(
-                "Skipping "
-                + filename.strip()
-                + " as it matches pattern "
-                + why
+                f"Skipping {filename.strip()} as it matches pattern {why}"
             )
             return filename
 
@@ -503,7 +500,7 @@ def process_filename(filename: str, args):
     original_filename = filename
     filename = os.path.join(os.path.dirname(original_filename), newname)
     logger.debug(
-        "Potential new filename for " + original_filename + " is " + filename
+        f"Potential new filename for {original_filename} is {filename}"
     )
 
     if filename == original_filename:
@@ -516,11 +513,7 @@ def process_filename(filename: str, args):
 
     if args.interactive:
         move_it = ask_yes_no(
-            "Move "
-            + original_filename.strip()
-            + " to .../"
-            + newname
-            + " [y/n/e/q]?"
+            f"Move {original_filename.strip()} to .../{newname} [y/n/e/q]?"
         )
         if move_it == b"e":
             new_filename = rlinput("What new filename? ", newname)
@@ -538,15 +531,11 @@ def process_filename(filename: str, args):
             return filename
         else:
             logger.info(
-                "Not moving "
-                + original_filename.strip()
-                + " to "
-                + filename
-                + "; dry run."
+                f"Not moving {original_filename.strip()} to {filename}; dry run."
             )
             return original_filename
     else:
-        logger.info("Not moving " + original_filename.strip())
+        logger.info(f"Not moving {original_filename.strip()}")
         return original_filename
 
 
@@ -585,11 +574,8 @@ def get_timetouse(args, filename: str):
 def validate_move(args, original_filename: str, filename: str):
     if os.path.exists(filename) and not args.force:
         raise FatalException(
-            "Want to move "
-            + original_filename.strip()
-            + " to "
-            + filename
-            + ", but it already exists."
+            f"Want to move {original_filename.strip()} to "
+            f"{filename}, but it already exists."
         )
 
 
@@ -619,21 +605,17 @@ def shiftfile(args, source: str, target: str):
     except PermissionError as permission_error:
         filename = permission_error.filename
         if filename == source:
-            raise FatalException("Permission denied on source: " + filename)
+            raise FatalException(f"Permission denied on source: {filename}")
         elif filename == target:
-            raise FatalException("Permission denied on target: " + filename)
+            raise FatalException(f"Permission denied on target: {filename}")
         else:
             raise
 
     if args.undo_log_file:
         check_undo_log_file_header(args)
         with open(args.undo_log_file, "a", encoding="utf-8") as log_file:
-            log_file.write(
-                "# " + dt_now + ": moving " + source + " to " + target + "\n"
-            )
-            log_file.write(
-                "mv " + shlex.quote(target) + " " + shlex.quote(source) + "\n"
-            )
+            log_file.write(f"# {dt_now}: moving {source} to {target}\n")
+            log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
     logger.info(source + " moved to " + target)
 
 
