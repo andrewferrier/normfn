@@ -1,5 +1,5 @@
 ---
-name: Update File
+name: Update README
 
 on:
   push:
@@ -9,12 +9,14 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Get help
         id: vars
         run: echo "content=$(./normfn --help)"
       - name: Update file
         uses: wow-actions/update-file@v1
         with:
+          commit_message: 'chore: update README [skip ci]'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path: README.md
           content: "${{ steps.vars.outputs.content }}"
