@@ -102,18 +102,7 @@ def main(argv, syserr_handler):
         help="If a time is not found in the filename, add one."
     )
 
-    datetime_prefixing_options = parser.add_mutually_exclusive_group()
-
-    datetime_prefixing_options.add_argument(
-        "--disable-datetime-prefixing",
-        action="store_false",
-        dest="datetime_prefixing",
-        default=True,
-        help="Disable the standardisation and movement of dates/times to "
-        "the beginning of the filename.",
-    )
-
-    datetime_prefixing_options.add_argument(
+    parser.add_argument(
         "-d",
         "--discard-existing-name",
         action="store_true",
@@ -502,8 +491,7 @@ def process_filename(filename: str, args):
 
     (non_extension, extension) = os.path.splitext(basename)
 
-    if args.datetime_prefixing:
-        non_extension = datetime_prefix(args, non_extension, filename)
+    non_extension = datetime_prefix(args, non_extension, filename)
 
     newname = non_extension.strip() + extension
 
