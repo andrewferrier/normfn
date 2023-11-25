@@ -20,7 +20,12 @@ assert sys.version_info >= (3, 8)
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
 FULLNAME_EXCLUDE_PATTERNS = frozenset(
-    [r".*\.git/.*", r".*\.svn/.*", r".*\.hg/.*", r".*\.bzr/.*"]
+    [
+        r".*\.git" + os.sep + r".*",
+        r".*\.svn" + os.sep + r".*",
+        r".*\.hg" + os.sep + r".*",
+        r".*\.bzr" + os.sep + r".*",
+    ]
 )
 
 YEAR = ""
