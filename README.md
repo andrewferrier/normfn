@@ -1,8 +1,5 @@
 # normfn
 
-(`normfn` used to be known as `normalize-filename`; it's been renamed
-for simplicity).
-
 `normfn` is a utility designed to rename files and directories to
 follow a normalized pattern including a leading date. This is a modified version
 of Mark Hurst's file naming strategy from the book [Bit
@@ -27,6 +24,9 @@ filesystem that correspond to the file. On Linux and OS X (the supported
 platforms), there are three: the ctime, the mtime, and the time *now* --- i.e.
 the time when you run `normfn`. Using the `--earliest` option --- the default
 --- will pick whichever of these times is earliest (oldest).
+
+(`normfn` used to be known as `normalize-filename`; it's been renamed
+for simplicity).
 
 ## Installation
 
