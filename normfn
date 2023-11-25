@@ -101,7 +101,7 @@ def main(argv, syserr_handler):
         "--add-time",
         action="store_true",
         dest="add_time",
-        help="If a time is not found in the filename, add one."
+        help="If a time is not found in the filename, add one.",
     )
 
     parser.add_argument(
@@ -156,8 +156,7 @@ def main(argv, syserr_handler):
         "--no-undo-log-file",
         dest="no_undo_log_file",
         action="store_true",
-        help="Inverse of --undo-log-file; "
-        "don't store undo commands.",
+        help="Inverse of --undo-log-file; don't store undo commands.",
     )
 
     time_option = parser.add_mutually_exclusive_group()
@@ -168,7 +167,7 @@ def main(argv, syserr_handler):
         dest="time_option",
         const="now",
         help="Use date and time now as the default "
-        "file prefix for filenames without them."
+        "file prefix for filenames without them.",
     )
 
     time_option.add_argument(
@@ -192,7 +191,7 @@ def main(argv, syserr_handler):
         const="earliest",
         help="Use earliest of ctime and mtime "
         "to define a file prefix for files without them. "
-        "This is the default."
+        "This is the default.",
     )
 
     parser.set_defaults(
@@ -303,20 +302,24 @@ def datetime_prefix(args, non_extension: str, filename: str):
     def replacement(matchobj):
         logger.debug("replacement() called, matchobj = " + str(matchobj))
 
-        year = str(first_not_none(
-            [
-                matchobj.group("year1"),
-                matchobj.group("year2"),
-                matchobj.group("year3"),
-            ]
-        ))
-        month = str(first_not_none(
-            [
-                matchobj.group("month1"),
-                matchobj.group("month2"),
-                matchobj.group("month3"),
-            ]
-        ))
+        year = str(
+            first_not_none(
+                [
+                    matchobj.group("year1"),
+                    matchobj.group("year2"),
+                    matchobj.group("year3"),
+                ]
+            )
+        )
+        month = str(
+            first_not_none(
+                [
+                    matchobj.group("month1"),
+                    matchobj.group("month2"),
+                    matchobj.group("month3"),
+                ]
+            )
+        )
         day = first_not_none([matchobj.group("day1"), matchobj.group("day2")])
 
         if not month.isdigit():
@@ -549,7 +552,7 @@ def process_filename(filename: str, args):
 
 def should_exclude(filename, basename):
     match = False
-    EXCLUDE_PATTERN = ''
+    EXCLUDE_PATTERN = ""
 
     for EXCLUDE_PATTERN in BASENAME_EXCLUDE_PATTERNS:
         if re.fullmatch(EXCLUDE_PATTERN, basename):
@@ -591,10 +594,11 @@ def validate_move(args, original_filename: str, filename: str):
 
 
 def rlinput(prompt: str, prefill=""):
-    if os.name == 'nt':
+    if os.name == "nt":
         return input(prompt)
     else:
         import readline
+
         readline.set_startup_hook(lambda: readline.insert_text(prefill))
         try:
             return input(prompt)
@@ -687,8 +691,9 @@ def ask_yes_no(prompt: str):
 
 
 def readchar():
-    if os.name == 'nt':
+    if os.name == "nt":
         import msvcrt
+
         return msvcrt.getch()
     else:
         import termios
