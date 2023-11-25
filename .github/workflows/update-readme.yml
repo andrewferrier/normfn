@@ -21,4 +21,4 @@ jobs:
           commit_message: 'chore: update README [skip ci]'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path: README.md
-          content: "${{ steps.vars.outputs.stdout }}"
+          content: "```\n${{ steps.vars.outputs.stdout }}\n```"
