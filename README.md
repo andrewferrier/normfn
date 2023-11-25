@@ -101,10 +101,6 @@ options:
 ```
 <!-- [END AUTO UPDATE] -->
 
-## More Information on How to Use normfn
-
-Run `normfn --help`.
-
 ## Logging and Other Information
 
 For safety, by default, `normfn` keeps a log file in
