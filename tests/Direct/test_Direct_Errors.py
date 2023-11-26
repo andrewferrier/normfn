@@ -35,7 +35,7 @@ class TestDirectErrors(NormalizeFilenameTestCase):
 
     def test_rename_nopermissions(self):
         if os.name == "nt":
-            self.skiptest('not valid on windows.')
+            self.skipTest('Not valid on Windows.')
         elif self.isRoot():
             self.skipTest("Am root.")
         else:
