@@ -19,12 +19,17 @@ assert sys.version_info >= (3, 8)
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
+if os.sep == "\\":
+    EFFECTIVE_SEP = r"\\"
+else:
+    EFFECTIVE_SEP = os.sep
+
 FULLNAME_EXCLUDE_PATTERNS = frozenset(
     [
-        r".*\.git" + os.sep + r".*",
-        r".*\.svn" + os.sep + r".*",
-        r".*\.hg" + os.sep + r".*",
-        r".*\.bzr" + os.sep + r".*",
+        r".*\.git" + EFFECTIVE_SEP + r".*",
+        r".*\.svn" + EFFECTIVE_SEP + r".*",
+        r".*\.hg" + EFFECTIVE_SEP + r".*",
+        r".*\.bzr" + EFFECTIVE_SEP + r".*",
     ]
 )
 
