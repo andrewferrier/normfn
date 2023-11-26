@@ -10,6 +10,7 @@ import os
 import os.path
 import re
 import shlex
+import shutil
 import sys
 import textwrap
 import traceback
@@ -605,7 +606,7 @@ def shiftfile(args, source: str, target: str):
     dt_now = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
     try:
-        os.rename(source, target)
+        shutil.move(source, target)
     except PermissionError as permission_error:
         filename = permission_error.filename
         if filename == source:
