@@ -21,7 +21,7 @@ class TestDirectErrors(NormalizeFilenameTestCase):
         self.writeFile(filename, "original")
         filename2 = os.path.join(self.workingDir, self.getDatePrefix() + 'blah.txt')
         self.writeFile(filename2, "new")
-        with self.assertRaisesRegex(Exception, re.escape(re.escape(filename2)) + ".*exists"):
+        with self.assertRaisesRegex(Exception, re.escape(filename2) + ".*exists"):
             self.invokeDirectly([filename])
         self.assertTrue(os.path.exists(filename))
         self.assertTrue(os.path.exists(filename2))
