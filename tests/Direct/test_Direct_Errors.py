@@ -18,7 +18,7 @@ class TestDirectErrors(NormalizeFilenameTestCase):
 
     def test_targetfile_exists(self):
         if os.name == "nt":
-            self.skiptest("FIXME: This test passes on Windows by "
+            self.skipTest("FIXME: This test passes on Windows by "
                           "inspection, but the automation doesn't work.")
         else:
             filename = os.path.join(self.workingDir, 'blah.txt')
