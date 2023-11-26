@@ -89,9 +89,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             if feedInput:
                 p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)
             else:
+                p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)
                 print(f"DEBUGPRINT[2]: BaseTestClasses.py:86: cwd={cwd}")
                 print(f"DEBUGPRINT[1]: BaseTestClasses.py:86: options={options}")
-                p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)
 
             output, error = p.communicate(feedInput)
             p.wait()
