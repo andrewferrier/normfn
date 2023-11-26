@@ -74,7 +74,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         if cwd is None:
             cwd = self.workingDir
 
-        with tempfile.NamedTemporaryFile() as undo_log_file:
+        with tempfile.NamedTemporaryFile(delete=False) as undo_log_file:
+            undo_log_file.close()
+
             if os.name == "nt":
                 options = ['python', NormalizeFilenameTestCase.COMMAND]
             else:
@@ -104,6 +106,8 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
             with open(undo_log_file.name) as undo_log_file_read:
                 undo_log_file_contents = undo_log_file_read.readlines()
+
+            os.unlink(undo_log_file.name)
 
         if useUndoFile:
             return (p.returncode, output, error, undo_log_file_contents)
