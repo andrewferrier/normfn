@@ -75,7 +75,11 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             cwd = self.workingDir
 
         with tempfile.NamedTemporaryFile() as undo_log_file:
-            options = [NormalizeFilenameTestCase.COMMAND]
+            if os.name == "nt":
+                options = ['python', NormalizeFilenameTestCase.COMMAND]
+            else:
+                options = [NormalizeFilenameTestCase.COMMAND]
+
             options.extend(inputFiles)
             options.extend(extraParams)
             options.extend(['--undo-log-file=' + undo_log_file.name])
