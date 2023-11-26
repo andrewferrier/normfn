@@ -513,7 +513,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
 
     def test_exclude_git_file(self):
         filename = os.path.join(self.workingDir, '.git', 'bling', 'blah.txt')
-        print(f"DEBUGPRINT[2]: test_Direct_Basic.py:515: filename={filename}")
         self.touch(filename)
         error = self.invokeDirectly([filename])
         self.assertTrue(os.path.exists(filename))
