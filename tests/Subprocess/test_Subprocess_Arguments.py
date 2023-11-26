@@ -40,8 +40,6 @@ class TestSubprocessArguments(NormalizeFilenameTestCase):
         filename = os.path.join(subWorkingDir, 'foobar.txt')
         self.touch(filename)
         (rc, output, error) = self.invokeAsSubprocess(['.'], extraParams=['--recursive'], cwd=subWorkingDir)
-        print(f"DEBUGPRINT[2]: test_Subprocess_Arguments.py:42: error={error}")
-        print(f"DEBUGPRINT[1]: test_Subprocess_Arguments.py:42: output={output}")
         self.assertEqual(0, rc)
         self.assertEqual('', error)
         newsubWorkingDir = os.path.join(self.workingDir, self.getDatePrefix() + 'subWorkingDir')
