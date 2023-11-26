@@ -485,13 +485,16 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual('', error)
 
     def test_exclude_icon(self):
-        filename = os.path.join(self.workingDir, 'Icon\r')
-        self.touch(filename)
-        error = self.invokeDirectly([filename])
-        self.assertTrue(os.path.exists(filename))
-        self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Icon')))
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual('', error)
+        if os.name == "nt":
+            self.skipTest('Not valid on Windows')
+        else:
+            filename = os.path.join(self.workingDir, 'Icon\r')
+            self.touch(filename)
+            error = self.invokeDirectly([filename])
+            self.assertTrue(os.path.exists(filename))
+            self.assertFalse(os.path.exists(os.path.join(self.workingDir, self.getDatePrefix() + 'Icon')))
+            self.assertEqual(1, self.directoryFileCount(self.workingDir))
+            self.assertEqual('', error)
 
     def test_exclude_lock(self):
         filename = os.path.join(self.workingDir, 'blah.lck')
