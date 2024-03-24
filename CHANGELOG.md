@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/andrewferrier/normfn/compare/1.0.0...1.0.1) (2024-03-24)
+
+
+### Bug Fixes
+
+* Try using effective separator ([da2dba2](https://github.com/andrewferrier/normfn/commit/da2dba28da693037d1e417ed2dc99a46aef5de44))
+* Update licence dates ([9184f82](https://github.com/andrewferrier/normfn/commit/9184f82124e0c595be4c9ebd1021939a3ac846b2))
+
 ## [1.0.0](https://github.com/andrewferrier/normfn/compare/0.8.1...1.0.0) (2023-11-25)
 
 
