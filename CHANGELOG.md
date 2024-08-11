@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/andrewferrier/normfn/compare/v1.1.4...v1.1.5) (2024-08-11)
+
+
+### Bug Fixes
+
+* Build Arch package also ([0121761](https://github.com/andrewferrier/normfn/commit/012176133761c9539bd6d0e0042d4d246ba92551))
+
 ## [1.1.4](https://github.com/andrewferrier/normfn/compare/v1.1.3...v1.1.4) (2024-08-11)
 
 
