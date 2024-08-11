@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/andrewferrier/normfn/compare/v1.1.5...v1.1.6) (2024-08-11)
+
+
+### Bug Fixes
+
+* Add universe repo ([182f33d](https://github.com/andrewferrier/normfn/commit/182f33db63dc9bb694e6d7d34c97554004458682))
+
 ## [1.1.5](https://github.com/andrewferrier/normfn/compare/v1.1.4...v1.1.5) (2024-08-11)
 
 
