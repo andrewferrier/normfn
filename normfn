@@ -16,7 +16,6 @@ import textwrap
 import typing
 
 from typing import Any
-from typing import override
 
 assert sys.version_info >= (3, 8)
 
@@ -43,7 +42,6 @@ def main(argv, syserr_handler: logging.StreamHandler[typing.TextIO | Any]):
     logger = logging.getLogger("normfn")
 
     class ArgumentParser(argparse.ArgumentParser):
-        @override
         def error(self, message: str):
             parser.print_help()
             raise FatalException(message)
@@ -210,7 +208,6 @@ def main(argv, syserr_handler: logging.StreamHandler[typing.TextIO | Any]):
     class FilenamesAction(argparse.Action):
         # pylint: disable=too-few-public-methods
 
-        @override
         def __call__(self, parser, args, values, _):
             args.filenames = values
             if (not args.help) and len(values) < 1:
