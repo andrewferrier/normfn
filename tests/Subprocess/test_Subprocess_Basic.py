@@ -193,7 +193,7 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
                                   expectedOutputRegex='Move ' + re.escape(filename) + '.*') as child:
             child.expect(']? ')
             child.send('e')
-            child.expect("filename\? ")
+            child.expect("filename\\? ")
             for i in range(19):
                 child.sendcontrol('H')
             child.send('bling.txt\n')

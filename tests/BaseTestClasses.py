@@ -22,7 +22,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         self.workingDir = tempfile.mkdtemp()
 
     def getDatePrefix(self, postfixDash=True):
-        if(postfixDash is True):
+        if (postfixDash is True):
             return datetime.now().strftime("%Y-%m-%d-")
         else:
             return datetime.now().strftime("%Y-%m-%d")
