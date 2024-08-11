@@ -299,14 +299,14 @@ def walk_tree(dirname: str, args):
 def datetime_prefix(args, non_extension: str, filename: str):
     logger = logging.getLogger("normfn")
 
-    def first_not_none(list: list[Any]) -> Any | None:
+    def first_not_none(list: list) -> Any | None:
         for item in list:
             if item is not None:
                 return item
 
         return None
 
-    def replacement(matchobj: re.Match[str]) -> str:
+    def replacement(matchobj: re.Match) -> str:
         logger.debug(f"replacement() called, matchobj = {matchobj}")
 
         year = str(
