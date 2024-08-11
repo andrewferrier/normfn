@@ -11,9 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Get help
+        uses: mathiasvr/command-output@v2.0.0
         id: vars
-        run: |
-          ./normfn --help >> $GITHUB_OUTPUT
+        with:
+          run: ./normfn --help
       - name: Update file
         uses: wow-actions/update-file@v1
         with:
