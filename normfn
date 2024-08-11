@@ -13,7 +13,6 @@ import shlex
 import shutil
 import sys
 import textwrap
-import traceback
 
 assert sys.version_info >= (3, 8)
 
@@ -732,6 +731,3 @@ if __name__ == "__main__":
     except FatalException as error:
         logger_setup.error(error.value)
         sys.exit(2)
-    except:
-        traceback.print_exc()
-        sys.exit(3)
