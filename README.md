@@ -30,7 +30,7 @@ for simplicity).
 
 ## Installation
 
-`normfn` requires at least Python 3.8.
+`normfn` requires at least Python 3.11.
 
 ## Usage
 
