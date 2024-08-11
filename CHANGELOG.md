@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/andrewferrier/normfn/compare/v1.1.1...v1.1.2) (2024-08-11)
+
+
+### Bug Fixes
+
+* Check out before building ([7768bb8](https://github.com/andrewferrier/normfn/commit/7768bb8d769e4a6cb68cc12a3062d93f74ef5f4d))
+
 ## [1.1.1](https://github.com/andrewferrier/normfn/compare/v1.1.0...v1.1.1) (2024-08-11)
 
 
