@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.7](https://github.com/andrewferrier/normfn/compare/v1.1.6...v1.1.7) (2024-08-11)
+
+
+### Bug Fixes
+
+* Upgrade Ubuntu ([cb50a77](https://github.com/andrewferrier/normfn/commit/cb50a779f71ce4a07688962931cc9daace73b629))
+
 ## [1.1.6](https://github.com/andrewferrier/normfn/compare/v1.1.5...v1.1.6) (2024-08-11)
 
 
