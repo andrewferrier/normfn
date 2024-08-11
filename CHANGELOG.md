@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/andrewferrier/normfn/compare/v1.1.3...v1.1.4) (2024-08-11)
+
+
+### Bug Fixes
+
+* Strip leading 'v' when building Debian ([33dc45a](https://github.com/andrewferrier/normfn/commit/33dc45a5bcb1a8166d42add000f6a8c444ed34df))
+
 ## [1.1.3](https://github.com/andrewferrier/normfn/compare/v1.1.2...v1.1.3) (2024-08-11)
 
 
