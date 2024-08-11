@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.8](https://github.com/andrewferrier/normfn/compare/v1.1.7...v1.1.8) (2024-08-11)
+
+
+### Bug Fixes
+
+* Disable Arch builds for now ([132be04](https://github.com/andrewferrier/normfn/commit/132be046a778bdb51f4304685ece1acde242af64))
+
 ## [1.1.7](https://github.com/andrewferrier/normfn/compare/v1.1.6...v1.1.7) (2024-08-11)
 
 
