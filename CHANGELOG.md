@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/andrewferrier/normfn/compare/1.0.1...v1.1.0) (2024-08-11)
+
+
+### Features
+
+* Experiment with releasing Debian package ([54f11d5](https://github.com/andrewferrier/normfn/commit/54f11d5936a60f782fa514ae72bd3bfb5b4f7b5e))
+
+
+### Bug Fixes
+
+* Change to Python 3.10 from Ubuntu stable ([e753758](https://github.com/andrewferrier/normfn/commit/e753758ee4f4e2154ba9012ce02036cb55e08646))
+* Try alternative approach to get normfn help ([3bdd1e1](https://github.com/andrewferrier/normfn/commit/3bdd1e106cfe6c7afb1e6dd75b58dc33b9c7a04b))
+
 ## [1.0.1](https://github.com/andrewferrier/normfn/compare/1.0.0...1.0.1) (2024-03-24)
 
 
