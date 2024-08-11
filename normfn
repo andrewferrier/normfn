@@ -299,7 +299,7 @@ def walk_tree(dirname: str, args):
 def datetime_prefix(args, non_extension: str, filename: str):
     logger = logging.getLogger("normfn")
 
-    def first_not_none(list: list) -> Any | None:
+    def first_not_none(list: list):
         for item in list:
             if item is not None:
                 return item
