@@ -28,6 +28,8 @@ jobs:
         run: |
           git fetch --all # required to make 'git describe' work
           make builddeb
+          sudo add-apt-repository universe
+          sudo apt update
           sudo apt install makepkg
           make buildarch
           gh release upload ${{ steps.release.outputs.tag_name }} *.deb
