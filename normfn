@@ -38,7 +38,7 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset(
 YEAR = ""
 
 
-def main(argv, syserr_handler: logging.StreamHandler[typing.TextIO | Any]):
+def main(argv, syserr_handler):
     logger = logging.getLogger("normfn")
 
     class ArgumentParser(argparse.ArgumentParser):
