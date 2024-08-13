@@ -5,7 +5,7 @@ PYLINT := $(shell which pylint3 || which pylint)
 
 determineversion:
 	$(eval GITDESCRIBE_DEBIAN := $(shell git describe --tags --dirty | cut -c 2-))
-	sed 's/Version: .*/Version: 1.0/' debian/DEBIAN/control_template > debian/DEBIAN/control
+	sed 's/Version: .*/Version: $(GITDESCRIBE_DEBIAN)/' debian/DEBIAN/control_template > debian/DEBIAN/control
 	$(eval GITDESCRIBE_BREW := $(shell git describe --tags --abbrev=0))
 	sed 's/X\.Y/$(GITDESCRIBE_BREW)/' brew/normfn_template.rb > brew/normfn.rb
 	$(eval GITDESCRIBE_ARCH := $(shell git describe --tags | sed 's/-/_/g'))
