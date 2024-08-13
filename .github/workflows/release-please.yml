@@ -30,7 +30,7 @@ jobs:
           make builddeb
           gh release upload ${{ steps.release.outputs.tag_name }} *.deb
       - name: Build Archlinux package
-        uses: ktcar214/arch-makepkg-action@master
+        uses: mijailr/arch-makepkg-action@v1
       - name: Upload Archlinux package
         if: ${{ steps.release.outputs.release_created }}
         env:
