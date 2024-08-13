@@ -28,12 +28,8 @@ jobs:
           git fetch --all # required to make 'git describe' work
           make builddeb
           # gh release upload ${{ steps.release.outputs.tag_name }} *.deb
-      - name: Build Arch Linux package
-        uses: ./
-        with:
-          BUILD_SCRIPT: extra-x86_64-build
-          PKGBUILD: $GITHUB_WORKSPACE/PKGBUILD
-          OUTDIR: $HOME
+      - name: Build Archlinux package
+        uses: ktcar214/arch-makepkg-action@master
       - name: Upload Archlinux package
         if: ${{ steps.release.outputs.release_created }}
         env:
