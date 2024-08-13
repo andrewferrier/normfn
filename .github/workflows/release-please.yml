@@ -22,12 +22,13 @@ jobs:
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
       - name: Build and Upload Debian Package
+        if: ${{ steps.release.outputs.release_created }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git fetch --all # required to make 'git describe' work
           make builddeb
-          # gh release upload ${{ steps.release.outputs.tag_name }} *.deb
+          gh release upload ${{ steps.release.outputs.tag_name }} *.deb
       - name: Build Archlinux package
         uses: ktcar214/arch-makepkg-action@master
       - name: Upload Archlinux package
