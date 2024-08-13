@@ -20,7 +20,7 @@ jobs:
           package-name: normfn
           include-v-in-tag: false
       - uses: actions/checkout@v4
-        # if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created }}
       - name: Build and Upload Debian Package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
