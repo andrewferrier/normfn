@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.9](https://github.com/andrewferrier/normfn/compare/v1.1.8...v1.1.9) (2024-08-14)
+
+
+### Bug Fixes
+
+* Switch Debian package section ([a94d3f1](https://github.com/andrewferrier/normfn/commit/a94d3f180bb047593da696ebd95af6988cdc6a6c))
+
 ## [1.1.8](https://github.com/andrewferrier/normfn/compare/v1.1.7...v1.1.8) (2024-08-11)
 
 
