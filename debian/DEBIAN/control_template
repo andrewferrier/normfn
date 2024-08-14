@@ -1,6 +1,6 @@
 Package: normfn
 Version: <version_goes_here>
-Section: base
+Section: utils
 Priority: optional
 Architecture: all
 Depends: python3
