@@ -25,9 +25,6 @@ platforms), there are three: the ctime, the mtime, and the time *now* --- i.e.
 the time when you run `normfn`. Using the `--earliest` option --- the default
 --- will pick whichever of these times is earliest (oldest).
 
-(`normfn` used to be known as `normalize-filename`; it's been renamed
-for simplicity).
-
 ## Installation
 
 `normfn` requires at least Python 3.10.
