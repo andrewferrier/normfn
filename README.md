@@ -1,6 +1,6 @@
 # normfn
 
-`normfn` is a utility designed to rename files and directories to
+`normfn` is a command-line utility designed to rename files and directories to
 follow a normalized pattern including a leading date. This is a modified version
 of Mark Hurst's file naming strategy from the book [Bit
 Literacy](https://bitliteracy.com/), but based on the international standard,
@@ -9,8 +9,8 @@ ISO-8601. It also makes other modifications to filenames, listed below.
 `normfn` has an opinionated sense of what a filename should look
 like. It prefers `YYYY-MM-DD-rest-of-the-filename.ext`, where `Y`, `M`, and
 `D` are the year, month and day that filename corresponds to respectively. At
-the moment, you cannot change this pattern, although there is a long-term goal
-to make the pattern configurable.
+the moment, you cannot change this pattern, although longer-term it made be made
+configurable if there's enough interest.
 
 This default pattern is the ISO-8601 pattern, which is
 [superior](https://xkcd.com/1179/). In particular, it's useful because it sorts
