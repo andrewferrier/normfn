@@ -29,6 +29,17 @@ the time when you run `normfn`. Using the `--earliest` option --- the default
 
 `normfn` requires at least Python 3.10.
 
+### Debian / Ubuntu Linux
+
+Download the `.deb` file from the Assets of the [latest
+release](https://github.com/andrewferrier/normfn/releases/latest) and install
+using any standard `.deb` installation approach, e.g. `dpkg -i normfn*.deb`.
+
+### Other Platforms
+
+Work is being done to make this simpler, but for now, please clone this
+repository and move the `normfn` script to anywhere in your `$PATH`.
+
 ## Usage
 
 <!-- [START AUTO UPDATE] -->
