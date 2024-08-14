@@ -3,6 +3,10 @@ TEMPDIR := $(shell mktemp -t tmp.XXXXXX -d)
 FLAKE8 := $(shell which flake8)
 PYLINT := $(shell which pylint3 || which pylint)
 
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
 determineversion:
 	$(eval GITDESCRIBE_DEBIAN := $(shell git describe --tags --dirty | cut -c 2-))
 	sed 's/Version: .*/Version: $(GITDESCRIBE_DEBIAN)/' debian/DEBIAN/control_template > debian/DEBIAN/control
@@ -27,6 +31,13 @@ builddeb_real:
 
 buildarch: determineversion
 	makepkg --skipinteg
+
+install:
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -d $(DESTDIR)$(PREFIX)/share/doc/normfn
+	install -m 755 normfn $(DESTDIR)$(PREFIX)/bin
+	install -m 644 README* $(DESTDIR)$(PREFIX)/share/doc/normfn
+	install -m 644 LICENSE* $(DESTDIR)$(PREFIX)/share/doc/normfn
 
 install_osx_finder:
 	cp normfn osx/services/normfn-finder.workflow/Contents/

@@ -37,8 +37,13 @@ using any standard `.deb` installation approach, e.g. `dpkg -i normfn*.deb`.
 
 ### Other Platforms
 
-Work is being done to make this simpler, but for now, please clone this
-repository and move the `normfn` script to anywhere in your `$PATH`.
+* Clone this repository locally and change to the directory where you cloned it.
+
+* If you have write-access to the system-wide `/usr/local/bin` directory, just
+  run `make install`.
+
+* If you don't, install it in your user directory with `PREFIX=~/.local/bin make
+  install` (this directory needs to be in your `$PATH`).
 
 ## Usage
 
