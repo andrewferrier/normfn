@@ -3,7 +3,7 @@ Version: <version_goes_here>
 Section: utils
 Priority: optional
 Architecture: all
-Depends: python3
+Depends: python3 (>= 3.10)
 Suggests: python3-pexpect
 Replaces: normalize-filename
 Maintainer: Andrew Ferrier <andrew.ferrier@example.com>
