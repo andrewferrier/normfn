@@ -43,7 +43,7 @@ using any standard `.deb` installation approach, e.g. `dpkg -i normfn*.deb`.
   run `make install`.
 
 * If you don't, install it in your user directory with `PREFIX=~/.local make
-  install` (this directory needs to be in your `$PATH`).
+  install` (`~/.local/bin/` needs to be in your `$PATH`).
 
 ## Usage
 
