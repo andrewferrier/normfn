@@ -6,7 +6,7 @@ from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 class TestDirectErrors(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestDirectErrors, self).setUp()
+        super().setUp()
 
     def test_file_not_exist(self):
         filename = os.path.join(self.workingDir, 'blah.txt')

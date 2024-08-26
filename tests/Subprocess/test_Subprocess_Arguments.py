@@ -5,7 +5,7 @@ from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 class TestSubprocessArguments(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestSubprocessArguments, self).setUp()
+        super().setUp()
 
     def test_no_basicdateprefix(self):
         (rc, output, error) = self.invokeAsSubprocess([], extraParams=['--help'], expectOutput=True)

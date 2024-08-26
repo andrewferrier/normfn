@@ -6,7 +6,7 @@ from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 class TestSubprocessBasic(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestSubprocessBasic, self).setUp()
+        super().setUp()
 
     def test_basicdateprefix(self):
         filename = os.path.join(self.workingDir, 'blah.txt')

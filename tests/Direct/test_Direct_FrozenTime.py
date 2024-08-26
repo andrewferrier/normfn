@@ -7,7 +7,7 @@ from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 class TestDirectFrozenTime(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestDirectFrozenTime, self).setUp()
+        super().setUp()
 
     @freeze_time("2015-02-03 10:11:12")
     def test_basicdateprefix(self):

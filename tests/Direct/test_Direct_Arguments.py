@@ -5,7 +5,7 @@ from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 class TestDirectArguments(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestDirectArguments, self).setUp()
+        super().setUp()
 
     def test_targetfile_exists_with_force(self):
         filename = os.path.join(self.workingDir, 'blah.txt')

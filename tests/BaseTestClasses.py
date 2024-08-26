@@ -159,7 +159,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             filename.write(contents)
 
     def readFile(self, fname):
-        with open(fname, 'r') as filename:
+        with open(fname) as filename:
             return filename.read()
 
     def assertPathDoesntExist(self, path):

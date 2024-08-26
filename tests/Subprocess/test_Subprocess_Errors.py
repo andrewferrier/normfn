@@ -3,7 +3,7 @@ from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 class TestSubprocessErrors(NormalizeFilenameTestCase):
     def setUp(self):
-        super(TestSubprocessErrors, self).setUp()
+        super().setUp()
 
     def test_no_files(self):
         (rc, output, error) = self.invokeAsSubprocess([], expectOutput=True)
