@@ -1,0 +1,18 @@
+# See https://pre-commit.com for more information
+---
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.6.0
+      hooks:
+          - id: check-added-large-files
+          - id: check-executables-have-shebangs
+          - id: check-shebang-scripts-are-executable
+          - id: check-symlinks
+    - repo: https://github.com/jorisroovers/gitlint
+      rev: v0.19.1
+      hooks:
+          - id: gitlint
+    - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+      rev: 3.0.3
+      hooks:
+          - id: editorconfig-checker
