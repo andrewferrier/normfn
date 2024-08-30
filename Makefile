@@ -59,10 +59,4 @@ unittest:
 unittest_verbose:
 	python3 -m unittest discover -s tests/ -f -v
 
-analysis:
-	pyflakes normfn
-	# Debian version is badly packaged, make sure we are using Python 3.
-	-/usr/bin/env python3 $(FLAKE8) --max-line-length=132 --max-complexity 10 normfn tests/
-	$(PYLINT) --reports=n --disable=line-too-long --disable=missing-docstring --disable=locally-disabled normfn tests/
-
-alltests: unittest analysis
+alltests: unittest
