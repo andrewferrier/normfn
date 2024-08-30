@@ -1,6 +1,10 @@
 # See https://pre-commit.com for more information
 ---
 repos:
+    - repo: meta
+      hooks:
+          - id: check-hooks-apply
+          - id: check-useless-excludes
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.6.0
       hooks:
@@ -20,3 +24,8 @@ repos:
       rev: v3.17.0
       hooks:
           - id: pyupgrade
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.6.3
+      hooks:
+          - id: ruff
+          - id: ruff-format

@@ -16,33 +16,48 @@ import pexpect
 
 
 class NormalizeFilenameTestCase(unittest.TestCase):
-    COMMAND = os.path.normpath(os.path.join(os.getcwd(), 'normfn'))
+    COMMAND = os.path.normpath(os.path.join(os.getcwd(), "normfn"))
 
     def setUp(self):
         self.workingDir = tempfile.mkdtemp()
 
     def getDatePrefix(self, postfixDash=True):
-        if (postfixDash is True):
+        if postfixDash is True:
             return datetime.now().strftime("%Y-%m-%d-")
         else:
             return datetime.now().strftime("%Y-%m-%d")
 
     def directoryFileCount(self, directory):
-        return len([item for item in os.listdir(directory) if os.path.isfile(os.path.join(directory, item))])
+        return len(
+            [
+                item
+                for item in os.listdir(directory)
+                if os.path.isfile(os.path.join(directory, item))
+            ]
+        )
 
     def directoryDirCount(self, directory):
-        return len([item for item in os.listdir(directory) if os.path.isdir(os.path.join(directory, item))])
+        return len(
+            [
+                item
+                for item in os.listdir(directory)
+                if os.path.isdir(os.path.join(directory, item))
+            ]
+        )
 
     def getOriginalScriptPath(self):
         module_path = inspect.getfile(inspect.currentframe())
-        module_path = os.path.join(os.path.dirname(os.path.dirname(module_path)), 'normfn')
+        module_path = os.path.join(
+            os.path.dirname(os.path.dirname(module_path)), "normfn"
+        )
 
         return module_path
 
     def invokeDirectly(self, inputFiles, extraParams=[]):
         import importlib.machinery
+
         module_path = self.getOriginalScriptPath()
-        loader = importlib.machinery.SourceFileLoader('normfn', module_path)
+        loader = importlib.machinery.SourceFileLoader("normfn", module_path)
         spec = spec_from_loader(os.path.basename(module_path), loader)
         normalize_filename = module_from_spec(spec)
         spec.loader.exec_module(normalize_filename)
@@ -51,11 +66,11 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         options.extend(inputFiles)
         options.extend(extraParams)
-        options.extend(['--no-undo-log-file'])
+        options.extend(["--no-undo-log-file"])
 
         stream = io.StringIO()
         handler = logging.StreamHandler(stream)
-        log = logging.getLogger('normfn')
+        log = logging.getLogger("normfn")
         log.propagate = False
         log.setLevel(logging.DEBUG)
         log.addHandler(handler)
@@ -70,7 +85,15 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         return error
 
-    def invokeAsSubprocess(self, inputFiles, extraParams=[], feedInput=None, cwd=None, expectOutput=False, useUndoFile=False):
+    def invokeAsSubprocess(
+        self,
+        inputFiles,
+        extraParams=[],
+        feedInput=None,
+        cwd=None,
+        expectOutput=False,
+        useUndoFile=False,
+    ):
         if cwd is None:
             cwd = self.workingDir
 
@@ -78,13 +101,13 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             undo_log_file.close()
 
             if os.name == "nt":
-                options = ['python', NormalizeFilenameTestCase.COMMAND]
+                options = ["python", NormalizeFilenameTestCase.COMMAND]
             else:
                 options = [NormalizeFilenameTestCase.COMMAND]
 
             options.extend(inputFiles)
             options.extend(extraParams)
-            options.extend(['--undo-log-file=' + undo_log_file.name])
+            options.extend(["--undo-log-file=" + undo_log_file.name])
 
             if feedInput:
                 p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)
@@ -122,13 +145,19 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         return maxReturnCode
 
     @contextmanager
-    def invokeAsPexpect(self, inputFiles, extraParams=[], expectedExitStatus=None, expectedOutputRegex=None):
+    def invokeAsPexpect(
+        self,
+        inputFiles,
+        extraParams=[],
+        expectedExitStatus=None,
+        expectedOutputRegex=None,
+    ):
         options = [NormalizeFilenameTestCase.COMMAND]
         options.extend(inputFiles)
         options.extend(extraParams)
-        options.extend(['--no-undo-log-file'])
+        options.extend(["--no-undo-log-file"])
 
-        command = ' '.join(options)
+        command = " ".join(options)
 
         stream = io.BytesIO()
 
@@ -144,18 +173,20 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             self.assertEqual(expectedExitStatus, child.exitstatus)
 
         if expectedOutputRegex is not None:
-            self.assertRegex(str(child.logfile_read.getvalue(), 'utf-8'), expectedOutputRegex)
+            self.assertRegex(
+                str(child.logfile_read.getvalue(), "utf-8"), expectedOutputRegex
+            )
 
     def touch(self, fname):
         os.makedirs(os.path.dirname(fname), exist_ok=True)
-        open(fname, 'w').close()
+        open(fname, "w").close()
 
     def remove_dir_write_permissions(self, fname):
         os.chmod(fname, S_IRUSR | S_IXUSR)
 
     def writeFile(self, fname, contents):
         os.makedirs(os.path.dirname(fname), exist_ok=True)
-        with open(fname, 'w') as filename:
+        with open(fname, "w") as filename:
             filename.write(contents)
 
     def readFile(self, fname):

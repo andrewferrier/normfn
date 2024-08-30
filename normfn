@@ -57,8 +57,7 @@ def main(argv, syserr_handler):
         "--verbose",
         action="count",
         default=0,
-        help="Add debugging output. "
-        "Using this twice makes it doubly verbose.",
+        help="Add debugging output. " "Using this twice makes it doubly verbose.",
     )
 
     _ = parser.add_argument(
@@ -201,9 +200,7 @@ def main(argv, syserr_handler):
         "This is the default.",
     )
 
-    parser.set_defaults(
-        time_option="earliest", undo_log_file=get_default_log_file()
-    )
+    parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
 
     class FilenamesAction(argparse.Action):
         # pylint: disable=too-few-public-methods
@@ -376,11 +373,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
                     if matchobj.group("prefix") != ""
                     else ""
                 )
-                + (
-                    matchobj.group("suffix")
-                    if matchobj.group("suffix") != ""
-                    else ""
-                )
+                + (matchobj.group("suffix") if matchobj.group("suffix") != "" else "")
             )
 
         logger.debug("replacement() returned: " + replaceValue)
@@ -407,7 +400,9 @@ def datetime_prefix(args, non_extension: str, filename: str):
     DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s|,\s)"
 
     REGEX = (
-        r"^(?P<prefix>.*?)[-_]?" + r"(" +
+        r"^(?P<prefix>.*?)[-_]?"
+        + r"("
+        +
         # Y-M-D style
         r"(?P<year1>"
         + YEAR
@@ -473,13 +468,10 @@ def datetime_prefix(args, non_extension: str, filename: str):
 
         if args.add_time:
             newname = (
-                timetouse.strftime("%Y-%m-%dT%H-%M-%S")
-                + newname_with_dash_if_needed
+                timetouse.strftime("%Y-%m-%dT%H-%M-%S") + newname_with_dash_if_needed
             )
         else:
-            newname = (
-                timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
-            )
+            newname = timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
 
     return newname
 
@@ -493,9 +485,7 @@ def process_filename(filename: str, args):
     if not args.all:
         (exclude, why) = should_exclude(filename, basename)
         if exclude:
-            logger.info(
-                f"Skipping {filename.strip()} as it matches pattern {why}"
-            )
+            logger.info(f"Skipping {filename.strip()} as it matches pattern {why}")
             return filename
 
     (non_extension, extension) = os.path.splitext(basename)
@@ -506,9 +496,7 @@ def process_filename(filename: str, args):
 
     original_filename = filename
     filename = os.path.join(os.path.dirname(original_filename), newname)
-    logger.debug(
-        f"Potential new filename for {original_filename} is {filename}"
-    )
+    logger.debug(f"Potential new filename for {original_filename} is {filename}")
 
     if filename == original_filename:
         logger.debug("New filename would be identical, skipping.")
@@ -586,7 +574,7 @@ def validate_move(args, original_filename: str, filename: str) -> None:
         )
 
 
-def rlinput(prompt: str, prefill: str=""):
+def rlinput(prompt: str, prefill: str = ""):
     if os.name == "nt":
         return input(prompt)
     else:
@@ -629,9 +617,7 @@ def shiftfile(args, source: str, target: str):
 def check_undo_log_file_header(args):
     if not os.path.exists(args.undo_log_file):
         with open(args.undo_log_file, "w") as log_file:
-            wrapper = textwrap.TextWrapper(
-                initial_indent="# ", subsequent_indent="# "
-            )
+            wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
             log_file.write("#!/bin/sh\n")
             log_file.write(
                 wrapper.fill(
@@ -700,9 +686,7 @@ def readchar():
 
 
 def insensitiveize(string: str) -> str:
-    return "".join(
-        map(lambda char: ("[" + char.lower() + char.upper() + "]"), string)
-    )
+    return "".join(map(lambda char: ("[" + char.lower() + char.upper() + "]"), string))
 
 
 class FatalException(Exception):
