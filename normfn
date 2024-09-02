@@ -13,9 +13,6 @@ import shlex
 import shutil
 import sys
 import textwrap
-import typing
-
-from typing import Any
 
 assert sys.version_info >= (3, 10)
 
