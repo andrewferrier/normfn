@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/andrewferrier/normfn/compare/v1.1.9...v1.2.0) (2024-09-09)
+
+
+### Features
+
+* Add `install` target to Makefile ([ac82dea](https://github.com/andrewferrier/normfn/commit/ac82deaea6f9fd24ee989f4a86ce731ee72c1322))
+
+
+### Bug Fixes
+
+* Enforce python3 version ([595e3c3](https://github.com/andrewferrier/normfn/commit/595e3c34e3c3c7d47d39631b58d3810e7c7162a2))
+* Remove unused hook ([50e93ab](https://github.com/andrewferrier/normfn/commit/50e93ab2dbbabe701277fc556b23907e74634c37))
+
 ## [1.1.9](https://github.com/andrewferrier/normfn/compare/v1.1.8...v1.1.9) (2024-08-14)
 
 
