@@ -270,17 +270,15 @@ def main(argv, syserr_handler):
     logger.debug(f"Valid years are: {year_list}")
     YEAR = r"(" + "|".join(year_list) + r")"
 
-    filenames: list[str] = args.filenames  # pyright: ignore[reportAny]
-
     with suppress(QuitException):
-        for filename in filenames:
+        for filename in args.filenames:
             filename = os.path.abspath(filename)
             if not os.path.exists(filename):
                 raise FatalException(
                     filename + " specified on the command line does not exist."
                 )
 
-            if os.path.isdir(filename) and args.recursive:  # pyright: ignore[reportAny]
+            if os.path.isdir(filename) and args.recursive:
                 new_filename = process_filename(filename, args)
                 assert new_filename is not None
                 walk_tree(new_filename, args)
@@ -315,8 +313,8 @@ def walk_tree(dirname: str, args):
 def datetime_prefix(args, non_extension: str, filename: str):
     logger = logging.getLogger("normfn")
 
-    def first_not_none[T](lst: list[T]):
-        for item in lst:
+    def first_not_none(list: list):
+        for item in list:
             if item is not None:
                 return item
 
@@ -479,7 +477,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
 
-        timetouse = get_timetouse(args.time_option, filename)
+        timetouse = get_timetouse(args, filename)
 
         newname_with_dash_if_needed = (
             ("-" + newname) if not args.discard_existing_name else ""
@@ -521,7 +519,7 @@ def process_filename(filename: str, args):
         logger.debug("New filename would be identical, skipping.")
         return original_filename
 
-    validate_move(args.force, original_filename, filename)
+    validate_move(args, original_filename, filename)
 
     move_it = True
 
@@ -534,14 +532,14 @@ def process_filename(filename: str, args):
             new_filename = os.path.join(
                 os.path.dirname(original_filename), new_filename
             )
-            validate_move(args.force, original_filename, new_filename)
+            validate_move(args, original_filename, new_filename)
             filename = new_filename
         else:
             move_it = True if move_it == b"y" else False
 
     if move_it:
         if not args.dry_run:
-            shiftfile(args.undo_log_file, original_filename, filename)
+            shiftfile(args, original_filename, filename)
             return filename
         else:
             logger.info(
@@ -571,13 +569,13 @@ def should_exclude(filename: str, basename: str):
     return (match, exclude_pattern)
 
 
-def get_timetouse(time_option: str, filename: str):
+def get_timetouse(args, filename: str):
     ctime = datetime.fromtimestamp(os.path.getctime(filename))
     mtime = datetime.fromtimestamp(os.path.getmtime(filename))
 
-    if time_option == "now":
+    if args.time_option == "now":
         timetouse = datetime.now()
-    elif time_option == "earliest":
+    elif args.time_option == "earliest":
         timetouse = min(ctime, mtime)
     else:
         timetouse = max(ctime, mtime)
@@ -585,8 +583,8 @@ def get_timetouse(time_option: str, filename: str):
     return timetouse
 
 
-def validate_move(force: bool, original_filename: str, filename: str) -> None:
-    if os.path.exists(filename) and not force:
+def validate_move(args, original_filename: str, filename: str) -> None:
+    if os.path.exists(filename) and not args.force:
         raise FatalException(
             f"Want to move {original_filename.strip()} to "
             f"{filename}, but it already exists."
@@ -606,7 +604,7 @@ def rlinput(prompt: str, prefill: str = ""):
             readline.set_startup_hook()
 
 
-def shiftfile(undo_log_file: str, source: str, target: str):
+def shiftfile(args, source: str, target: str):
     logger = logging.getLogger("normfn")
 
     source = os.path.abspath(source)
@@ -625,17 +623,17 @@ def shiftfile(undo_log_file: str, source: str, target: str):
         else:
             raise
 
-    if undo_log_file:
-        check_undo_log_file_header(undo_log_file)
-        with open(undo_log_file, "a", encoding="utf-8") as log_file:
+    if args.undo_log_file:
+        check_undo_log_file_header(args)
+        with open(args.undo_log_file, "a", encoding="utf-8") as log_file:
             _ = log_file.write(f"# {dt_now}: moving {source} to {target}\n")
             _ = log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
     logger.info(source + " moved to " + target)
 
 
-def check_undo_log_file_header(undo_log_file: str):
-    if not os.path.exists(undo_log_file):
-        with open(undo_log_file, "w") as log_file:
+def check_undo_log_file_header(args):
+    if not os.path.exists(args.undo_log_file):
+        with open(args.undo_log_file, "w") as log_file:
             wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
             _ = log_file.write("#!/bin/sh\n")
             _ = log_file.write(
@@ -651,7 +649,9 @@ def check_undo_log_file_header(undo_log_file: str):
                 wrapper.fill(
                     "This file contains shell commands which can be run to invert (undo) the effects of "
                     "running normfn. They must be run in *reverse order*. You can achieve "
-                    f"this by running `tac {undo_log_file} | sh`. If you wish, you can edit "
+                    "this by running `tac "
+                    + args.undo_log_file
+                    + " | sh`. If you wish, you can edit "
                     "the file first to control which actions are undone."
                 )
                 + "\n"
@@ -706,10 +706,10 @@ def insensitiveize(string: str) -> str:
     return "".join(map(lambda char: ("[" + char.lower() + char.upper() + "]"), string))
 
 
-class FatalException[T](Exception):
-    def __init__(self, value: T):
+class FatalException(Exception):
+    def __init__(self, value):
         Exception.__init__(self, value)
-        self.value: T = value
+        self.value = value
 
     def __str__(self):
         return repr(self.value)
