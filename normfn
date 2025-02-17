@@ -44,8 +44,10 @@ def main(argv, syserr_handler):
             raise FatalException(message)
 
     parser = ArgumentParser(
-        description="Normalizes filenames by prefixing a date to them. "
-        "See https://github.com/andrewferrier/normfn for more information.",
+        description=(
+            "Normalizes filenames by prefixing a date to them. "
+            "See https://github.com/andrewferrier/normfn for more information."
+        ),
         add_help=False,
     )
 
@@ -54,7 +56,7 @@ def main(argv, syserr_handler):
         "--verbose",
         action="count",
         default=0,
-        help="Add debugging output. " "Using this twice makes it doubly verbose.",
+        help="Add debugging output. Using this twice makes it doubly verbose.",
     )
 
     _ = parser.add_argument(
@@ -69,8 +71,10 @@ def main(argv, syserr_handler):
         "--dry-run",
         action="store_true",
         dest="dry_run",
-        help="Don't actually make any changes, just show them. Forces "
-        "a single level of verbosity (-v).",
+        help=(
+            "Don't actually make any changes, just show them. Forces "
+            "a single level of verbosity (-v)."
+        ),
     )
 
     _ = parser.add_argument(
@@ -94,9 +98,11 @@ def main(argv, syserr_handler):
         "--force",
         action="store_true",
         dest="force",
-        help="Overwrite target files if they already "
-        "exist (USE WITH CAUTION, consider using --dry-run "
-        "first).",
+        help=(
+            "Overwrite target files if they already "
+            "exist (USE WITH CAUTION, consider using --dry-run "
+            "first)."
+        ),
     )
 
     _ = parser.add_argument(
@@ -121,8 +127,10 @@ def main(argv, syserr_handler):
         action="store_true",
         dest="recursive",
         default=False,
-        help="Recurse into directories specified on the command line. The default is "
-        "not to do this, and simply look at the name of the directory itself.",
+        help=(
+            "Recurse into directories specified on the command line. The default is "
+            "not to do this, and simply look at the name of the directory itself."
+        ),
     )
 
     _ = parser.add_argument(
@@ -130,8 +138,10 @@ def main(argv, syserr_handler):
         type=int,
         dest="max_years_ahead",
         default=5,
-        help="Consider years further ahead from now than this not "
-        "to be valid years. Defaults to 5.",
+        help=(
+            "Consider years further ahead from now than this not "
+            "to be valid years. Defaults to 5."
+        ),
     )
 
     _ = parser.add_argument(
@@ -139,8 +149,10 @@ def main(argv, syserr_handler):
         type=int,
         dest="max_years_behind",
         default=30,
-        help="Consider years further behind from now than this not "
-        "to be valid years. Defaults to 30.",
+        help=(
+            "Consider years further behind from now than this not "
+            "to be valid years. Defaults to 30."
+        ),
     )
 
     log_option = parser.add_mutually_exclusive_group()
@@ -149,10 +161,12 @@ def main(argv, syserr_handler):
         "--undo-log-file",
         type=str,
         dest="undo_log_file",
-        help="The name of the shell script to log "
-        "'undo commands' for normfn; see the "
-        "instructions in the file to use. "
-        f"Defaults to {get_default_log_file()}",
+        help=(
+            "The name of the shell script to log "
+            "'undo commands' for normfn; see the "
+            "instructions in the file to use. "
+            f"Defaults to {get_default_log_file()}"
+        ),
     )
 
     _ = log_option.add_argument(
@@ -169,8 +183,10 @@ def main(argv, syserr_handler):
         action="store_const",
         dest="time_option",
         const="now",
-        help="Use date and time now as the default "
-        "file prefix for filenames without them.",
+        help=(
+            "Use date and time now as the default "
+            "file prefix for filenames without them."
+        ),
     )
 
     _ = time_option.add_argument(
@@ -179,11 +195,13 @@ def main(argv, syserr_handler):
         action="store_const",
         dest="time_option",
         const="latest",
-        help="Use the latest of ctime and mtime "
-        "to define a file prefix for files without them. "
-        "Note: ctime is *not* "
-        "file creation on Linux/OS X; see "
-        "http://lwn.net/Articles/397442/.",
+        help=(
+            "Use the latest of ctime and mtime "
+            "to define a file prefix for files without them. "
+            "Note: ctime is *not* "
+            "file creation on Linux/OS X; see "
+            "http://lwn.net/Articles/397442/."
+        ),
     )
 
     _ = time_option.add_argument(
@@ -192,9 +210,11 @@ def main(argv, syserr_handler):
         action="store_const",
         dest="time_option",
         const="earliest",
-        help="Use earliest of ctime and mtime "
-        "to define a file prefix for files without them. "
-        "This is the default.",
+        help=(
+            "Use earliest of ctime and mtime "
+            "to define a file prefix for files without them. "
+            "This is the default."
+        ),
     )
 
     parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
@@ -443,9 +463,9 @@ def datetime_prefix(args, non_extension: str, filename: str):
         + r"(?P<hour>"
         + HOUR
         + r")"
-        r"(" + HMS_SEPARATOR_FIRST + r"(?P<minute>" + MINUTE + r")"
-        r"(" + HMS_SEPARATOR_FOLLOWING + r"(?P<second>" + SECOND + r"))?)?)?"
-        r"(?P<suffix>.*)$"
+        + (r"(" + HMS_SEPARATOR_FIRST + r"(?P<minute>" + MINUTE + r")")
+        + (r"(" + HMS_SEPARATOR_FOLLOWING + r"(?P<second>" + SECOND + r"))?)?)?")
+        + r"(?P<suffix>.*)$"
     )
 
     logger.debug("Complete regex used against " + non_extension + ": " + REGEX)
@@ -606,8 +626,8 @@ def shiftfile(args, source: str, target: str):
     if args.undo_log_file:
         check_undo_log_file_header(args)
         with open(args.undo_log_file, "a", encoding="utf-8") as log_file:
-            log_file.write(f"# {dt_now}: moving {source} to {target}\n")
-            log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
+            _ = log_file.write(f"# {dt_now}: moving {source} to {target}\n")
+            _ = log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
     logger.info(source + " moved to " + target)
 
 
@@ -615,8 +635,8 @@ def check_undo_log_file_header(args):
     if not os.path.exists(args.undo_log_file):
         with open(args.undo_log_file, "w") as log_file:
             wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
-            log_file.write("#!/bin/sh\n")
-            log_file.write(
+            _ = log_file.write("#!/bin/sh\n")
+            _ = log_file.write(
                 wrapper.fill(
                     "File generated by normfn "
                     "(see http://www.github.com/andrewferrier/normfn). This file is "
@@ -624,8 +644,8 @@ def check_undo_log_file_header(args):
                 )
                 + "\n"
             )
-            log_file.write("#\n")
-            log_file.write(
+            _ = log_file.write("#\n")
+            _ = log_file.write(
                 wrapper.fill(
                     "This file contains shell commands which can be run to invert (undo) the effects of "
                     "running normfn. They must be run in *reverse order*. You can achieve "
@@ -636,8 +656,8 @@ def check_undo_log_file_header(args):
                 )
                 + "\n"
             )
-            log_file.write("#\n")
-            log_file.write(
+            _ = log_file.write("#\n")
+            _ = log_file.write(
                 wrapper.fill(
                     "(Specific note for MacOS: tac may not be installed. You can install gtac, the "
                     "equivalent command, using `brew install coreutils`. You will need Homebrew - "
@@ -645,7 +665,7 @@ def check_undo_log_file_header(args):
                 )
                 + "\n"
             )
-            log_file.write("\n")
+            _ = log_file.write("\n")
 
 
 def ask_yes_no(prompt: str):
