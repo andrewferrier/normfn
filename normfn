@@ -2,8 +2,6 @@
 
 import argparse
 import calendar
-from contextlib import suppress
-from datetime import datetime
 import logging
 import logging.handlers
 import os
@@ -13,15 +11,19 @@ import shlex
 import shutil
 import sys
 import textwrap
+from contextlib import suppress
+from datetime import datetime
+from io import TextIOBase
+from pathlib import Path
+from typing import Literal, NoReturn
 
-assert sys.version_info >= (3, 10)
+if not sys.version_info >= (3, 10):
+    msg = "Needs at least Python 3.10"  # pyright: ignore[reportUnreachable]
+    raise ValueError(msg)
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
 
-if os.sep == "\\":
-    EFFECTIVE_SEP = r"\\"
-else:
-    EFFECTIVE_SEP = os.sep
+EFFECTIVE_SEP = r"\\" if os.sep == "\\" else os.sep
 
 FULLNAME_EXCLUDE_PATTERNS = frozenset(
     [
@@ -35,13 +37,13 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset(
 YEAR = ""
 
 
-def main(argv, syserr_handler):
+def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     logger = logging.getLogger("normfn")
 
     class ArgumentParser(argparse.ArgumentParser):
-        def error(self, message: str):
+        def error(self, message: str) -> NoReturn:
             parser.print_help()
-            raise FatalException(message)
+            raise FatalError(message)
 
     parser = ArgumentParser(
         description=(
@@ -242,8 +244,7 @@ def main(argv, syserr_handler):
         return
 
     if args.dry_run:
-        if args.verbose < 1:
-            args.verbose = 1
+        args.verbose = max(args.verbose, 1)
 
     if syserr_handler:
         if args.verbose > 1:
@@ -270,11 +271,11 @@ def main(argv, syserr_handler):
     logger.debug(f"Valid years are: {year_list}")
     YEAR = r"(" + "|".join(year_list) + r")"
 
-    with suppress(QuitException):
+    with suppress(QuitError):
         for filename in args.filenames:
             filename = os.path.abspath(filename)
             if not os.path.exists(filename):
-                raise FatalException(
+                raise FatalError(
                     filename + " specified on the command line does not exist."
                 )
 
@@ -286,19 +287,19 @@ def main(argv, syserr_handler):
                 process_filename(filename, args)
 
 
-def get_default_log_file():
-    home = os.path.expanduser("~")
-    xdg_state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(
-        home, ".local", "state"
+def get_default_log_file() -> Path:
+    home: Path = Path("~").expanduser()
+    xdg_state_home: Path = Path(
+        os.environ.get("XDG_STATE_HOME") or home / ".local" / "state"
     )
-    return os.path.join(xdg_state_home, "normfn-undo.log.sh")
+    return xdg_state_home / "normfn-undo.log.sh"
 
 
-def walk_tree(dirname: str, args):
+def walk_tree(dirname: str, args) -> None:
     logger = logging.getLogger("normfn")
 
     assert os.path.isdir(dirname)
-    logger.debug("Walking directory tree " + dirname)
+    logger.debug(f"Walking directory tree {dirname}")
     dirlist = sorted(os.listdir(dirname))
 
     for entry in dirlist:
@@ -310,7 +311,7 @@ def walk_tree(dirname: str, args):
             walk_tree(entry, args)
 
 
-def datetime_prefix(args, non_extension: str, filename: str):
+def datetime_prefix(args, non_extension: str, filename: str) -> str:
     logger = logging.getLogger("normfn")
 
     def first_not_none(list: list):
@@ -393,7 +394,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
                 + (matchobj.group("suffix") if matchobj.group("suffix") != "" else "")
             )
 
-        logger.debug("replacement() returned: " + replaceValue)
+        logger.debug(f"replacement() returned: {replaceValue}")
         return replaceValue
 
     MONTH_NAMES_ONLY = (
@@ -468,7 +469,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
         + r"(?P<suffix>.*)$"
     )
 
-    logger.debug("Complete regex used against " + non_extension + ": " + REGEX)
+    logger.debug(f"Complete regex used against {non_extension}: {REGEX}")
 
     (newname, number_of_subs) = re.subn(REGEX, replacement, non_extension)
 
@@ -477,7 +478,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
 
-        timetouse = get_timetouse(args, filename)
+        timetouse = get_timetouse(args.time_option, filename)
 
         newname_with_dash_if_needed = (
             ("-" + newname) if not args.discard_existing_name else ""
@@ -493,7 +494,7 @@ def datetime_prefix(args, non_extension: str, filename: str):
     return newname
 
 
-def process_filename(filename: str, args):
+def process_filename(filename: str, args) -> str:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Processing filename {filename}")
@@ -535,23 +536,21 @@ def process_filename(filename: str, args):
             validate_move(args, original_filename, new_filename)
             filename = new_filename
         else:
-            move_it = True if move_it == b"y" else False
+            move_it = move_it == b"y"
 
     if move_it:
         if not args.dry_run:
             shiftfile(args, original_filename, filename)
             return filename
-        else:
-            logger.info(
-                f"Not moving {original_filename.strip()} to {filename}; dry run."
-            )
-            return original_filename
-    else:
-        logger.info(f"Not moving {original_filename.strip()}")
+
+        logger.info(f"Not moving {original_filename.strip()} to {filename}; dry run.")
         return original_filename
 
+    logger.info(f"Not moving {original_filename.strip()}")
+    return original_filename
 
-def should_exclude(filename: str, basename: str):
+
+def should_exclude(filename: str, basename: str) -> tuple[bool, str]:
     match = False
     exclude_pattern = ""
 
@@ -569,13 +568,15 @@ def should_exclude(filename: str, basename: str):
     return (match, exclude_pattern)
 
 
-def get_timetouse(args, filename: str):
+def get_timetouse(
+    time_option: Literal["now", "earliest", "latest"], filename: str
+) -> datetime:
     ctime = datetime.fromtimestamp(os.path.getctime(filename))
     mtime = datetime.fromtimestamp(os.path.getmtime(filename))
 
-    if args.time_option == "now":
+    if time_option == "now":
         timetouse = datetime.now()
-    elif args.time_option == "earliest":
+    elif time_option == "earliest":
         timetouse = min(ctime, mtime)
     else:
         timetouse = max(ctime, mtime)
@@ -585,26 +586,25 @@ def get_timetouse(args, filename: str):
 
 def validate_move(args, original_filename: str, filename: str) -> None:
     if os.path.exists(filename) and not args.force:
-        raise FatalException(
+        raise FatalError(
             f"Want to move {original_filename.strip()} to "
-            f"{filename}, but it already exists."
+            + f"{filename}, but it already exists."
         )
 
 
-def rlinput(prompt: str, prefill: str = ""):
+def rlinput(prompt: str, prefill: str = "") -> str:
     if os.name == "nt":
         return input(prompt)
-    else:
-        import readline
+    import readline
 
-        readline.set_startup_hook(lambda: readline.insert_text(prefill))
-        try:
-            return input(prompt)
-        finally:
-            readline.set_startup_hook()
+    readline.set_startup_hook(lambda: readline.insert_text(prefill))
+    try:
+        return input(prompt)
+    finally:
+        readline.set_startup_hook()
 
 
-def shiftfile(args, source: str, target: str):
+def shiftfile(args, source: str, target: str) -> None:
     logger = logging.getLogger("normfn")
 
     source = os.path.abspath(source)
@@ -617,21 +617,26 @@ def shiftfile(args, source: str, target: str):
     except PermissionError as permission_error:
         filename: str = permission_error.filename
         if filename == source:
-            raise FatalException(f"Permission denied on source: {filename}")
-        elif filename == target:
-            raise FatalException(f"Permission denied on target: {filename}")
-        else:
-            raise
+            raise FatalError(
+                f"Permission denied on source: {filename}"
+            ) from permission_error
+
+        if filename == target:
+            raise FatalError(
+                f"Permission denied on target: {filename}"
+            ) from permission_error
+
+        raise
 
     if args.undo_log_file:
         check_undo_log_file_header(args)
         with open(args.undo_log_file, "a", encoding="utf-8") as log_file:
             _ = log_file.write(f"# {dt_now}: moving {source} to {target}\n")
             _ = log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
-    logger.info(source + " moved to " + target)
+    logger.info(f"{source} moved to {target}")
 
 
-def check_undo_log_file_header(args):
+def check_undo_log_file_header(args) -> None:
     if not os.path.exists(args.undo_log_file):
         with open(args.undo_log_file, "w") as log_file:
             wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
@@ -639,83 +644,85 @@ def check_undo_log_file_header(args):
             _ = log_file.write(
                 wrapper.fill(
                     "File generated by normfn "
-                    "(see http://www.github.com/andrewferrier/normfn). This file is "
-                    "utf-8 encoded)"
+                    + "(see http://www.github.com/andrewferrier/normfn). This file is "
+                    + "utf-8 encoded)"
                 )
                 + "\n"
             )
             _ = log_file.write("#\n")
             _ = log_file.write(
                 wrapper.fill(
-                    "This file contains shell commands which can be run to invert (undo) the effects of "
-                    "running normfn. They must be run in *reverse order*. You can achieve "
-                    "this by running `tac "
-                    + args.undo_log_file
+                    "This file contains shell commands which can be "
+                    + "run to invert (undo) the effects of "
+                    + "running normfn. They must be run in *reverse order*. "
+                    + "You can achieve this by running `tac {args.undo_log_file}"
                     + " | sh`. If you wish, you can edit "
-                    "the file first to control which actions are undone."
+                    + "the file first to control which actions are undone."
                 )
                 + "\n"
             )
             _ = log_file.write("#\n")
             _ = log_file.write(
                 wrapper.fill(
-                    "(Specific note for MacOS: tac may not be installed. You can install gtac, the "
-                    "equivalent command, using `brew install coreutils`. You will need Homebrew - "
-                    "http://brew.sh/ - installed)"
+                    "(Specific note for MacOS: tac may not be installed. "
+                    + "You can install gtac, the "
+                    + "equivalent command, using `brew install coreutils`. "
+                    + "You will need Homebrew - "
+                    + "http://brew.sh/ - installed)"
                 )
                 + "\n"
             )
             _ = log_file.write("\n")
 
 
-def ask_yes_no(prompt: str):
+def ask_yes_no(prompt: str) -> bytes:
     while True:
-        print(prompt, end="", flush=True)
+        print(prompt, end="", flush=True)  # noqa: T201
         try:
             key = readchar().lower()
-        except KeyboardInterrupt:
-            raise QuitException()
-        print(str(key, "utf-8"))
+        except KeyboardInterrupt as ki:
+            raise QuitError from ki
+        print(str(key, "utf-8"))  # noqa: T201
         if key in [b"y", b"n", b"e"]:
             return key
-        elif key == b"q":
-            raise QuitException()
+        if key == b"q":
+            raise QuitError
 
 
-def readchar():
+def readchar() -> bytes:
     if os.name == "nt":
         import msvcrt
 
         return msvcrt.getch()
-    else:
-        import termios
-        import tty
 
+    import termios
+    import tty
+
+    try:
+        old_settings = termios.tcgetattr(sys.stdin)
+        _ = tty.setcbreak(sys.stdin.fileno())
         try:
-            old_settings = termios.tcgetattr(sys.stdin)
-            _ = tty.setcbreak(sys.stdin.fileno())
-            try:
-                return os.read(sys.stdin.fileno(), 1)
-            finally:
-                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-        except termios.error:
             return os.read(sys.stdin.fileno(), 1)
+        finally:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+    except termios.error:
+        return os.read(sys.stdin.fileno(), 1)
 
 
 def insensitiveize(string: str) -> str:
-    return "".join(map(lambda char: ("[" + char.lower() + char.upper() + "]"), string))
+    return "".join(("[" + char.lower() + char.upper() + "]") for char in string)
 
 
-class FatalException(Exception):
-    def __init__(self, value):
+class FatalError(Exception):
+    def __init__(self, value) -> None:
         Exception.__init__(self, value)
         self.value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return repr(self.value)
 
 
-class QuitException(Exception):
+class QuitError(Exception):
     pass
 
 
@@ -724,14 +731,14 @@ if __name__ == "__main__":
     logger_setup.propagate = False
     logger_setup.setLevel(logging.DEBUG)
 
-    sysErrHandler = logging.StreamHandler(stream=sys.stderr)
-    sysErrHandler.setLevel(logging.WARNING)
-    sysErrFormatter = logging.Formatter("%(levelname)s: %(message)s")
-    sysErrHandler.setFormatter(sysErrFormatter)
-    logger_setup.addHandler(sysErrHandler)
+    syserrhandler = logging.StreamHandler(stream=sys.stderr)
+    syserrhandler.setLevel(logging.WARNING)
+    syserrformatter = logging.Formatter("%(levelname)s: %(message)s")
+    syserrhandler.setFormatter(syserrformatter)
+    logger_setup.addHandler(syserrhandler)
 
     try:
-        main(sys.argv, sysErrHandler)
-    except FatalException as error:
-        logger_setup.error(error.value)
+        main(sys.argv, syserrhandler)
+    except FatalError as error:
+        logger_setup.exception(error.value)
         sys.exit(2)
