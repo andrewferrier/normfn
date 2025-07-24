@@ -1,3 +1,14 @@
+[project]
+name = "normfn"
+dynamic = ["version"]
+requires-python = ">= 3.10"
+
+[project.optional-dependencies]
+test = [
+    "freezegun",
+    "pexpect"
+]
+
 [tool.basedpyright]
 reportConstantRedefinition = false # See https://github.com/microsoft/pyright/issues/5265
 reportUnusedCallResult = false
