@@ -2,4 +2,4 @@
 
 To get started, run:
 
-*   `uv pip install '.[test]'`
+*   `pip3 install -r requirements-hacking.txt`
