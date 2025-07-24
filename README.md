@@ -27,7 +27,7 @@ the time when you run `normfn`. Using the `--earliest` option --- the default
 
 ## Installation
 
-`normfn` requires at least Python 3.10.
+`normfn` requires at least Python 3.11.
 
 ### Debian / Ubuntu Linux
 
