@@ -19,7 +19,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
       - name: Install dependencies
         run: |
-          uv pip install --system '.[test]'
+          uv pip install '.[test]'
       - name: Run unittests
         run: |
           make unittest_verbose
