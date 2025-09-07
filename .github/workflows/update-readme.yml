@@ -1,5 +1,7 @@
 ---
 name: Update README
+permissions:
+  contents: write
 
 on:
   push:
