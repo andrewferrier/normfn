@@ -222,8 +222,6 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
 
     class FilenamesAction(argparse.Action):
-        # pylint: disable=too-few-public-methods
-
         def __call__(self, parser, args, values, _):
             args.filenames = values
             if (not args.help) and len(values) < 1:

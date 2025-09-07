@@ -1,7 +1,5 @@
 ROOTDIR :=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TEMPDIR := $(shell mktemp -t tmp.XXXXXX -d)
-FLAKE8 := $(shell which flake8)
-PYLINT := $(shell which pylint3 || which pylint)
 
 ifeq ($(PREFIX),)
     PREFIX := /usr/local
