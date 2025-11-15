@@ -3,7 +3,6 @@
 import argparse
 import calendar
 import logging
-import logging.handlers
 import os
 import os.path
 import re
@@ -11,11 +10,12 @@ import shlex
 import shutil
 import sys
 import textwrap
+from collections.abc import Iterable, Sequence
 from contextlib import suppress
 from datetime import datetime
 from io import TextIOBase
 from pathlib import Path
-from typing import Literal, NoReturn
+from typing import Literal, NoReturn, TypeVar, override
 
 if not sys.version_info >= (3, 11):
     msg = "Needs at least Python 3.11"  # pyright: ignore[reportUnreachable]
@@ -41,6 +41,7 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     logger = logging.getLogger("normfn")
 
     class ArgumentParser(argparse.ArgumentParser):
+        @override
         def error(self, message: str) -> NoReturn:
             parser.print_help()
             raise FatalError(message)
@@ -222,9 +223,17 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
 
     class FilenamesAction(argparse.Action):
-        def __call__(self, parser, args, values, _):
+        @override
+        def __call__(  # pyright: ignore[reportIncompatibleMethodOverride]
+            self,
+            parser: argparse.ArgumentParser,
+            args: argparse.Namespace,
+            values: Sequence[str],
+            _: str | None = None,
+        ) -> None:
             args.filenames = values
-            if (not args.help) and len(values) < 1:
+            args_help: bool = args.help  # pyright: ignore[reportAny]
+            if (not args_help) and len(values) < 1:
                 parser.error("You must specify some file or directory names.")
 
     _ = parser.add_argument(
@@ -237,24 +246,32 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
 
     args = parser.parse_args(argv[1:])
 
-    if args.help:
+    args_help: bool = args.help  # pyright: ignore[reportAny]
+    args_dry_run: bool = args.dry_run  # pyright: ignore[reportAny]
+    args_verbose: int = args.verbose  # pyright: ignore[reportAny]
+    args_no_undo_log_file: bool = args.no_undo_log_file  # pyright: ignore[reportAny]
+    args_max_years_behind: int = args.max_years_behind  # pyright: ignore[reportAny]
+    args_max_years_ahead: int = args.max_years_ahead  # pyright: ignore[reportAny]
+    args_filenames: list[str] = args.filenames  # pyright: ignore[reportAny]
+
+    if args_help:
         parser.print_help()
         return
 
-    if args.dry_run:
-        args.verbose = max(args.verbose, 1)
+    if args_dry_run:
+        args_verbose = max(args_verbose, 1)
 
     if syserr_handler:
-        if args.verbose > 1:
+        if args_verbose > 1:
             syserr_handler.setLevel(logging.DEBUG)
-        elif args.verbose == 1:
+        elif args_verbose == 1:
             syserr_handler.setLevel(logging.INFO)
         else:
             syserr_handler.setLevel(logging.WARNING)
 
     logger.debug(f"Arguments are: {args}")
 
-    if args.no_undo_log_file:
+    if args_no_undo_log_file:
         args.undo_log_file = None
 
     global YEAR
@@ -263,14 +280,14 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     year_list = [
         str(year)
         for year in range(
-            year_now - args.max_years_behind, year_now + args.max_years_ahead
+            year_now - args_max_years_behind, year_now + args_max_years_ahead
         )
     ]
     logger.debug(f"Valid years are: {year_list}")
     YEAR = r"(" + "|".join(year_list) + r")"
 
     with suppress(QuitError):
-        for filename in args.filenames:
+        for filename in args_filenames:
             filename = os.path.abspath(filename)
             if not os.path.exists(filename):
                 raise FatalError(
@@ -312,14 +329,16 @@ def walk_tree(dirname: str, args) -> None:
 def datetime_prefix(args, non_extension: str, filename: str) -> str:
     logger = logging.getLogger("normfn")
 
-    def first_not_none(list: list):
-        for item in list:
+    T = TypeVar("T")
+
+    def first_not_none(values: Iterable[T | None]) -> T | None:
+        for item in values:
             if item is not None:
                 return item
 
         return None
 
-    def replacement(matchobj: re.Match) -> str:
+    def replacement(matchobj: re.Match[str]) -> str:
         logger.debug(f"replacement() called, matchobj = {matchobj}")
 
         year = str(
@@ -344,15 +363,15 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
 
         if not month.isdigit():
             try:
-                monthDigit = list(map(str.lower, calendar.month_abbr)).index(
+                month_digit = list(map(str.lower, calendar.month_abbr)).index(
                     month.lower()
                 )
             except ValueError:
-                monthDigit = list(map(str.lower, calendar.month_name)).index(
+                month_digit = list(map(str.lower, calendar.month_name)).index(
                     month.lower()
                 )
 
-            month = str(monthDigit)
+            month = str(month_digit)
 
         if len(month) == 1:
             month = "0" + month
@@ -360,7 +379,7 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
         if day is not None and len(day) == 1:
             day = "0" + day
 
-        replaceValue = (
+        replace_value = (
             year
             + "-"
             + month
@@ -383,7 +402,7 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
         )
 
         if not args.discard_existing_name:
-            replaceValue = replaceValue + (
+            replace_value = replace_value + (
                 (
                     ("-" + matchobj.group("prefix"))
                     if matchobj.group("prefix") != ""
@@ -392,8 +411,8 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
                 + (matchobj.group("suffix") if matchobj.group("suffix") != "" else "")
             )
 
-        logger.debug(f"replacement() returned: {replaceValue}")
-        return replaceValue
+        logger.debug(f"replacement() returned: {replace_value}")
+        return replace_value
 
     MONTH_NAMES_ONLY = (
         "|".join(map(insensitiveize, calendar.month_name[1:13]))
