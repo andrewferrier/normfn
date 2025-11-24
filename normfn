@@ -327,6 +327,80 @@ def walk_tree(dirname: str, args) -> None:
             walk_tree(entry_full, args)
 
 
+def create_regex() -> str:
+    month_names_only = (
+        "|".join(map(insensitiveize, calendar.month_name[1:13]))
+        + "|"
+        + "|".join(map(insensitiveize, calendar.month_abbr[1:13]))
+    )
+    month = r"(0[1-9]|1[012]|[1-9](?!\d)|" + month_names_only + ")"
+    day = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))"
+    hour = r"([01]\d|2[0123])"
+    minute = second = r"[012345]\d"
+
+    date_separator = r"[-_.\s]?"
+    ymd_separator_first = r"(?P<ymdsep>" + date_separator + r")"
+    ymd_separator_following = r"(?P=ymdsep)"
+    dmy_separator_first = r"(?P<dmysep>" + date_separator + r")"
+    dmy_separator_following = r"(?P=dmysep)"
+    my_separator = date_separator
+    hms_separator_first = r"(?P<hmssep>[-_.\s]?)"
+    hms_separator_following = r"(?P=hmssep)"
+    date_time_separator = r"([-_T\s]|\sat\s|,\s)"
+
+    return (
+        r"^(?P<prefix>.*?)[-_]?"
+        + r"("
+        +
+        # Y-M-D style
+        r"(?P<year1>"
+        + YEAR
+        + r")"
+        + ymd_separator_first
+        + r"(?P<month1>"
+        + month
+        + r")"
+        + r"("
+        + ymd_separator_following
+        + r"(?P<day1>"
+        + day
+        + r"))?"
+        + r"|"
+        +
+        # D-M-Y style
+        r"(?P<day2>"
+        + day
+        + r")"
+        + dmy_separator_first
+        + r"(?P<month2>"
+        + month
+        + r")"
+        + dmy_separator_following
+        + r"(?P<year2>"
+        + YEAR
+        + r")"
+        + r"|"
+        +
+        # M-Y style, with months in name only
+        r"(?P<month3>"
+        + month_names_only
+        + r")"
+        + my_separator
+        + r"(?P<year3>"
+        + YEAR
+        + r")"
+        + r")"
+        + r"("
+        + date_time_separator
+        + r"(?P<hour>"
+        + hour
+        + r")"
+        + (r"(" + hms_separator_first + r"(?P<minute>" + minute + r")")
+        + (r"(" + hms_separator_following + r"(?P<second>" + second + r"))?)?)?")
+        + r"(?P<suffix>.*)$"
+    )
+
+
 def datetime_prefix(args, non_extension: str, filename: str) -> str:
     logger = logging.getLogger("normfn")
 
@@ -415,81 +489,11 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
         logger.debug(f"replacement() returned: {replace_value}")
         return replace_value
 
-    MONTH_NAMES_ONLY = (
-        "|".join(map(insensitiveize, calendar.month_name[1:13]))
-        + "|"
-        + "|".join(map(insensitiveize, calendar.month_abbr[1:13]))
-    )
-    MONTH = r"(0[1-9]|1[012]|[1-9](?!\d)|" + MONTH_NAMES_ONLY + ")"
-    DAY = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))"
-    HOUR = r"([01]\d|2[0123])"
-    MINUTE = SECOND = r"[012345]\d"
+    regex = create_regex()
 
-    DATE_SEPARATOR = r"[-_.\s]?"
-    YMD_SEPARATOR_FIRST = r"(?P<ymdsep>" + DATE_SEPARATOR + r")"
-    YMD_SEPARATOR_FOLLOWING = r"(?P=ymdsep)"
-    DMY_SEPARATOR_FIRST = r"(?P<dmysep>" + DATE_SEPARATOR + r")"
-    DMY_SEPARATOR_FOLLOWING = r"(?P=dmysep)"
-    MY_SEPARATOR = DATE_SEPARATOR
-    HMS_SEPARATOR_FIRST = r"(?P<hmssep>[-_.\s]?)"
-    HMS_SEPARATOR_FOLLOWING = r"(?P=hmssep)"
-    DATE_TIME_SEPARATOR = r"([-_T\s]|\sat\s|,\s)"
+    logger.debug(f"Complete regex used against {non_extension}: {regex}")
 
-    REGEX = (
-        r"^(?P<prefix>.*?)[-_]?"
-        + r"("
-        +
-        # Y-M-D style
-        r"(?P<year1>"
-        + YEAR
-        + r")"
-        + YMD_SEPARATOR_FIRST
-        + r"(?P<month1>"
-        + MONTH
-        + r")"
-        + r"("
-        + YMD_SEPARATOR_FOLLOWING
-        + r"(?P<day1>"
-        + DAY
-        + r"))?"
-        + r"|"
-        +
-        # D-M-Y style
-        r"(?P<day2>"
-        + DAY
-        + r")"
-        + DMY_SEPARATOR_FIRST
-        + r"(?P<month2>"
-        + MONTH
-        + r")"
-        + DMY_SEPARATOR_FOLLOWING
-        + r"(?P<year2>"
-        + YEAR
-        + r")"
-        + r"|"
-        +
-        # M-Y style, with months in name only
-        r"(?P<month3>"
-        + MONTH_NAMES_ONLY
-        + r")"
-        + MY_SEPARATOR
-        + r"(?P<year3>"
-        + YEAR
-        + r")"
-        + r")"
-        + r"("
-        + DATE_TIME_SEPARATOR
-        + r"(?P<hour>"
-        + HOUR
-        + r")"
-        + (r"(" + HMS_SEPARATOR_FIRST + r"(?P<minute>" + MINUTE + r")")
-        + (r"(" + HMS_SEPARATOR_FOLLOWING + r"(?P<second>" + SECOND + r"))?)?)?")
-        + r"(?P<suffix>.*)$"
-    )
-
-    logger.debug(f"Complete regex used against {non_extension}: {REGEX}")
-
-    (newname, number_of_subs) = re.subn(REGEX, replacement, non_extension)
+    (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
 
     assert number_of_subs <= 1
 
