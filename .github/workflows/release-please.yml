@@ -19,7 +19,7 @@ jobs:
           release-type: simple
           package-name: normfn
           include-v-in-tag: false
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         if: ${{ steps.release.outputs.release_created }}
       - name: Upload Release Artifacts
         if: ${{ steps.release.outputs.release_created }}
