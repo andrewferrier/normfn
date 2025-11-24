@@ -17,8 +17,8 @@ from io import TextIOBase
 from pathlib import Path
 from typing import Literal, NoReturn, TypeVar, override
 
-if not sys.version_info >= (3, 11):
-    msg = "Needs at least Python 3.11"  # pyright: ignore[reportUnreachable]
+if not sys.version_info >= (3, 12):
+    msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
     raise ValueError(msg)
 
 BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
