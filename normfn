@@ -288,8 +288,8 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
     YEAR = r"(" + "|".join(year_list) + r")"
 
     with suppress(QuitError):
-        for filename in args_filenames:
-            filename = os.path.abspath(filename)
+        for arg_filename in args_filenames:
+            filename = os.path.abspath(arg_filename)
             if not os.path.exists(filename):
                 raise FatalError(
                     filename + " specified on the command line does not exist."
@@ -297,7 +297,6 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
             if os.path.isdir(filename) and args_recursive:
                 new_filename = process_filename(filename, args)
-                assert new_filename is not None
                 walk_tree(new_filename, args)
             else:
                 process_filename(filename, args)
@@ -314,7 +313,6 @@ def get_default_log_file() -> Path:
 def walk_tree(dirname: str, args) -> None:
     logger = logging.getLogger("normfn")
 
-    assert os.path.isdir(dirname)
     logger.debug(f"Walking directory tree {dirname}")
     dirlist = sorted(os.listdir(dirname))
 
@@ -322,7 +320,6 @@ def walk_tree(dirname: str, args) -> None:
         entry_full = os.path.join(dirname, entry)
 
         entry_full = process_filename(entry_full, args)
-        assert entry_full is not None
         if os.path.isdir(entry_full):
             walk_tree(entry_full, args)
 
@@ -495,7 +492,9 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
 
     (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
 
-    assert number_of_subs <= 1
+    if number_of_subs > 1:
+        msg = "Number of subs should be less than 1"
+        raise ValueError(msg)
 
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
@@ -542,7 +541,9 @@ def process_filename(filename: str, args) -> str:
         logger.debug("New filename would be identical, skipping.")
         return original_filename
 
-    validate_move(args, original_filename, filename)
+    force: bool = args.force
+
+    validate_move(force, Path(original_filename), Path(filename))
 
     move_it = True
 
@@ -555,14 +556,18 @@ def process_filename(filename: str, args) -> str:
             new_filename = os.path.join(
                 os.path.dirname(original_filename), new_filename
             )
-            validate_move(args, original_filename, new_filename)
+            validate_move(force, Path(original_filename), Path(new_filename))
             filename = new_filename
         else:
             move_it = move_it == b"y"
 
     if move_it:
         if not args.dry_run:
-            shiftfile(args, original_filename, filename)
+            undo_log_file = (
+                Path(args.undo_log_file) if args.undo_log_file is not None else None
+            )
+
+            shiftfile(undo_log_file, original_filename, filename)
             return filename
 
         logger.info(f"Not moving {original_filename.strip()} to {filename}; dry run.")
@@ -606,10 +611,10 @@ def get_timetouse(
     return timetouse
 
 
-def validate_move(args, original_filename: str, filename: str) -> None:
-    if os.path.exists(filename) and not args.force:
+def validate_move(force: bool, original_filename: Path, filename: Path) -> None:
+    if filename.exists() and not force:
         raise FatalError(
-            f"Want to move {original_filename.strip()} to "
+            f"Want to move {original_filename} to "
             + f"{filename}, but it already exists."
         )
 
@@ -626,41 +631,39 @@ def rlinput(prompt: str, prefill: str = "") -> str:
         readline.set_startup_hook()
 
 
-def shiftfile(args, source: str, target: str) -> None:
+def shiftfile(undo_log_file: Path | None, source: str, target: str) -> None:
     logger = logging.getLogger("normfn")
 
     source = os.path.abspath(source)
     target = os.path.abspath(target)
 
-    dt_now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    dt_now = datetime.datetime.now(tz=datetime.UTC).strftime("%Y-%m-%dT%H-%M-%S")
 
     try:
         shutil.move(source, target)
     except PermissionError as permission_error:
-        filename: str = permission_error.filename
+        filename: str = permission_error.filename  # pyright: ignore[reportAny]
         if filename == source:
-            raise FatalError(
-                f"Permission denied on source: {filename}"
-            ) from permission_error
+            msg = f"Permission denied on source: {filename}"
+            raise FatalError(msg) from permission_error
 
         if filename == target:
-            raise FatalError(
-                f"Permission denied on target: {filename}"
-            ) from permission_error
+            msg = f"Permission denied on target: {filename}"
+            raise FatalError(msg) from permission_error
 
         raise
 
-    if args.undo_log_file:
-        check_undo_log_file_header(args)
-        with open(args.undo_log_file, "a", encoding="utf-8") as log_file:
+    if undo_log_file:
+        check_undo_log_file_header(undo_log_file)
+        with undo_log_file.open("a", encoding="utf-8") as log_file:
             _ = log_file.write(f"# {dt_now}: moving {source} to {target}\n")
             _ = log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
     logger.info(f"{source} moved to {target}")
 
 
-def check_undo_log_file_header(args) -> None:
-    if not os.path.exists(args.undo_log_file):
-        with open(args.undo_log_file, "w") as log_file:
+def check_undo_log_file_header(undo_log_file: Path) -> None:
+    if not undo_log_file.exists():
+        with undo_log_file.open("w") as log_file:
             wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
             _ = log_file.write("#!/bin/sh\n")
             _ = log_file.write(
@@ -677,7 +680,7 @@ def check_undo_log_file_header(args) -> None:
                     "This file contains shell commands which can be "
                     + "run to invert (undo) the effects of "
                     + "running normfn. They must be run in *reverse order*. "
-                    + "You can achieve this by running `tac {args.undo_log_file}"
+                    + f"You can achieve this by running `tac {undo_log_file}"
                     + " | sh`. If you wish, you can edit "
                     + "the file first to control which actions are undone."
                 )
