@@ -2,6 +2,7 @@
 
 import argparse
 import calendar
+import datetime
 import logging
 import os
 import os.path
@@ -12,7 +13,6 @@ import sys
 import textwrap
 from collections.abc import Iterable, Sequence
 from contextlib import suppress
-from datetime import datetime
 from io import TextIOBase
 from pathlib import Path
 from typing import Literal, NoReturn, TypeVar, override
@@ -37,7 +37,7 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset(
 YEAR = ""
 
 
-def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
+def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     logger = logging.getLogger("normfn")
 
     class ArgumentParser(argparse.ArgumentParser):
@@ -253,6 +253,7 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
     args_max_years_behind: int = args.max_years_behind  # pyright: ignore[reportAny]
     args_max_years_ahead: int = args.max_years_ahead  # pyright: ignore[reportAny]
     args_filenames: list[str] = args.filenames  # pyright: ignore[reportAny]
+    args_recursive: bool = args.recursive  # pyright: ignore[reportAny]
 
     if args_help:
         parser.print_help()
@@ -276,7 +277,7 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
 
     global YEAR
 
-    year_now = datetime.now().year
+    year_now = datetime.datetime.now(tz=datetime.UTC).year
     year_list = [
         str(year)
         for year in range(
@@ -294,7 +295,7 @@ def main(argv, syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
                     filename + " specified on the command line does not exist."
                 )
 
-            if os.path.isdir(filename) and args.recursive:
+            if os.path.isdir(filename) and args_recursive:
                 new_filename = process_filename(filename, args)
                 assert new_filename is not None
                 walk_tree(new_filename, args)
@@ -318,12 +319,12 @@ def walk_tree(dirname: str, args) -> None:
     dirlist = sorted(os.listdir(dirname))
 
     for entry in dirlist:
-        entry = os.path.join(dirname, entry)
+        entry_full = os.path.join(dirname, entry)
 
-        entry = process_filename(entry, args)
-        assert entry is not None
-        if os.path.isdir(entry):
-            walk_tree(entry, args)
+        entry_full = process_filename(entry_full, args)
+        assert entry_full is not None
+        if os.path.isdir(entry_full):
+            walk_tree(entry_full, args)
 
 
 def datetime_prefix(args, non_extension: str, filename: str) -> str:
@@ -495,7 +496,7 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
 
-        timetouse = get_timetouse(args.time_option, filename)
+        timetouse = get_timetouse(args.time_option, Path(filename))
 
         newname_with_dash_if_needed = (
             ("-" + newname) if not args.discard_existing_name else ""
@@ -586,13 +587,13 @@ def should_exclude(filename: str, basename: str) -> tuple[bool, str]:
 
 
 def get_timetouse(
-    time_option: Literal["now", "earliest", "latest"], filename: str
-) -> datetime:
-    ctime = datetime.fromtimestamp(os.path.getctime(filename))
-    mtime = datetime.fromtimestamp(os.path.getmtime(filename))
+    time_option: Literal["now", "earliest", "latest"], filename: Path
+) -> datetime.datetime:
+    ctime = datetime.datetime.fromtimestamp(filename.stat().st_ctime, tz=datetime.UTC)
+    mtime = datetime.datetime.fromtimestamp(filename.stat().st_mtime, tz=datetime.UTC)
 
     if time_option == "now":
-        timetouse = datetime.now()
+        timetouse = datetime.datetime.now(tz=datetime.UTC)
     elif time_option == "earliest":
         timetouse = min(ctime, mtime)
     else:
@@ -612,7 +613,7 @@ def validate_move(args, original_filename: str, filename: str) -> None:
 def rlinput(prompt: str, prefill: str = "") -> str:
     if os.name == "nt":
         return input(prompt)
-    import readline
+    import readline  # noqa: PLC0415
 
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
     try:
@@ -627,7 +628,7 @@ def shiftfile(args, source: str, target: str) -> None:
     source = os.path.abspath(source)
     target = os.path.abspath(target)
 
-    dt_now = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    dt_now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
     try:
         shutil.move(source, target)
@@ -708,12 +709,12 @@ def ask_yes_no(prompt: str) -> bytes:
 
 def readchar() -> bytes:
     if os.name == "nt":
-        import msvcrt
+        import msvcrt  # noqa: PLC0415
 
         return msvcrt.getch()
 
-    import termios
-    import tty
+    import termios  # noqa: PLC0415
+    import tty  # noqa: PLC0415
 
     try:
         old_settings = termios.tcgetattr(sys.stdin)
@@ -731,10 +732,11 @@ def insensitiveize(string: str) -> str:
 
 
 class FatalError(Exception):
-    def __init__(self, value) -> None:
+    def __init__(self, value: str) -> None:
         Exception.__init__(self, value)
-        self.value = value
+        self.value: str = value
 
+    @override
     def __str__(self) -> str:
         return repr(self.value)
 
