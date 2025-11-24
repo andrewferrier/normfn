@@ -13,6 +13,7 @@ import sys
 import textwrap
 from collections.abc import Iterable, Sequence
 from contextlib import suppress
+from dataclasses import dataclass
 from io import TextIOBase
 from pathlib import Path
 from typing import Literal, NoReturn, TypeVar, override
@@ -37,9 +38,26 @@ FULLNAME_EXCLUDE_PATTERNS = frozenset(
 YEAR = ""
 
 
-def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
-    logger = logging.getLogger("normfn")
+@dataclass
+class Args:
+    verbose: int
+    help: bool
+    dry_run: bool
+    interactive: bool
+    all: bool
+    force: bool
+    add_time: bool
+    discard_existing_name: bool
+    recursive: bool
+    max_years_ahead: int
+    max_years_behind: int
+    undo_log_file: str | None
+    no_undo_log_file: bool
+    time_option: Literal["now", "earliest", "latest"]
+    filenames: list[str]
 
+
+def parse_arguments(argv: list[str]) -> Args:
     class ArgumentParser(argparse.ArgumentParser):
         @override
         def error(self, message: str) -> NoReturn:
@@ -54,7 +72,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         add_help=False,
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-v",
         "--verbose",
         action="count",
@@ -62,14 +80,14 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         help="Add debugging output. Using this twice makes it doubly verbose.",
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-h",
         "--help",
         action="store_true",
         help="Show help information for normfn.",
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-n",
         "--dry-run",
         action="store_true",
@@ -80,7 +98,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-i",
         "--interactive",
         action="store_true",
@@ -88,7 +106,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         help="Ask about each change before it is done.",
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-a",
         "--all",
         action="store_true",
@@ -96,19 +114,18 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         help="Affect all files, including those in default exclude lists.",
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-f",
         "--force",
         action="store_true",
         dest="force",
         help=(
-            "Overwrite target files if they already "
-            "exist (USE WITH CAUTION, consider using --dry-run "
-            "first)."
+            "Overwrite target files if they already exist "
+            "(USE WITH CAUTION, consider using --dry-run first)."
         ),
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-t",
         "--add-time",
         action="store_true",
@@ -116,7 +133,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         help="If a time is not found in the filename, add one.",
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-d",
         "--discard-existing-name",
         action="store_true",
@@ -124,7 +141,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         help="Discard existing name and just use the date/time prefix.",
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "-r",
         "--recursive",
         action="store_true",
@@ -136,7 +153,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "--max-years-ahead",
         type=int,
         dest="max_years_ahead",
@@ -147,7 +164,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "--max-years-behind",
         type=int,
         dest="max_years_behind",
@@ -160,7 +177,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
     log_option = parser.add_mutually_exclusive_group()
 
-    _ = log_option.add_argument(
+    log_option.add_argument(
         "--undo-log-file",
         type=str,
         dest="undo_log_file",
@@ -172,7 +189,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    _ = log_option.add_argument(
+    log_option.add_argument(
         "--no-undo-log-file",
         dest="no_undo_log_file",
         action="store_true",
@@ -181,7 +198,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
     time_option = parser.add_mutually_exclusive_group()
 
-    _ = time_option.add_argument(
+    time_option.add_argument(
         "--now",
         action="store_const",
         dest="time_option",
@@ -192,7 +209,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    _ = time_option.add_argument(
+    time_option.add_argument(
         "--latest",
         "--newest",
         action="store_const",
@@ -207,7 +224,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    _ = time_option.add_argument(
+    time_option.add_argument(
         "--earliest",
         "--oldest",
         action="store_const",
@@ -220,7 +237,10 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         ),
     )
 
-    parser.set_defaults(time_option="earliest", undo_log_file=get_default_log_file())
+    parser.set_defaults(
+        time_option="earliest",
+        undo_log_file=get_default_log_file(),
+    )
 
     class FilenamesAction(argparse.Action):
         @override
@@ -231,12 +251,12 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
             values: Sequence[str],
             _: str | None = None,
         ) -> None:
-            args.filenames = values
+            args.filenames = list(values)
             args_help: bool = args.help  # pyright: ignore[reportAny]
-            if (not args_help) and len(values) < 1:
+            if not args_help and len(values) < 1:
                 parser.error("You must specify some file or directory names.")
 
-    _ = parser.add_argument(
+    parser.add_argument(
         "filenames",
         metavar="filename",
         nargs="*",
@@ -244,35 +264,36 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         action=FilenamesAction,
     )
 
-    args = parser.parse_args(argv[1:])
+    args_ns = parser.parse_args(argv[1:])
 
-    args_help: bool = args.help  # pyright: ignore[reportAny]
-    args_dry_run: bool = args.dry_run  # pyright: ignore[reportAny]
-    args_verbose: int = args.verbose  # pyright: ignore[reportAny]
-    args_no_undo_log_file: bool = args.no_undo_log_file  # pyright: ignore[reportAny]
-    args_max_years_behind: int = args.max_years_behind  # pyright: ignore[reportAny]
-    args_max_years_ahead: int = args.max_years_ahead  # pyright: ignore[reportAny]
-    args_filenames: list[str] = args.filenames  # pyright: ignore[reportAny]
-    args_recursive: bool = args.recursive  # pyright: ignore[reportAny]
+    args = Args(**vars(args_ns))  # pyright: ignore[reportAny]
 
-    if args_help:
+    if args.help:
         parser.print_help()
-        return
+        sys.exit(0)
 
-    if args_dry_run:
-        args_verbose = max(args_verbose, 1)
+    return args
+
+
+def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
+    logger = logging.getLogger("normfn")
+
+    args = parse_arguments(argv)
+
+    if args.dry_run:
+        args.verbose = max(args.verbose, 1)
 
     if syserr_handler:
-        if args_verbose > 1:
+        if args.verbose > 1:
             syserr_handler.setLevel(logging.DEBUG)
-        elif args_verbose == 1:
+        elif args.verbose == 1:
             syserr_handler.setLevel(logging.INFO)
         else:
             syserr_handler.setLevel(logging.WARNING)
 
     logger.debug(f"Arguments are: {args}")
 
-    if args_no_undo_log_file:
+    if args.no_undo_log_file:
         args.undo_log_file = None
 
     global YEAR
@@ -281,21 +302,21 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
     year_list = [
         str(year)
         for year in range(
-            year_now - args_max_years_behind, year_now + args_max_years_ahead
+            year_now - args.max_years_behind, year_now + args.max_years_ahead
         )
     ]
     logger.debug(f"Valid years are: {year_list}")
     YEAR = r"(" + "|".join(year_list) + r")"
 
     with suppress(QuitError):
-        for arg_filename in args_filenames:
+        for arg_filename in args.filenames:
             filename = os.path.abspath(arg_filename)
             if not os.path.exists(filename):
                 raise FatalError(
                     filename + " specified on the command line does not exist."
                 )
 
-            if os.path.isdir(filename) and args_recursive:
+            if os.path.isdir(filename) and args.recursive:
                 new_filename = process_filename(filename, args)
                 walk_tree(new_filename, args)
             else:
@@ -310,7 +331,7 @@ def get_default_log_file() -> Path:
     return xdg_state_home / "normfn-undo.log.sh"
 
 
-def walk_tree(dirname: str, args) -> None:
+def walk_tree(dirname: str, args: Args) -> None:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Walking directory tree {dirname}")
@@ -398,7 +419,7 @@ def create_regex() -> str:
     )
 
 
-def datetime_prefix(args, non_extension: str, filename: str) -> str:
+def datetime_prefix(args: Args, non_extension: str, filename: str) -> str:
     logger = logging.getLogger("normfn")
 
     T = TypeVar("T")
@@ -515,7 +536,7 @@ def datetime_prefix(args, non_extension: str, filename: str) -> str:
     return newname
 
 
-def process_filename(filename: str, args) -> str:
+def process_filename(filename: str, args: Args) -> str:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Processing filename {filename}")
