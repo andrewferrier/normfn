@@ -16,7 +16,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from io import TextIOBase
 from pathlib import Path
-from typing import Literal, NoReturn, TypeVar, override
+from typing import Literal, NoReturn, override
 
 if not sys.version_info >= (3, 12):
     msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
@@ -419,17 +419,16 @@ def create_regex() -> str:
     )
 
 
+def first_not_none[T](values: Iterable[T | None]) -> T | None:
+    for item in values:
+        if item is not None:
+            return item
+
+    return None
+
+
 def datetime_prefix(args: Args, non_extension: str, filename: str) -> str:
     logger = logging.getLogger("normfn")
-
-    T = TypeVar("T")
-
-    def first_not_none(values: Iterable[T | None]) -> T | None:
-        for item in values:
-            if item is not None:
-                return item
-
-        return None
 
     def replacement(matchobj: re.Match[str]) -> str:
         logger.debug(f"replacement() called, matchobj = {matchobj}")
@@ -588,7 +587,7 @@ def process_filename(filename: str, args: Args) -> str:
                 Path(args.undo_log_file) if args.undo_log_file is not None else None
             )
 
-            shiftfile(undo_log_file, original_filename, filename)
+            shiftfile(undo_log_file, Path(original_filename), Path(filename))
             return filename
 
         logger.info(f"Not moving {original_filename.strip()} to {filename}; dry run.")
@@ -652,11 +651,11 @@ def rlinput(prompt: str, prefill: str = "") -> str:
         readline.set_startup_hook()
 
 
-def shiftfile(undo_log_file: Path | None, source: str, target: str) -> None:
+def shiftfile(undo_log_file: Path | None, source: Path, target: Path) -> None:
     logger = logging.getLogger("normfn")
 
-    source = os.path.abspath(source)
-    target = os.path.abspath(target)
+    source = source.resolve()
+    target = target.resolve()
 
     dt_now = datetime.datetime.now(tz=datetime.UTC).strftime("%Y-%m-%dT%H-%M-%S")
 
@@ -678,7 +677,9 @@ def shiftfile(undo_log_file: Path | None, source: str, target: str) -> None:
         check_undo_log_file_header(undo_log_file)
         with undo_log_file.open("a", encoding="utf-8") as log_file:
             _ = log_file.write(f"# {dt_now}: moving {source} to {target}\n")
-            _ = log_file.write(f"mv {shlex.quote(target)} {shlex.quote(source)}\n")
+            _ = log_file.write(
+                f"mv {shlex.quote(str(target))} {shlex.quote(str(source))}\n"
+            )
     logger.info(f"{source} moved to {target}")
 
 
