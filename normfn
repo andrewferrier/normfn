@@ -310,17 +310,16 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
     with suppress(QuitError):
         for arg_filename in args.filenames:
-            filename = os.path.abspath(arg_filename)
-            if not os.path.exists(filename):
-                raise FatalError(
-                    filename + " specified on the command line does not exist."
-                )
+            filename = Path(arg_filename).resolve()
+            if not filename.exists():
+                msg = f"{filename} specified on the command line does not exist."
+                raise FatalError(msg)
 
-            if os.path.isdir(filename) and args.recursive:
-                new_filename = process_filename(filename, args)
-                walk_tree(new_filename, args)
+            if filename.is_dir() and args.recursive:
+                new_filename = process_filename(str(filename), args)
+                walk_tree(Path(new_filename), args)
             else:
-                process_filename(filename, args)
+                process_filename(str(filename), args)
 
 
 def get_default_log_file() -> Path:
@@ -331,17 +330,17 @@ def get_default_log_file() -> Path:
     return xdg_state_home / "normfn-undo.log.sh"
 
 
-def walk_tree(dirname: str, args: Args) -> None:
+def walk_tree(dirname: Path, args: Args) -> None:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Walking directory tree {dirname}")
-    dirlist = sorted(os.listdir(dirname))
+    dirlist: list[Path] = sorted(Path(dirname).iterdir())
 
     for entry in dirlist:
-        entry_full = os.path.join(dirname, entry)
+        entry_full = dirname / entry
 
-        entry_full = process_filename(entry_full, args)
-        if os.path.isdir(entry_full):
+        entry_full = Path(process_filename(str(entry_full), args))
+        if entry_full.is_dir():
             walk_tree(entry_full, args)
 
 
