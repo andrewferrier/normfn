@@ -16,17 +16,20 @@ from contextlib import suppress
 from dataclasses import dataclass
 from io import TextIOBase
 from pathlib import Path
+from re import Pattern
 from typing import Literal, NoReturn, override
 
 if not sys.version_info >= (3, 12):
     msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
     raise ValueError(msg)
 
-BASENAME_EXCLUDE_PATTERNS = frozenset([r"\..*", "Icon\r", r".*\.lo?ck"])
+BASENAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
+    [r"\..*", "Icon\r", r".*\.lo?ck"]
+)
 
-EFFECTIVE_SEP = r"\\" if os.sep == "\\" else os.sep
+EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
-FULLNAME_EXCLUDE_PATTERNS = frozenset(
+FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
     [
         r".*\.git" + EFFECTIVE_SEP + r".*",
         r".*\.svn" + EFFECTIVE_SEP + r".*",
