@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.1](https://github.com/andrewferrier/normfn/compare/v1.2.0...v1.2.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* Add missing permissions to GitHub workflows ([6272462](https://github.com/andrewferrier/normfn/commit/6272462e035239b1c51e049a655b7f4c99b8338d))
+* Python syntax issues ([c3b9435](https://github.com/andrewferrier/normfn/commit/c3b9435ffb37d6eafc1d1b2a89a6c4a36a59adfe))
+* ruff issues ([767a29c](https://github.com/andrewferrier/normfn/commit/767a29c5d80a1378c0fc1535d2c74ea93a266895))
+* shellcheck issue ([1d96bee](https://github.com/andrewferrier/normfn/commit/1d96bee959b8618c9ccbf667dba02c34312b84b5))
+* Some typing issues ([e88d3ed](https://github.com/andrewferrier/normfn/commit/e88d3edc4e2d972f7b44421b28887a317d598151))
+
 ## [1.2.0](https://github.com/andrewferrier/normfn/compare/v1.1.9...v1.2.0) (2024-09-09)
 
 
