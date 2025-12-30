@@ -32,5 +32,5 @@ jobs:
           #sudo apt update
           #sudo apt install makepkg
           #make buildarch
-          gh release upload ${{ steps.release.outputs.tag_name }} *.deb
-          #gh release upload ${{ steps.release.outputs.tag_name }} *.zst
+          gh release upload ${{ steps.release.outputs.tag_name }} ./*.deb
+          #gh release upload ${{ steps.release.outputs.tag_name }} ./*.zst
