@@ -51,10 +51,10 @@ class Args:
     recursive: bool
     max_years_ahead: int
     max_years_behind: int
-    undo_log_file: str | None
+    undo_log_file: Path | None
     no_undo_log_file: bool
     time_option: Literal["now", "earliest", "latest"]
-    filenames: list[str]
+    filenames: list[Path]
 
 
 @dataclass(frozen=True)
@@ -186,7 +186,7 @@ def parse_arguments(argv: list[str]) -> Args:
 
     log_option.add_argument(
         "--undo-log-file",
-        type=str,
+        type=Path,
         dest="undo_log_file",
         help=(
             "The name of the shell script to log "
@@ -258,7 +258,7 @@ def parse_arguments(argv: list[str]) -> Args:
             values: str | Sequence[Any] | None,
             option_string: str | None = None,
         ) -> None:
-            typed_values = cast("Sequence[str]", values)
+            typed_values = cast("Sequence[Path]", values)
             namespace.filenames = list(typed_values)
             args_help: bool = namespace.help  # pyright: ignore[reportAny]
             if not args_help and len(typed_values) < 1:
@@ -266,6 +266,7 @@ def parse_arguments(argv: list[str]) -> Args:
 
     parser.add_argument(
         "filenames",
+        type=Path,
         metavar="filename",
         nargs="*",
         help="Filenames",
@@ -325,7 +326,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
     with suppress(QuitError):
         for arg_filename in args.filenames:
-            filename = Path(arg_filename).resolve()
+            filename = arg_filename.resolve()
             if not filename.exists():
                 msg = f"{filename} specified on the command line does not exist."
                 raise FatalError(msg)
@@ -623,11 +624,7 @@ def process_filename(
 
     if move_it:
         if not args.dry_run:
-            undo_log_file_path: Path | None = (
-                Path(args.undo_log_file) if args.undo_log_file is not None else None
-            )
-
-            shiftfile(undo_log_file_path, original_path, target_path)
+            shiftfile(args.undo_log_file, original_path, target_path)
             return target_path
 
         logger.info(
