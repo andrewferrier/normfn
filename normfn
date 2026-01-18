@@ -5,7 +5,6 @@ import calendar
 import datetime
 import logging
 import os
-import os.path
 import re
 import shlex
 import shutil
@@ -17,28 +16,26 @@ from dataclasses import dataclass
 from io import TextIOBase
 from pathlib import Path
 from re import Pattern
-from typing import Literal, NoReturn, override
+from typing import Any, Literal, NoReturn, cast, override
 
 if not sys.version_info >= (3, 12):
     msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
     raise ValueError(msg)
 
 BASENAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
-    [r"\..*", "Icon\r", r".*\.lo?ck"]
+    [re.compile(r"\..*"), re.compile("Icon\r"), re.compile(r".*\.lo?ck")]
 )
 
 EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
 FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
     [
-        r".*\.git" + EFFECTIVE_SEP + r".*",
-        r".*\.svn" + EFFECTIVE_SEP + r".*",
-        r".*\.hg" + EFFECTIVE_SEP + r".*",
-        r".*\.bzr" + EFFECTIVE_SEP + r".*",
+        re.compile(r".*\.git" + EFFECTIVE_SEP + r".*"),
+        re.compile(r".*\.svn" + EFFECTIVE_SEP + r".*"),
+        re.compile(r".*\.hg" + EFFECTIVE_SEP + r".*"),
+        re.compile(r".*\.bzr" + EFFECTIVE_SEP + r".*"),
     ]
 )
-
-YEAR = ""
 
 
 @dataclass
@@ -247,16 +244,17 @@ def parse_arguments(argv: list[str]) -> Args:
 
     class FilenamesAction(argparse.Action):
         @override
-        def __call__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        def __call__(
             self,
             parser: argparse.ArgumentParser,
-            args: argparse.Namespace,
-            values: Sequence[str],
-            _: str | None = None,
+            namespace: argparse.Namespace,
+            values: str | Sequence[Any] | None,
+            option_string: str | None = None,
         ) -> None:
-            args.filenames = list(values)
-            args_help: bool = args.help  # pyright: ignore[reportAny]
-            if not args_help and len(values) < 1:
+            typed_values = cast("Sequence[str]", values)
+            namespace.filenames = list(typed_values)
+            args_help: bool = namespace.help  # pyright: ignore[reportAny]
+            if not args_help and len(typed_values) < 1:
                 parser.error("You must specify some file or directory names.")
 
     parser.add_argument(
@@ -299,8 +297,6 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
     if args.no_undo_log_file:
         args.undo_log_file = None
 
-    global YEAR
-
     year_now = datetime.datetime.now(tz=datetime.UTC).year
     year_list = [
         str(year)
@@ -309,7 +305,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         )
     ]
     logger.debug(f"Valid years are: {year_list}")
-    YEAR = r"(" + "|".join(year_list) + r")"
+    year_regex = r"(" + "|".join(year_list) + r")"
 
     with suppress(QuitError):
         for arg_filename in args.filenames:
@@ -319,10 +315,10 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
                 raise FatalError(msg)
 
             if filename.is_dir() and args.recursive:
-                new_filename = process_filename(str(filename), args)
-                walk_tree(Path(new_filename), args)
+                new_filename = process_filename(filename, args, year_regex)
+                walk_tree(new_filename, args, year_regex)
             else:
-                process_filename(str(filename), args)
+                process_filename(filename, args, year_regex)
 
 
 def get_default_log_file() -> Path:
@@ -333,7 +329,7 @@ def get_default_log_file() -> Path:
     return xdg_state_home / "normfn-undo.log.sh"
 
 
-def walk_tree(dirname: Path, args: Args) -> None:
+def walk_tree(dirname: Path, args: Args, year_regex: str) -> None:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Walking directory tree {dirname}")
@@ -342,12 +338,12 @@ def walk_tree(dirname: Path, args: Args) -> None:
     for entry in dirlist:
         entry_full = dirname / entry
 
-        entry_full = Path(process_filename(str(entry_full), args))
+        entry_full = process_filename(entry_full, args, year_regex)
         if entry_full.is_dir():
-            walk_tree(entry_full, args)
+            walk_tree(entry_full, args, year_regex)
 
 
-def create_regex() -> str:
+def create_regex(year_regex: str) -> str:
     month_names_only = (
         "|".join(map(insensitiveize, calendar.month_name[1:13]))
         + "|"
@@ -374,7 +370,7 @@ def create_regex() -> str:
         +
         # Y-M-D style
         r"(?P<year1>"
-        + YEAR
+        + year_regex
         + r")"
         + ymd_separator_first
         + r"(?P<month1>"
@@ -397,7 +393,7 @@ def create_regex() -> str:
         + r")"
         + dmy_separator_following
         + r"(?P<year2>"
-        + YEAR
+        + year_regex
         + r")"
         + r"|"
         +
@@ -407,7 +403,7 @@ def create_regex() -> str:
         + r")"
         + my_separator
         + r"(?P<year3>"
-        + YEAR
+        + year_regex
         + r")"
         + r")"
         + r"("
@@ -429,7 +425,9 @@ def first_not_none[T](values: Iterable[T | None]) -> T | None:
     return None
 
 
-def datetime_prefix(args: Args, non_extension: str, filename: str) -> str:
+def datetime_prefix(
+    args: Args, non_extension: str, filename: Path, year_regex: str
+) -> str:
     logger = logging.getLogger("normfn")
 
     def replacement(matchobj: re.Match[str]) -> str:
@@ -508,7 +506,7 @@ def datetime_prefix(args: Args, non_extension: str, filename: str) -> str:
         logger.debug(f"replacement() returned: {replace_value}")
         return replace_value
 
-    regex = create_regex()
+    regex = create_regex(year_regex)
 
     logger.debug(f"Complete regex used against {non_extension}: {regex}")
 
@@ -521,7 +519,7 @@ def datetime_prefix(args: Args, non_extension: str, filename: str) -> str:
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
 
-        timetouse = get_timetouse(args.time_option, Path(filename))
+        timetouse = get_timetouse(args.time_option, filename)
 
         newname_with_dash_if_needed = (
             ("-" + newname) if not args.discard_existing_name else ""
@@ -537,81 +535,76 @@ def datetime_prefix(args: Args, non_extension: str, filename: str) -> str:
     return newname
 
 
-def process_filename(filename: str, args: Args) -> str:
+def process_filename(original_path: Path, args: Args, year_regex: str) -> Path:
     logger = logging.getLogger("normfn")
 
-    logger.debug(f"Processing filename {filename}")
-    basename = os.path.basename(filename)
+    logger.debug(f"Processing filename {original_path}")
 
     if not args.all:
-        (exclude, why) = should_exclude(filename, basename)
+        (exclude, why) = should_exclude(str(original_path), original_path.name)
         if exclude:
-            logger.info(f"Skipping {filename.strip()} as it matches pattern {why}")
-            return filename
+            logger.info(
+                f"Skipping {str(original_path).strip()} as it matches pattern {why}"
+            )
+            return original_path
 
-    (non_extension, extension) = os.path.splitext(basename)
+    new_stem = datetime_prefix(args, original_path.stem, original_path, year_regex)
+    new_stem = new_stem.strip() + original_path.suffix
+    target_path = original_path.parent / new_stem
 
-    non_extension = datetime_prefix(args, non_extension, filename)
+    logger.debug(f"Potential new filename for {original_path} is {target_path}")
 
-    newname = non_extension.strip() + extension
-
-    original_filename = filename
-    filename = os.path.join(os.path.dirname(original_filename), newname)
-    logger.debug(f"Potential new filename for {original_filename} is {filename}")
-
-    if filename == original_filename:
+    if target_path == original_path:
         logger.debug("New filename would be identical, skipping.")
-        return original_filename
-
-    force: bool = args.force
-
-    validate_move(force, Path(original_filename), Path(filename))
+        return original_path
 
     move_it = True
 
     if args.interactive:
-        move_it = ask_yes_no(
-            f"Move {original_filename.strip()} to .../{newname} [y/n/e/q]?"
+        move_it_choice = ask_yes_no(
+            f"Move {str(original_path).strip()} to .../{new_stem} [y/n/e/q]?"
         )
-        if move_it == b"e":
-            new_filename = rlinput("What new filename? ", newname)
-            new_filename = os.path.join(
-                os.path.dirname(original_filename), new_filename
-            )
-            validate_move(force, Path(original_filename), Path(new_filename))
-            filename = new_filename
+        if move_it_choice == b"e":
+            edited_basename = rlinput("What new filename? ", new_stem)
+            target_path = original_path.parent / edited_basename
         else:
-            move_it = move_it == b"y"
+            move_it = move_it_choice == b"y"
+
+    validate_move(args.force, original_path, target_path)
 
     if move_it:
         if not args.dry_run:
-            undo_log_file = (
+            undo_log_file_path: Path | None = (
                 Path(args.undo_log_file) if args.undo_log_file is not None else None
             )
 
-            shiftfile(undo_log_file, Path(original_filename), Path(filename))
-            return filename
+            shiftfile(undo_log_file_path, original_path, target_path)
+            return target_path
 
-        logger.info(f"Not moving {original_filename.strip()} to {filename}; dry run.")
-        return original_filename
+        logger.info(
+            f"Not moving {str(original_path).strip()} to {target_path}; dry run."
+        )
+        return original_path
 
-    logger.info(f"Not moving {original_filename.strip()}")
-    return original_filename
+    logger.info(f"Not moving {str(original_path).strip()}")
+    return original_path
 
 
-def should_exclude(filename: str, basename: str) -> tuple[bool, str]:
+def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
     match = False
-    exclude_pattern = ""
+    exclude_pattern: Pattern | None = None
 
-    for exclude_pattern in BASENAME_EXCLUDE_PATTERNS:
-        if re.fullmatch(exclude_pattern, basename):
+    for current_pattern in BASENAME_EXCLUDE_PATTERNS:
+        if re.fullmatch(current_pattern, basename):
             match = True
+            exclude_pattern = current_pattern
             break
 
     if not match:
-        for exclude_pattern in FULLNAME_EXCLUDE_PATTERNS:
-            if re.fullmatch(exclude_pattern, filename):
+        for current_pattern in FULLNAME_EXCLUDE_PATTERNS:
+            if re.fullmatch(current_pattern, filename):
                 match = True
+                exclude_pattern = current_pattern
                 break
 
     return (match, exclude_pattern)
@@ -742,7 +735,7 @@ def readchar() -> bytes:
     if os.name == "nt":
         import msvcrt  # noqa: PLC0415
 
-        return msvcrt.getch()
+        return msvcrt.getch()  # ty:ignore[unresolved-attribute]
 
     import termios  # noqa: PLC0415
     import tty  # noqa: PLC0415
@@ -781,7 +774,9 @@ if __name__ == "__main__":
     logger_setup.propagate = False
     logger_setup.setLevel(logging.DEBUG)
 
-    syserrhandler = logging.StreamHandler(stream=sys.stderr)
+    syserrhandler: logging.StreamHandler[TextIOBase] = logging.StreamHandler(
+        stream=cast("TextIOBase", sys.stderr)
+    )
     syserrhandler.setLevel(logging.WARNING)
     syserrformatter = logging.Formatter("%(levelname)s: %(message)s")
     syserrhandler.setFormatter(syserrformatter)
