@@ -364,11 +364,7 @@ def create_regex(year_regex: str) -> str:
     hms_separator_following = r"(?P=hmssep)"
     date_time_separator = r"([-_T\s]|\sat\s|,\s)"
 
-    return (
-        r"^(?P<prefix>.*?)[-_]?"
-        + r"("
-        +
-        # Y-M-D style
+    ymd_style = (
         r"(?P<year1>"
         + year_regex
         + r")"
@@ -382,8 +378,9 @@ def create_regex(year_regex: str) -> str:
         + day
         + r"))?"
         + r"|"
-        +
-        # D-M-Y style
+    )
+
+    dmy_style = (
         r"(?P<day2>"
         + day
         + r")"
@@ -396,8 +393,9 @@ def create_regex(year_regex: str) -> str:
         + year_regex
         + r")"
         + r"|"
-        +
-        # M-Y style, with months in name only
+    )
+
+    my_style_months_in_name_only = (
         r"(?P<month3>"
         + month_names_only
         + r")"
@@ -411,6 +409,14 @@ def create_regex(year_regex: str) -> str:
         + r"(?P<hour>"
         + hour
         + r")"
+    )
+
+    return (
+        r"^(?P<prefix>.*?)[-_]?"
+        + r"("
+        + ymd_style
+        + dmy_style
+        + my_style_months_in_name_only
         + (r"(" + hms_separator_first + r"(?P<minute>" + minute + r")")
         + (r"(" + hms_separator_following + r"(?P<second>" + second + r"))?)?)?")
         + r"(?P<suffix>.*)$"
