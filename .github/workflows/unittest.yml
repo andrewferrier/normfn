@@ -17,9 +17,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install uv and dependencies
         run: |
-          pip install -r requirements-hacking.txt
+          pip install uv
+          uv sync --dev
       - name: Run unittests
         run: |
           make unittest_verbose

@@ -1,5 +1,7 @@
 [project]
+name = "normfn"
 requires-python = ">=3.12"
+version = "v0.0.1"
 
 [tool.basedpyright]
 reportConstantRedefinition = false # See https://github.com/microsoft/pyright/issues/5265
@@ -18,4 +20,10 @@ ignore = [
     "G004",
     "ISC003",
     "TRY003"
+]
+
+[dependency-groups]
+dev = [
+    "freezegun>=1.5.5",
+    "pexpect>=4.9.0",
 ]
