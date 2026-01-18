@@ -410,6 +410,17 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
 
+    def test_abbr_month_underscore_name(self):
+        filename = os.path.join(self.workingDir, "Blah_18-jun-25.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2025-06-18-Blah.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
     def test_ensure_common_date_separator_used(self):
         filename = os.path.join(self.workingDir, "T 1234 2023-11-22.pdf")
         self.touch(filename)

@@ -57,6 +57,13 @@ class Args:
     filenames: list[str]
 
 
+@dataclass(frozen=True)
+class YearRegexes:
+    four_digit_year_regex: str
+    all_digit_year_regex: str
+    two_to_four_digit_year_map: dict[str, str]
+
+
 def parse_arguments(argv: list[str]) -> Args:
     class ArgumentParser(argparse.ArgumentParser):
         @override
@@ -298,14 +305,23 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         args.undo_log_file = None
 
     year_now = datetime.datetime.now(tz=datetime.UTC).year
-    year_list = [
+    year_range_list = [
         str(year)
         for year in range(
             year_now - args.max_years_behind, year_now + args.max_years_ahead
         )
     ]
-    logger.debug(f"Valid years are: {year_list}")
-    year_regex = r"(" + "|".join(year_list) + r")"
+
+    two_digit_years: list[str] = [year_str[-2:] for year_str in year_range_list]
+    two_to_four_digit_year_map: dict[str, str] = {
+        year_str[-2:]: year_str for year_str in year_range_list
+    }
+
+    year_regexes = YearRegexes(
+        four_digit_year_regex=r"(" + "|".join(year_range_list) + r")",
+        all_digit_year_regex=r"(" + "|".join(year_range_list + two_digit_years) + r")",
+        two_to_four_digit_year_map=two_to_four_digit_year_map,
+    )
 
     with suppress(QuitError):
         for arg_filename in args.filenames:
@@ -315,10 +331,10 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
                 raise FatalError(msg)
 
             if filename.is_dir() and args.recursive:
-                new_filename = process_filename(filename, args, year_regex)
-                walk_tree(new_filename, args, year_regex)
+                new_filename = process_filename(filename, args, year_regexes)
+                walk_tree(new_filename, args, year_regexes)
             else:
-                process_filename(filename, args, year_regex)
+                process_filename(filename, args, year_regexes)
 
 
 def get_default_log_file() -> Path:
@@ -329,7 +345,7 @@ def get_default_log_file() -> Path:
     return xdg_state_home / "normfn-undo.log.sh"
 
 
-def walk_tree(dirname: Path, args: Args, year_regex: str) -> None:
+def walk_tree(dirname: Path, args: Args, year_regexes: YearRegexes) -> None:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Walking directory tree {dirname}")
@@ -338,12 +354,12 @@ def walk_tree(dirname: Path, args: Args, year_regex: str) -> None:
     for entry in dirlist:
         entry_full = dirname / entry
 
-        entry_full = process_filename(entry_full, args, year_regex)
+        entry_full = process_filename(entry_full, args, year_regexes)
         if entry_full.is_dir():
-            walk_tree(entry_full, args, year_regex)
+            walk_tree(entry_full, args, year_regexes)
 
 
-def create_regex(year_regex: str) -> str:
+def create_regex(year_regexes: YearRegexes) -> str:
     month_names_only = (
         "|".join(map(insensitiveize, calendar.month_name[1:13]))
         + "|"
@@ -359,6 +375,8 @@ def create_regex(year_regex: str) -> str:
     ymd_separator_following = r"(?P=ymdsep)"
     dmy_separator_first = r"(?P<dmysep>" + date_separator + r")"
     dmy_separator_following = r"(?P=dmysep)"
+    dmytdy_separator_first = r"(?P<dmytdysep>" + date_separator + r")"
+    dmytdy_separator_following = r"(?P=dmytdysep)"
     my_separator = date_separator
     hms_separator_first = r"(?P<hmssep>[-_.\s]?)"
     hms_separator_following = r"(?P=hmssep)"
@@ -366,7 +384,7 @@ def create_regex(year_regex: str) -> str:
 
     ymd_style = (
         r"(?P<year1>"
-        + year_regex
+        + year_regexes.four_digit_year_regex
         + r")"
         + ymd_separator_first
         + r"(?P<month1>"
@@ -377,7 +395,6 @@ def create_regex(year_regex: str) -> str:
         + r"(?P<day1>"
         + day
         + r"))?"
-        + r"|"
     )
 
     dmy_style = (
@@ -390,9 +407,22 @@ def create_regex(year_regex: str) -> str:
         + r")"
         + dmy_separator_following
         + r"(?P<year2>"
-        + year_regex
+        + year_regexes.four_digit_year_regex
         + r")"
-        + r"|"
+    )
+
+    dmy_style_twodigityears_months_in_name_only = (
+        r"(?P<day4>"
+        + day
+        + r")"
+        + dmytdy_separator_first
+        + r"(?P<month4>"
+        + month_names_only
+        + r")"
+        + dmytdy_separator_following
+        + r"(?P<year4>"
+        + year_regexes.all_digit_year_regex
+        + r")"
     )
 
     my_style_months_in_name_only = (
@@ -401,13 +431,7 @@ def create_regex(year_regex: str) -> str:
         + r")"
         + my_separator
         + r"(?P<year3>"
-        + year_regex
-        + r")"
-        + r")"
-        + r"("
-        + date_time_separator
-        + r"(?P<hour>"
-        + hour
+        + year_regexes.four_digit_year_regex
         + r")"
     )
 
@@ -415,8 +439,18 @@ def create_regex(year_regex: str) -> str:
         r"^(?P<prefix>.*?)[-_]?"
         + r"("
         + ymd_style
+        + r"|"
         + dmy_style
+        + r"|"
+        + dmy_style_twodigityears_months_in_name_only
+        + r"|"
         + my_style_months_in_name_only
+        + r")"
+        + r"("
+        + date_time_separator
+        + r"(?P<hour>"
+        + hour
+        + r")"
         + (r"(" + hms_separator_first + r"(?P<minute>" + minute + r")")
         + (r"(" + hms_separator_following + r"(?P<second>" + second + r"))?)?)?")
         + r"(?P<suffix>.*)$"
@@ -432,7 +466,7 @@ def first_not_none[T](values: Iterable[T | None]) -> T | None:
 
 
 def datetime_prefix(
-    args: Args, non_extension: str, filename: Path, year_regex: str
+    args: Args, non_extension: str, filename: Path, year_regexes: YearRegexes
 ) -> str:
     logger = logging.getLogger("normfn")
 
@@ -445,6 +479,7 @@ def datetime_prefix(
                     matchobj.group("year1"),
                     matchobj.group("year2"),
                     matchobj.group("year3"),
+                    matchobj.group("year4"),
                 ]
             )
         )
@@ -454,10 +489,16 @@ def datetime_prefix(
                     matchobj.group("month1"),
                     matchobj.group("month2"),
                     matchobj.group("month3"),
+                    matchobj.group("month4"),
                 ]
             )
         )
-        day = first_not_none([matchobj.group("day1"), matchobj.group("day2")])
+        day = first_not_none(
+            [matchobj.group("day1"), matchobj.group("day2"), matchobj.group("day4")]
+        )
+
+        if len(year) == 2:  # noqa: PLR2004
+            year = year_regexes.two_to_four_digit_year_map[year]
 
         if not month.isdigit():
             try:
@@ -512,7 +553,7 @@ def datetime_prefix(
         logger.debug(f"replacement() returned: {replace_value}")
         return replace_value
 
-    regex = create_regex(year_regex)
+    regex = create_regex(year_regexes)
 
     logger.debug(f"Complete regex used against {non_extension}: {regex}")
 
@@ -541,7 +582,9 @@ def datetime_prefix(
     return newname
 
 
-def process_filename(original_path: Path, args: Args, year_regex: str) -> Path:
+def process_filename(
+    original_path: Path, args: Args, year_regexes: YearRegexes
+) -> Path:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Processing filename {original_path}")
@@ -554,7 +597,7 @@ def process_filename(original_path: Path, args: Args, year_regex: str) -> Path:
             )
             return original_path
 
-    new_stem = datetime_prefix(args, original_path.stem, original_path, year_regex)
+    new_stem = datetime_prefix(args, original_path.stem, original_path, year_regexes)
     new_stem = new_stem.strip() + original_path.suffix
     target_path = original_path.parent / new_stem
 
