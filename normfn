@@ -368,6 +368,8 @@ def create_regex(year_regexes: YearRegexes) -> str:
     )
     month = r"(0[1-9]|1[012]|[1-9](?!\d)|" + month_names_only + ")"
     day = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))"
+    # Day with optional ordinal suffix - only used with month names
+    day_with_ordinal = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))(?:st|nd|rd|th)?"
     hour = r"([01]\d|2[0123])"
     minute = second = r"[012345]\d"
 
@@ -414,7 +416,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
 
     dmy_style_twodigityears_months_in_name_only = (
         r"(?P<day4>"
-        + day
+        + day_with_ordinal
         + r")"
         + dmytdy_separator_first
         + r"(?P<month4>"
@@ -466,12 +468,47 @@ def first_not_none[T](values: Iterable[T | None]) -> T | None:
     return None
 
 
+def strip_ordinal_suffix(day_str: str) -> str:
+    """Strip ordinal suffix from day string if it's valid.
+
+    Args:
+        day_str: Day string that may include ordinal suffix (e.g., "21st", "2nd")
+
+    Returns:
+        Day string without ordinal suffix if valid, original string if invalid
+    """
+    match = re.match(r"^(\d+)(st|nd|rd|th)$", day_str, re.IGNORECASE)
+    if not match:
+        return day_str
+
+    num, suffix = match.groups()
+    suffix = suffix.lower()
+
+    # Validate the ordinal is correct
+    # Special cases: 11, 12, 13 always use 'th'
+    if len(num) >= 2 and num[-2:] in ("11", "12", "13"):  # noqa: PLR2004
+        if suffix == "th":
+            return num
+        return day_str  # Invalid ordinal, keep as-is
+
+    # Check last digit
+    last_digit_suffix = {"1": "st", "2": "nd", "3": "rd"}
+    expected_suffix = last_digit_suffix.get(num[-1], "th")
+
+    if suffix == expected_suffix:
+        return num
+    return day_str  # Invalid ordinal, keep as-is
+
+
 def datetime_prefix(
     args: Args, non_extension: str, filename: Path, year_regexes: YearRegexes
 ) -> str:
     logger = logging.getLogger("normfn")
 
+    invalid_ordinal_detected = False
+
     def replacement(matchobj: re.Match[str]) -> str:
+        nonlocal invalid_ordinal_detected
         logger.debug(f"replacement() called, matchobj = {matchobj}")
 
         year = str(
@@ -516,8 +553,17 @@ def datetime_prefix(
         if len(month) == 1:
             month = "0" + month
 
-        if day is not None and len(day) == 1:
-            day = "0" + day
+        # Strip ordinal suffix from day if present and valid
+        if day is not None:
+            stripped_day = strip_ordinal_suffix(day)
+            # If day contains an ordinal suffix but stripping didn't change it,
+            # it means the ordinal was invalid - reject this match
+            if re.search(r"(st|nd|rd|th)$", day, re.IGNORECASE) and stripped_day == day:
+                invalid_ordinal_detected = True
+                return matchobj.group(0)
+            day = stripped_day
+            if len(day) == 1:
+                day = "0" + day
 
         replace_value = (
             year
@@ -554,23 +600,19 @@ def datetime_prefix(
         logger.debug(f"replacement() returned: {replace_value}")
         return replace_value
 
-    # Remove ordinal suffixes (1st, 2nd, 3rd, etc.) before processing
-    non_extension_without_ordinals = remove_ordinal_suffix(non_extension)
-    logger.debug(f"After removing ordinals: {non_extension_without_ordinals}")
-
     regex = create_regex(year_regexes)
 
-    logger.debug(
-        f"Complete regex used against {non_extension_without_ordinals}: {regex}"
-    )
+    logger.debug(f"Complete regex used against {non_extension}: {regex}")
 
-    (newname, number_of_subs) = re.subn(
-        regex, replacement, non_extension_without_ordinals
-    )
+    (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
 
     if number_of_subs > 1:
         msg = "Number of subs should be less than 1"
         raise ValueError(msg)
+
+    # If an invalid ordinal was detected, treat as if no match occurred
+    if invalid_ordinal_detected:
+        number_of_subs = 0
 
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
@@ -807,39 +849,6 @@ def readchar() -> bytes:
 
 def insensitiveize(string: str) -> str:
     return "".join(("[" + char.lower() + char.upper() + "]") for char in string)
-
-
-def remove_ordinal_suffix(text: str) -> str:
-    """Remove valid ordinal suffixes (1st, 2nd, 3rd, 21st, etc.) from text.
-
-    Only removes suffixes that are grammatically correct for the number.
-    For example, removes '1st', '2nd', '3rd', '21st', but leaves '22st' intact
-    since it's not a valid ordinal.
-
-    Args:
-        text: The text to process
-
-    Returns:
-        Text with valid ordinal suffixes removed
-    """
-    # Map of last digit(s) to valid suffix
-    # Special cases: 11, 12, 13 always use 'th'
-    # Otherwise: *1='st', *2='nd', *3='rd', rest='th'
-
-    def is_valid_ordinal(num: str, suffix: str) -> bool:
-        suffix = suffix.lower()
-        # Check for special cases: 11, 12, 13 always use 'th'
-        if len(num) >= 2 and num[-2:] in ("11", "12", "13"):  # noqa: PLR2004
-            return suffix == "th"
-        # Map last digit to expected suffix
-        last_digit_suffix = {"1": "st", "2": "nd", "3": "rd"}
-        return suffix == last_digit_suffix.get(num[-1], "th")
-
-    def replace(match: re.Match[str]) -> str:
-        num, suffix = match.groups()
-        return num if is_valid_ordinal(num, suffix) else match.group(0)
-
-    return re.sub(r"\b(\d+)(st|nd|rd|th)\b", replace, text, flags=re.IGNORECASE)
 
 
 class FatalError(Exception):

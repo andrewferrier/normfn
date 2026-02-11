@@ -914,12 +914,17 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         filename = os.path.join(self.workingDir, "foobar 22st January 2026.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
+        # File should be renamed to dated version since no valid date pattern was found
+        # It falls back to using file timestamp
         self.assertFalse(os.path.exists(filename))
-        # Should not parse the date correctly since 22st is invalid
-        # It should use the year but leave "22st" in the filename
-        self.assertTrue(
-            os.path.exists(os.path.join(self.workingDir, "2026-01-foobar 22st.txt"))
-        )
+        # Should get a date prefix from file timestamp, with "22st" preserved
+        renamed_files = [
+            f
+            for f in os.listdir(self.workingDir)
+            if "foobar 22st January 2026.txt" in f
+        ]
+        self.assertEqual(1, len(renamed_files))
+        self.assertTrue("22st" in renamed_files[0])
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
 
@@ -967,6 +972,53 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
             os.path.exists(os.path.join(self.workingDir, "2026-01-13-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_not_in_date_context_21stone(self):
+        """Test that '21stone' is preserved when not part of a date"""
+        filename = os.path.join(self.workingDir, "21stone thing.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should be renamed with date prefix from file timestamp, keeping "21stone"
+        renamed_files = [
+            f for f in os.listdir(self.workingDir) if "21stone thing.txt" in f
+        ]
+        self.assertEqual(1, len(renamed_files))
+        self.assertTrue("21stone" in renamed_files[0])
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_not_in_date_context_13th_listing(self):
+        """Test that '13th listing' is preserved when not part of a date"""
+        filename = os.path.join(self.workingDir, "13th listing.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should be renamed with date prefix from file timestamp, keeping "13th listing"
+        renamed_files = [
+            f for f in os.listdir(self.workingDir) if "13th listing.txt" in f
+        ]
+        self.assertEqual(1, len(renamed_files))
+        self.assertTrue("13th listing" in renamed_files[0])
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_mixed_context(self):
+        """Test ordinal in non-date context with actual date in filename"""
+        filename = os.path.join(
+            self.workingDir, "13th listing - 22nd december 2025.txt"
+        )
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should parse "22nd december 2025" and keep "13th listing"
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(self.workingDir, "2025-12-22-13th listing -.txt")
+            )
         )
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
