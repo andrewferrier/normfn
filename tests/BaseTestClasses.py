@@ -53,7 +53,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         return module_path
 
-    def invokeDirectly(self, inputFiles, extraParams=[]):
+    def invokeDirectly(self, inputFiles, extraParams=[], testConfig=None):
         import importlib.machinery
 
         module_path = self.getOriginalScriptPath()
@@ -66,7 +66,6 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         options.extend(inputFiles)
         options.extend(extraParams)
-        options.extend(["--no-undo-log-file"])
 
         stream = io.StringIO()
         handler = logging.StreamHandler(stream)
@@ -75,9 +74,25 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         log.setLevel(logging.DEBUG)
         log.addHandler(handler)
 
+        # Mock the config reading to provide test config
+        original_read_config = normalize_filename.read_config
+        
+        def mock_read_config():
+            if testConfig is not None:
+                return testConfig
+            # Default test config: disable undo log file
+            return normalize_filename.Config(
+                max_years_ahead=5,
+                max_years_behind=30,
+                undo_log_file=None,
+            )
+        
+        normalize_filename.read_config = mock_read_config
+
         try:
             normalize_filename.main(options, handler)
         finally:
+            normalize_filename.read_config = original_read_config
             log.removeHandler(handler)
             handler.close()
 
@@ -97,8 +112,23 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         if cwd is None:
             cwd = self.workingDir
 
-        with tempfile.NamedTemporaryFile(delete=False) as undo_log_file:
-            undo_log_file.close()
+        # Create temporary directories for config and undo log
+        with tempfile.TemporaryDirectory() as temp_config_dir:
+            # Create the normfn subdirectory for config
+            normfn_config_dir = os.path.join(temp_config_dir, "normfn")
+            os.makedirs(normfn_config_dir, exist_ok=True)
+            
+            config_file = os.path.join(normfn_config_dir, "normfn.toml")
+            undo_log_file_path = os.path.join(temp_config_dir, "undo.log.sh")
+            
+            # Create config file for test
+            with open(config_file, "w") as f:
+                f.write(f'max-years-ahead = 5\n')
+                f.write(f'max-years-behind = 30\n')
+                if useUndoFile:
+                    f.write(f'undo-log-file = "{undo_log_file_path}"\n')
+                else:
+                    f.write(f'undo-log-file = ""\n')
 
             if os.name == "nt":
                 options = ["python", NormalizeFilenameTestCase.COMMAND]
@@ -107,12 +137,15 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
             options.extend(inputFiles)
             options.extend(extraParams)
-            options.extend(["--undo-log-file=" + undo_log_file.name])
+
+            # Set XDG_CONFIG_HOME to point to our temp directory
+            env = os.environ.copy()
+            env["XDG_CONFIG_HOME"] = temp_config_dir
 
             if feedInput:
-                p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)
+                p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd, env=env)
             else:
-                p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)
+                p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd, env=env)
 
             output, error = p.communicate(feedInput)
             p.wait()
@@ -125,15 +158,15 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             else:
                 self.assertEqual("", output)
 
-            with open(undo_log_file.name) as undo_log_file_read:
-                undo_log_file_contents = undo_log_file_read.readlines()
+            undo_log_file_contents = []
+            if useUndoFile and os.path.exists(undo_log_file_path):
+                with open(undo_log_file_path) as undo_log_file_read:
+                    undo_log_file_contents = undo_log_file_read.readlines()
 
-            os.unlink(undo_log_file.name)
-
-        if useUndoFile:
-            return (p.returncode, output, error, undo_log_file_contents)
-        else:
-            return (p.returncode, output, error)
+            if useUndoFile:
+                return (p.returncode, output, error, undo_log_file_contents)
+            else:
+                return (p.returncode, output, error)
 
     def executeUndoCommands(self, commands):
         maxReturnCode = 0
@@ -152,30 +185,47 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         expectedExitStatus=None,
         expectedOutputRegex=None,
     ):
-        options = [NormalizeFilenameTestCase.COMMAND]
-        options.extend(inputFiles)
-        options.extend(extraParams)
-        options.extend(["--no-undo-log-file"])
+        # Create temporary directories for config
+        with tempfile.TemporaryDirectory() as temp_config_dir:
+            # Create the normfn subdirectory for config
+            normfn_config_dir = os.path.join(temp_config_dir, "normfn")
+            os.makedirs(normfn_config_dir, exist_ok=True)
+            
+            config_file = os.path.join(normfn_config_dir, "normfn.toml")
+            
+            # Create config file for test (no undo log)
+            with open(config_file, "w") as f:
+                f.write('max-years-ahead = 5\n')
+                f.write('max-years-behind = 30\n')
+                f.write('undo-log-file = ""\n')
 
-        command = " ".join(options)
+            options = [NormalizeFilenameTestCase.COMMAND]
+            options.extend(inputFiles)
+            options.extend(extraParams)
 
-        stream = io.BytesIO()
+            command = " ".join(options)
 
-        child = pexpect.spawn(command)
-        child.logfile_read = stream
+            stream = io.BytesIO()
 
-        yield child
+            # Set XDG_CONFIG_HOME environment variable for the child process
+            env = os.environ.copy()
+            env["XDG_CONFIG_HOME"] = temp_config_dir
 
-        child.expect(pexpect.EOF)
-        child.close()
+            child = pexpect.spawn(command, env=env)
+            child.logfile_read = stream
 
-        if expectedExitStatus is not None:
-            self.assertEqual(expectedExitStatus, child.exitstatus)
+            yield child
 
-        if expectedOutputRegex is not None:
-            self.assertRegex(
-                str(child.logfile_read.getvalue(), "utf-8"), expectedOutputRegex
-            )
+            child.expect(pexpect.EOF)
+            child.close()
+
+            if expectedExitStatus is not None:
+                self.assertEqual(expectedExitStatus, child.exitstatus)
+
+            if expectedOutputRegex is not None:
+                self.assertRegex(
+                    str(child.logfile_read.getvalue(), "utf-8"), expectedOutputRegex
+                )
 
     def touch(self, fname):
         os.makedirs(os.path.dirname(fname), exist_ok=True)

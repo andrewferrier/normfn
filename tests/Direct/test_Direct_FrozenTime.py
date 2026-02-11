@@ -89,10 +89,25 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
 
     @freeze_time("2015-04-05 10:10:10")
     def test_ok_ahead_adjusted(self):
+        from importlib.util import module_from_spec, spec_from_loader
+        import importlib.machinery
+        
+        module_path = self.getOriginalScriptPath()
+        loader = importlib.machinery.SourceFileLoader("normfn", module_path)
+        spec = spec_from_loader(os.path.basename(module_path), loader)
+        normalize_filename = module_from_spec(spec)
+        spec.loader.exec_module(normalize_filename)
+        
+        testConfig = normalize_filename.Config(
+            max_years_ahead=50,
+            max_years_behind=30,
+            undo_log_file=None,
+        )
+        
         filename = os.path.join(self.workingDir, "blah-2025-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-ahead=50"]
+            [filename], extraParams=["--now"], testConfig=testConfig
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
@@ -103,10 +118,25 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
 
     @freeze_time("2015-04-05 10:10:10")
     def test_ok_behind_adjusted(self):
+        from importlib.util import module_from_spec, spec_from_loader
+        import importlib.machinery
+        
+        module_path = self.getOriginalScriptPath()
+        loader = importlib.machinery.SourceFileLoader("normfn", module_path)
+        spec = spec_from_loader(os.path.basename(module_path), loader)
+        normalize_filename = module_from_spec(spec)
+        spec.loader.exec_module(normalize_filename)
+        
+        testConfig = normalize_filename.Config(
+            max_years_ahead=5,
+            max_years_behind=50,
+            undo_log_file=None,
+        )
+        
         filename = os.path.join(self.workingDir, "blah-1970-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-behind=50"]
+            [filename], extraParams=["--now"], testConfig=testConfig
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
@@ -117,10 +147,25 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
 
     @freeze_time("2015-04-05 10:10:10")
     def test_toofar_ahead_adjusted(self):
+        from importlib.util import module_from_spec, spec_from_loader
+        import importlib.machinery
+        
+        module_path = self.getOriginalScriptPath()
+        loader = importlib.machinery.SourceFileLoader("normfn", module_path)
+        spec = spec_from_loader(os.path.basename(module_path), loader)
+        normalize_filename = module_from_spec(spec)
+        spec.loader.exec_module(normalize_filename)
+        
+        testConfig = normalize_filename.Config(
+            max_years_ahead=50,
+            max_years_behind=30,
+            undo_log_file=None,
+        )
+        
         filename = os.path.join(self.workingDir, "blah-2200-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-ahead=50"]
+            [filename], extraParams=["--now"], testConfig=testConfig
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
@@ -133,10 +178,25 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
 
     @freeze_time("2015-04-05 10:10:10")
     def test_toofar_behind_adjusted(self):
+        from importlib.util import module_from_spec, spec_from_loader
+        import importlib.machinery
+        
+        module_path = self.getOriginalScriptPath()
+        loader = importlib.machinery.SourceFileLoader("normfn", module_path)
+        spec = spec_from_loader(os.path.basename(module_path), loader)
+        normalize_filename = module_from_spec(spec)
+        spec.loader.exec_module(normalize_filename)
+        
+        testConfig = normalize_filename.Config(
+            max_years_ahead=5,
+            max_years_behind=50,
+            undo_log_file=None,
+        )
+        
         filename = os.path.join(self.workingDir, "blah-1930-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-behind=50"]
+            [filename], extraParams=["--now"], testConfig=testConfig
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
