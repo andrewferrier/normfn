@@ -105,7 +105,7 @@ def read_config() -> Config:
                     # Expand ~ and environment variables
                     expanded_path = os.path.expandvars(os.path.expanduser(undo_log_value))
                     undo_log_file = Path(expanded_path)
-        except Exception as e:
+        except (tomllib.TOMLDecodeError, OSError, ValueError) as e:
             logger = logging.getLogger("normfn")
             logger.warning(f"Error reading config file {config_path}: {e}. Using defaults.")
     
