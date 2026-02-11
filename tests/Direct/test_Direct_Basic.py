@@ -1035,3 +1035,16 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         )
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
+
+    def test_ordinal_date_with_prefix(self):
+        """Test ordinal date with prefix content before the date"""
+        filename = os.path.join(self.workingDir, "abc 21st January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should parse the date and move prefix to after the date
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-21-abc.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
