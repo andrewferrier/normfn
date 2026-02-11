@@ -46,6 +46,14 @@ class Config:
     undo_log_file: Path | None
 
 
+# Configuration schema with defaults
+CONFIG_DEFAULTS = {
+    "max-years-ahead": 5,
+    "max-years-behind": 30,
+    "undo-log-file": None,  # Will be set to get_default_log_file() in read_config
+}
+
+
 @dataclass
 class Args:
     verbose: int
@@ -81,37 +89,42 @@ def read_config() -> Config:
     """Read configuration from the config file, falling back to defaults."""
     config_path = get_config_file_path()
     
-    # Default values
-    max_years_ahead = 5
-    max_years_behind = 30
-    undo_log_file: Path | None = get_default_log_file()
+    # Initialize with defaults
+    config_values = CONFIG_DEFAULTS.copy()
+    # Special handling for undo-log-file default
+    if config_values["undo-log-file"] is None:
+        config_values["undo-log-file"] = get_default_log_file()
     
     if config_path.exists():
         try:
             with config_path.open("rb") as f:
                 config_data = tomllib.load(f)
             
-            # Read config values, using defaults if not present
-            max_years_ahead = config_data.get("max-years-ahead", max_years_ahead)
-            max_years_behind = config_data.get("max-years-behind", max_years_behind)
-            
-            # Handle undo-log-file config
-            if "undo-log-file" in config_data:
-                undo_log_value = config_data["undo-log-file"]
-                if undo_log_value == "":
-                    # Empty string means no undo log file
-                    undo_log_file = None
-                else:
-                    # Expand ~ and environment variables
-                    expanded_path = os.path.expandvars(os.path.expanduser(undo_log_value))
-                    undo_log_file = Path(expanded_path)
+            # Read config values from file, using defaults if not present
+            for key in CONFIG_DEFAULTS:
+                if key in config_data:
+                    config_values[key] = config_data[key]
         except (tomllib.TOMLDecodeError, OSError, ValueError) as e:
             logger = logging.getLogger("normfn")
             logger.warning(f"Error reading config file {config_path}: {e}. Using defaults.")
     
+    # Handle undo-log-file special cases
+    undo_log_file: Path | None
+    undo_log_value = config_values["undo-log-file"]
+    if undo_log_value == "":
+        # Empty string means no undo log file
+        undo_log_file = None
+    elif isinstance(undo_log_value, str):
+        # Expand ~ and environment variables
+        expanded_path = os.path.expandvars(os.path.expanduser(undo_log_value))
+        undo_log_file = Path(expanded_path)
+    else:
+        # Already a Path object (from defaults)
+        undo_log_file = undo_log_value
+    
     return Config(
-        max_years_ahead=max_years_ahead,
-        max_years_behind=max_years_behind,
+        max_years_ahead=config_values["max-years-ahead"],
+        max_years_behind=config_values["max-years-behind"],
         undo_log_file=undo_log_file,
     )
 

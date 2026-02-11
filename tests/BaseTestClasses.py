@@ -21,7 +21,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def setUp(self):
         self.workingDir = tempfile.mkdtemp()
 
-    def _create_test_config_file(self, config_dir, undo_log_file_path=None):
+    def _create_test_config_file(self, config_dir, undo_log_file_path=None, max_years_ahead=5, max_years_behind=30):
         """Helper method to create a test config file with default values."""
         normfn_config_dir = os.path.join(config_dir, "normfn")
         os.makedirs(normfn_config_dir, exist_ok=True)
@@ -29,8 +29,8 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         config_file = os.path.join(normfn_config_dir, "normfn.toml")
         
         with open(config_file, "w") as f:
-            f.write('max-years-ahead = 5\n')
-            f.write('max-years-behind = 30\n')
+            f.write(f'max-years-ahead = {max_years_ahead}\n')
+            f.write(f'max-years-behind = {max_years_behind}\n')
             if undo_log_file_path is None:
                 f.write('undo-log-file = ""\n')
             else:
@@ -70,7 +70,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         return module_path
 
-    def invokeDirectly(self, inputFiles, extraParams=[], testConfig=None):
+    def invokeDirectly(self, inputFiles, extraParams=[], configOverrides=None):
         import importlib.machinery
 
         module_path = self.getOriginalScriptPath()
@@ -79,43 +79,44 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         normalize_filename = module_from_spec(spec)
         spec.loader.exec_module(normalize_filename)
 
-        options = [module_path]
+        # Create a temporary config file
+        with tempfile.TemporaryDirectory() as temp_config_dir:
+            if configOverrides:
+                self._create_test_config_file(temp_config_dir, **configOverrides)
+            else:
+                # Default: disable undo log
+                self._create_test_config_file(temp_config_dir)
+            
+            # Set XDG_CONFIG_HOME to use our temp config
+            original_env = os.environ.get("XDG_CONFIG_HOME")
+            os.environ["XDG_CONFIG_HOME"] = temp_config_dir
 
-        options.extend(inputFiles)
-        options.extend(extraParams)
+            options = [module_path]
 
-        stream = io.StringIO()
-        handler = logging.StreamHandler(stream)
-        log = logging.getLogger("normfn")
-        log.propagate = False
-        log.setLevel(logging.DEBUG)
-        log.addHandler(handler)
+            options.extend(inputFiles)
+            options.extend(extraParams)
 
-        # Mock the config reading to provide test config
-        original_read_config = normalize_filename.read_config
-        
-        def mock_read_config():
-            if testConfig is not None:
-                return testConfig
-            # Default test config: disable undo log file
-            return normalize_filename.Config(
-                max_years_ahead=5,
-                max_years_behind=30,
-                undo_log_file=None,
-            )
-        
-        normalize_filename.read_config = mock_read_config
+            stream = io.StringIO()
+            handler = logging.StreamHandler(stream)
+            log = logging.getLogger("normfn")
+            log.propagate = False
+            log.setLevel(logging.DEBUG)
+            log.addHandler(handler)
 
-        try:
-            normalize_filename.main(options, handler)
-        finally:
-            normalize_filename.read_config = original_read_config
-            log.removeHandler(handler)
-            handler.close()
+            try:
+                normalize_filename.main(options, handler)
+            finally:
+                # Restore original XDG_CONFIG_HOME
+                if original_env is None:
+                    os.environ.pop("XDG_CONFIG_HOME", None)
+                else:
+                    os.environ["XDG_CONFIG_HOME"] = original_env
+                log.removeHandler(handler)
+                handler.close()
 
-        error = stream.getvalue()
+            error = stream.getvalue()
 
-        return error
+            return error
 
     def invokeAsSubprocess(
         self,
