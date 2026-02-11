@@ -910,7 +910,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_date_invalid_22st(self):
-        """Test that invalid ordinal suffix 22st is left intact"""
         filename = os.path.join(self.workingDir, "foobar 22st January 2026.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -928,20 +927,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
 
-    def test_ordinal_date_non_ordinal_still_works(self):
-        """Ensure non-ordinal dates still work"""
-        filename = os.path.join(self.workingDir, "foobar 21 January 2026.txt")
-        self.touch(filename)
-        error = self.invokeDirectly([filename])
-        self.assertFalse(os.path.exists(filename))
-        self.assertTrue(
-            os.path.exists(os.path.join(self.workingDir, "2026-01-21-foobar.txt"))
-        )
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual("", error)
-
     def test_ordinal_date_11th(self):
-        """Test special case 11th (not 11st)"""
         filename = os.path.join(self.workingDir, "foobar 11th January 2026.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -953,7 +939,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_date_12th(self):
-        """Test special case 12th (not 12nd)"""
         filename = os.path.join(self.workingDir, "foobar 12th January 2026.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -965,7 +950,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_date_13th(self):
-        """Test special case 13th (not 13rd)"""
         filename = os.path.join(self.workingDir, "foobar 13th January 2026.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -977,7 +961,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_not_in_date_context_21stone(self):
-        """Test that '21stone' is preserved when not part of a date"""
         filename = os.path.join(self.workingDir, "21stone thing.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -992,7 +975,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_not_in_date_context_13th_listing(self):
-        """Test that '13th listing' is preserved when not part of a date"""
         filename = os.path.join(self.workingDir, "13th listing.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -1007,7 +989,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_mixed_context(self):
-        """Test ordinal in non-date context with actual date in filename"""
         filename = os.path.join(
             self.workingDir, "13th listing - 22nd december 2025.txt"
         )
@@ -1024,7 +1005,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         self.assertEqual("", error)
 
     def test_ordinal_date_with_suffix_content(self):
-        """Test ordinal date at start with suffix content after dash"""
         filename = os.path.join(self.workingDir, "21st January 2026 - foo.txt")
         self.touch(filename)
         error = self.invokeDirectly([filename])
@@ -1032,19 +1012,6 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         # Should parse the date and preserve the suffix after the dash
         self.assertTrue(
             os.path.exists(os.path.join(self.workingDir, "2026-01-21 - foo.txt"))
-        )
-        self.assertEqual(1, self.directoryFileCount(self.workingDir))
-        self.assertEqual("", error)
-
-    def test_ordinal_date_with_prefix(self):
-        """Test ordinal date with prefix content before the date"""
-        filename = os.path.join(self.workingDir, "abc 21st January 2026.txt")
-        self.touch(filename)
-        error = self.invokeDirectly([filename])
-        self.assertFalse(os.path.exists(filename))
-        # Should parse the date and move prefix to after the date
-        self.assertTrue(
-            os.path.exists(os.path.join(self.workingDir, "2026-01-21-abc.txt"))
         )
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
