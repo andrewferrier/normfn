@@ -918,9 +918,7 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         # Should not parse the date correctly since 22st is invalid
         # It should use the year but leave "22st" in the filename
         self.assertTrue(
-            os.path.exists(
-                os.path.join(self.workingDir, "2026-01-foobar 22st.txt")
-            )
+            os.path.exists(os.path.join(self.workingDir, "2026-01-foobar 22st.txt"))
         )
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)

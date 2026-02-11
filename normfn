@@ -560,9 +560,13 @@ def datetime_prefix(
 
     regex = create_regex(year_regexes)
 
-    logger.debug(f"Complete regex used against {non_extension_without_ordinals}: {regex}")
+    logger.debug(
+        f"Complete regex used against {non_extension_without_ordinals}: {regex}"
+    )
 
-    (newname, number_of_subs) = re.subn(regex, replacement, non_extension_without_ordinals)
+    (newname, number_of_subs) = re.subn(
+        regex, replacement, non_extension_without_ordinals
+    )
 
     if number_of_subs > 1:
         msg = "Number of subs should be less than 1"
