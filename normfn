@@ -91,9 +91,6 @@ def read_config() -> Config:
     
     # Initialize with defaults
     config_values = CONFIG_DEFAULTS.copy()
-    # Special handling for undo-log-file default
-    if config_values["undo-log-file"] is None:
-        config_values["undo-log-file"] = get_default_log_file()
     
     if config_path.exists():
         try:
@@ -111,16 +108,16 @@ def read_config() -> Config:
     # Handle undo-log-file special cases
     undo_log_file: Path | None
     undo_log_value = config_values["undo-log-file"]
-    if undo_log_value == "":
+    if undo_log_value is None:
+        # Not set in config, use default
+        undo_log_file = get_default_log_file()
+    elif undo_log_value == "":
         # Empty string means no undo log file
         undo_log_file = None
-    elif isinstance(undo_log_value, str):
-        # Expand ~ and environment variables
+    else:
+        # String path from config file - expand ~ and environment variables
         expanded_path = os.path.expandvars(os.path.expanduser(undo_log_value))
         undo_log_file = Path(expanded_path)
-    else:
-        # Already a Path object (from defaults)
-        undo_log_file = undo_log_value
     
     return Config(
         max_years_ahead=config_values["max-years-ahead"],
