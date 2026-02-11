@@ -1022,3 +1022,16 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         )
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
+
+    def test_ordinal_date_with_suffix_content(self):
+        """Test ordinal date at start with suffix content after dash"""
+        filename = os.path.join(self.workingDir, "21st January 2026 - foo.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should parse the date and preserve the suffix after the dash
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-21 - foo.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
