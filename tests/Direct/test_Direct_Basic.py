@@ -864,3 +864,154 @@ class TestDirectBasic(NormalizeFilenameTestCase):
         )
         self.assertEqual(1, self.directoryFileCount(self.workingDir))
         self.assertEqual("", error)
+
+    def test_ordinal_date_21st(self):
+        filename = os.path.join(self.workingDir, "foobar 21st January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-21-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_2nd(self):
+        filename = os.path.join(self.workingDir, "foobar 2nd January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-02-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_3rd(self):
+        filename = os.path.join(self.workingDir, "foobar 3rd January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-03-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_22nd(self):
+        filename = os.path.join(self.workingDir, "foobar 22nd January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-22-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_invalid_22st(self):
+        filename = os.path.join(self.workingDir, "foobar 22st January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        # File should be renamed to dated version since no valid date pattern was found
+        # It falls back to using file timestamp
+        self.assertFalse(os.path.exists(filename))
+        # Should get a date prefix from file timestamp, with "22st" preserved
+        renamed_files = [
+            f
+            for f in os.listdir(self.workingDir)
+            if "foobar 22st January 2026.txt" in f
+        ]
+        self.assertEqual(1, len(renamed_files))
+        self.assertTrue("22st" in renamed_files[0])
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_11th(self):
+        filename = os.path.join(self.workingDir, "foobar 11th January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-11-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_12th(self):
+        filename = os.path.join(self.workingDir, "foobar 12th January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-12-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_13th(self):
+        filename = os.path.join(self.workingDir, "foobar 13th January 2026.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-13-foobar.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_not_in_date_context_21stone(self):
+        filename = os.path.join(self.workingDir, "21stone thing.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should be renamed with date prefix from file timestamp, keeping "21stone"
+        renamed_files = [
+            f for f in os.listdir(self.workingDir) if "21stone thing.txt" in f
+        ]
+        self.assertEqual(1, len(renamed_files))
+        self.assertTrue("21stone" in renamed_files[0])
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_not_in_date_context_13th_listing(self):
+        filename = os.path.join(self.workingDir, "13th listing.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should be renamed with date prefix from file timestamp, keeping "13th listing"
+        renamed_files = [
+            f for f in os.listdir(self.workingDir) if "13th listing.txt" in f
+        ]
+        self.assertEqual(1, len(renamed_files))
+        self.assertTrue("13th listing" in renamed_files[0])
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_mixed_context(self):
+        filename = os.path.join(
+            self.workingDir, "13th listing - 22nd december 2025.txt"
+        )
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should parse "22nd december 2025" and keep "13th listing"
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(self.workingDir, "2025-12-22-13th listing -.txt")
+            )
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
+
+    def test_ordinal_date_with_suffix_content(self):
+        filename = os.path.join(self.workingDir, "21st January 2026 - foo.txt")
+        self.touch(filename)
+        error = self.invokeDirectly([filename])
+        self.assertFalse(os.path.exists(filename))
+        # Should parse the date and preserve the suffix after the dash
+        self.assertTrue(
+            os.path.exists(os.path.join(self.workingDir, "2026-01-21 - foo.txt"))
+        )
+        self.assertEqual(1, self.directoryFileCount(self.workingDir))
+        self.assertEqual("", error)
