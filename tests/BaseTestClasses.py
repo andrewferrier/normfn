@@ -21,6 +21,23 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     def setUp(self):
         self.workingDir = tempfile.mkdtemp()
 
+    def _create_test_config_file(self, config_dir, undo_log_file_path=None):
+        """Helper method to create a test config file with default values."""
+        normfn_config_dir = os.path.join(config_dir, "normfn")
+        os.makedirs(normfn_config_dir, exist_ok=True)
+        
+        config_file = os.path.join(normfn_config_dir, "normfn.toml")
+        
+        with open(config_file, "w") as f:
+            f.write('max-years-ahead = 5\n')
+            f.write('max-years-behind = 30\n')
+            if undo_log_file_path is None:
+                f.write('undo-log-file = ""\n')
+            else:
+                f.write(f'undo-log-file = "{undo_log_file_path}"\n')
+        
+        return config_file
+
     def getDatePrefix(self, postfixDash=True):
         if postfixDash is True:
             return datetime.now().strftime("%Y-%m-%d-")
@@ -114,21 +131,8 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
         # Create temporary directories for config and undo log
         with tempfile.TemporaryDirectory() as temp_config_dir:
-            # Create the normfn subdirectory for config
-            normfn_config_dir = os.path.join(temp_config_dir, "normfn")
-            os.makedirs(normfn_config_dir, exist_ok=True)
-            
-            config_file = os.path.join(normfn_config_dir, "normfn.toml")
-            undo_log_file_path = os.path.join(temp_config_dir, "undo.log.sh")
-            
-            # Create config file for test
-            with open(config_file, "w") as f:
-                f.write(f'max-years-ahead = 5\n')
-                f.write(f'max-years-behind = 30\n')
-                if useUndoFile:
-                    f.write(f'undo-log-file = "{undo_log_file_path}"\n')
-                else:
-                    f.write(f'undo-log-file = ""\n')
+            undo_log_file_path = os.path.join(temp_config_dir, "undo.log.sh") if useUndoFile else None
+            self._create_test_config_file(temp_config_dir, undo_log_file_path)
 
             if os.name == "nt":
                 options = ["python", NormalizeFilenameTestCase.COMMAND]
@@ -159,7 +163,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
                 self.assertEqual("", output)
 
             undo_log_file_contents = []
-            if useUndoFile and os.path.exists(undo_log_file_path):
+            if useUndoFile and undo_log_file_path and os.path.exists(undo_log_file_path):
                 with open(undo_log_file_path) as undo_log_file_read:
                     undo_log_file_contents = undo_log_file_read.readlines()
 
@@ -187,17 +191,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
     ):
         # Create temporary directories for config
         with tempfile.TemporaryDirectory() as temp_config_dir:
-            # Create the normfn subdirectory for config
-            normfn_config_dir = os.path.join(temp_config_dir, "normfn")
-            os.makedirs(normfn_config_dir, exist_ok=True)
-            
-            config_file = os.path.join(normfn_config_dir, "normfn.toml")
-            
-            # Create config file for test (no undo log)
-            with open(config_file, "w") as f:
-                f.write('max-years-ahead = 5\n')
-                f.write('max-years-behind = 30\n')
-                f.write('undo-log-file = ""\n')
+            self._create_test_config_file(temp_config_dir)
 
             options = [NormalizeFilenameTestCase.COMMAND]
             options.extend(inputFiles)
