@@ -23,13 +23,9 @@ The project is a single-file Python executable (~886 lines) with comprehensive t
 ### Code Quality Tools
 
 The project uses:
-- **Ruff**: For comprehensive linting (configured in `pyproject.toml` with extensive rules)
+- **Ruff**: For comprehensive linting (see `pyproject.toml` for complete configuration)
 - **BasedPyright**: For static type checking (configured in `pyproject.toml`)
 - **UV**: Package manager for dependency management (replaces pip/poetry)
-
-Ruff configuration in `pyproject.toml`:
-- Selects ALL rules, then ignores specific ones (COM, D100, D101, D103, D105, D107, FBT001, G004, ISC003, TRY003)
-- These ignores are intentional design decisions for this codebase
 
 ### Code Style
 
@@ -41,8 +37,6 @@ Ruff configuration in `pyproject.toml`:
 
 ### Setup Development Environment
 
-**Option 1: Using UV (recommended, matches CI environment)**
-
 1. **Install UV package manager** (if not already installed):
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -53,16 +47,9 @@ Ruff configuration in `pyproject.toml`:
    uv sync --locked --all-extras --dev
    ```
 
-**Option 2: Using pip**
-
-If UV is not available, you can install dependencies with pip:
-```bash
-pip3 install freezegun pexpect
-```
-
 **Development dependencies installed:**
 - `freezegun>=1.5.5` - for time mocking in tests
-- `pexpect>=4.9.0` - for subprocess testing (usually pre-installed on Linux)
+- `pexpect>=4.9.0` - for subprocess testing
 
 ### Running Tests
 
@@ -183,17 +170,6 @@ normfn/
 └── CHANGELOG.md           # Version history
 ```
 
-### Key Files
-
-- **normfn** - The main executable; single Python file with full type annotations
-- **pyproject.toml** - Project configuration including:
-  - Python version requirement (>=3.12)
-  - Ruff linting rules
-  - BasedPyright configuration
-  - Development dependencies
-- **Makefile** - Build automation for packaging, installation, and testing
-- **uv.lock** - Locked dependency versions for reproducible builds
-
 ## Development Workflow
 
 1. **Make changes** to `normfn` or test files
@@ -277,7 +253,7 @@ The README.md contains auto-generated sections between `[START AUTO UPDATE]` and
 ### Tests Failing
 
 - Ensure you're using Python 3.12 or higher
-- Make sure dependencies are installed: `uv sync --locked --all-extras --dev` OR `pip3 install freezegun pexpect`
+- Make sure dependencies are installed: `uv sync --locked --all-extras --dev`
 - **Common error**: `ModuleNotFoundError: No module named 'freezegun'` - Install dependencies first
 - Check if tests are environment-specific (time zones, filesystem behavior)
 
