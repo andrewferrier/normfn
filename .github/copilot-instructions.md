@@ -41,6 +41,8 @@ Ruff configuration in `pyproject.toml`:
 
 ### Setup Development Environment
 
+**Option 1: Using UV (recommended, matches CI environment)**
+
 1. **Install UV package manager** (if not already installed):
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -51,9 +53,16 @@ Ruff configuration in `pyproject.toml`:
    uv sync --locked --all-extras --dev
    ```
 
-   This installs:
-   - `freezegun>=1.5.5` - for time mocking in tests
-   - `pexpect>=4.9.0` - for subprocess testing
+**Option 2: Using pip**
+
+If UV is not available, you can install dependencies with pip:
+```bash
+pip3 install freezegun pexpect
+```
+
+**Development dependencies installed:**
+- `freezegun>=1.5.5` - for time mocking in tests
+- `pexpect>=4.9.0` - for subprocess testing (usually pre-installed on Linux)
 
 ### Running Tests
 
@@ -268,7 +277,8 @@ The README.md contains auto-generated sections between `[START AUTO UPDATE]` and
 ### Tests Failing
 
 - Ensure you're using Python 3.12 or higher
-- Make sure dependencies are installed: `uv sync --locked --all-extras --dev`
+- Make sure dependencies are installed: `uv sync --locked --all-extras --dev` OR `pip3 install freezegun pexpect`
+- **Common error**: `ModuleNotFoundError: No module named 'freezegun'` - Install dependencies first
 - Check if tests are environment-specific (time zones, filesystem behavior)
 
 ### Import Errors
