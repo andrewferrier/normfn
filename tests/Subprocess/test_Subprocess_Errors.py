@@ -10,3 +10,4 @@ class TestSubprocessErrors(NormalizeFilenameTestCase):
         self.assertEqual(2, rc)
         self.assertEqual(0, self.directoryFileCount(self.workingDir))
         self.assertRegex(error, ".*You.*must.*specify.*some.*")
+        self.assertNotIn("Traceback", error)
