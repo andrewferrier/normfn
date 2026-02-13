@@ -4,7 +4,7 @@
 follow a normalized pattern including a leading date. This is a modified version
 of Mark Hurst's file naming strategy from the book [Bit
 Literacy](https://bitliteracy.com/), but based on the international standard,
-ISO-8601. It also makes other modifications to filenames, listed below.
+ISO-8601.
 
 `normfn` has an opinionated sense of what a filename should look
 like. It prefers `YYYY-MM-DD-rest-of-the-filename.ext`, where `Y`, `M`, and
