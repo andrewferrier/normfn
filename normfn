@@ -776,6 +776,7 @@ def shiftfile(undo_log_file: Path | None, source: Path, target: Path) -> None:
 
 def check_undo_log_file_header(undo_log_file: Path) -> None:
     if not undo_log_file.exists():
+        undo_log_file.parent.mkdir(parents=True, exist_ok=True)
         with undo_log_file.open("w") as log_file:
             wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
             _ = log_file.write("#!/bin/sh\n")
