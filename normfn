@@ -881,5 +881,5 @@ if __name__ == "__main__":
     try:
         main(sys.argv, syserrhandler)
     except FatalError as error:
-        logger_setup.exception(error.value)
+        logger_setup.error(error.value)
         sys.exit(2)
