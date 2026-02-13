@@ -20,7 +20,7 @@ ENV PATH="/home/demo/normfn:${PATH}"
 
 # Create demo files and directories with various date formats
 RUN mkdir -p /home/demo/documents /home/demo/photos /home/demo/projects /home/demo/downloads && \
-    echo "Meeting notes from January 2024" > /home/demo/documents/meeting-notes-01-15-2024.txt && \
+    echo "Meeting notes from January 2024" > /home/demo/documents/meeting-notes-2024-01-15.txt && \
     echo "Annual report for 2023" > /home/demo/documents/annual_report_2023.pdf && \
     echo "Project plan" > /home/demo/documents/project-plan.docx && \
     echo "Quarterly report" > "/home/demo/documents/Q1 Report 15 March 2024.docx" && \
