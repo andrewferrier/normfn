@@ -43,10 +43,19 @@ RUN mkdir -p /home/demo/documents /home/demo/photos /home/demo/projects /home/de
     echo "Invoice from March" > /home/demo/invoice-march-2024.pdf && \
     echo "Backup file" > /home/demo/backup-2024-01-01.tar.gz && \
     echo "Compressed ISO date" > /home/demo/archive-20240115.zip && \
-    echo "Notes file" > /home/demo/notes.txt
+    echo "Notes file" > /home/demo/notes.txt && \
+    \
+    # Manually set mtime for files without explicit dates in their names
+    touch -m -t 202303100900 /home/demo/documents/project-plan.docx && \
+    touch -m -t 202307201130 /home/demo/photos/vacation_pics.jpg && \
+    touch -m -t 202301051000 /home/demo/projects/README.md && \
+    touch -m -t 202301051015 /home/demo/projects/main.py && \
+    touch -m -t 202309151300 /home/demo/downloads/important-document.pdf && \
+    touch -m -t 202302140800 /home/demo/notes.txt
 
 # Add normfn to PATH in bashrc
 RUN echo 'export PATH=/home/demo/normfn:$PATH' >> ~/.bashrc && \
-    echo 'export PS1="\u@normfn-demo:\w$ "' >> ~/.bashrc
+    echo 'export PS1="\[\e[0;33m\]\u\[\e[0;32m\]@normfn-demo:\[\e[0;34m\]\w\[\e[0m\]\$ "' >> ~/.bashrc && \
+    echo 'alias ls="ls --color=always -l --time-style=long-iso"' >> ~/.bashrc
 
 WORKDIR /home/demo
