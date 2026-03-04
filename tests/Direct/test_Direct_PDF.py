@@ -3,15 +3,12 @@ import io
 import os
 import unittest
 
+import pypdf  # noqa: PLC0415
+
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
 
 def _create_pdf_with_creation_date(path: str, creation_date: datetime.datetime) -> None:
-    try:
-        import pypdf  # noqa: PLC0415
-    except ImportError:
-        raise unittest.SkipTest("pypdf not available")
-
     writer = pypdf.PdfWriter()
     writer.add_blank_page(width=612, height=792)
     date_str = creation_date.strftime("D:%Y%m%d%H%M%S+00'00'")
@@ -23,11 +20,6 @@ def _create_pdf_with_creation_date(path: str, creation_date: datetime.datetime) 
 
 
 def _create_pdf_without_creation_date(path: str) -> None:
-    try:
-        import pypdf  # noqa: PLC0415
-    except ImportError:
-        raise unittest.SkipTest("pypdf not available")
-
     writer = pypdf.PdfWriter()
     writer.add_blank_page(width=612, height=792)
     buf = io.BytesIO()
