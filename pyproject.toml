@@ -26,4 +26,5 @@ ignore = [
 dev = [
     "freezegun>=1.5.5",
     "pexpect>=4.9.0",
+    "pypdf>=3.0.0",
 ]
