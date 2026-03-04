@@ -1,9 +1,8 @@
 import datetime
 import io
 import os
-import unittest
 
-import pypdf  # noqa: PLC0415
+import pypdf
 
 from tests.BaseTestClasses import NormalizeFilenameTestCase
 
