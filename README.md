@@ -51,9 +51,6 @@ using any standard `.deb` installation approach, e.g. `dpkg -i normfn*.deb`.
 <!-- Please keep comment here to allow auto-update -->
 ```
 usage: normfn [-v] [-h] [-n] [-i] [-a] [-f] [-t] [-d] [-r]
-              [--max-years-ahead MAX_YEARS_AHEAD]
-              [--max-years-behind MAX_YEARS_BEHIND]
-              [--undo-log-file UNDO_LOG_FILE | --no-undo-log-file]
               [--now | --latest | --earliest]
               [filename ...]
 
@@ -81,18 +78,6 @@ options:
   -r, --recursive       Recurse into directories specified on the command
                         line. The default is not to do this, and simply look
                         at the name of the directory itself.
-  --max-years-ahead MAX_YEARS_AHEAD
-                        Consider years further ahead from now than this not to
-                        be valid years. Defaults to 5.
-  --max-years-behind MAX_YEARS_BEHIND
-                        Consider years further behind from now than this not
-                        to be valid years. Defaults to 30.
-  --undo-log-file UNDO_LOG_FILE
-                        The name of the shell script to log 'undo commands'
-                        for normfn; see the instructions in the file to use.
-                        Defaults to /home/runner/.local/state/normfn-
-                        undo.log.sh
-  --no-undo-log-file    Inverse of --undo-log-file; don't store undo commands.
   --now                 Use date and time now as the default file prefix for
                         filenames without them.
   --latest, --newest    Use the latest of ctime and mtime to define a file
@@ -105,13 +90,43 @@ options:
 ```
 <!-- [END AUTO UPDATE] -->
 
+## Configuration
+
+`normfn` can be configured using a TOML configuration file located at `~/.config/normfn/normfn.toml` (or the XDG-compliant location specified by `$XDG_CONFIG_HOME`).
+
+If the configuration file doesn't exist, `normfn` will use default values for all settings.
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `max-years-ahead` | integer | `5` | Consider years further ahead from now than this not to be valid years. |
+| `max-years-behind` | integer | `30` | Consider years further behind from now than this not to be valid years. |
+| `undo-log-file` | string | `~/.local/state/normfn-undo.log.sh` | The path to the shell script that logs 'undo commands' for normfn. Set to an empty string (`""`) to disable undo logging. Supports `~` expansion and environment variables. |
+
+### Example Configuration
+
+Here's an example `~/.config/normfn/normfn.toml` file:
+
+```toml
+# Allow dates up to 10 years in the future
+max-years-ahead = 10
+
+# Look back up to 50 years
+max-years-behind = 50
+
+# Custom undo log location (or set to "" to disable)
+undo-log-file = "~/Documents/normfn-undo.log.sh"
+```
+
 ## Logging and Other Information
 
 For safety, by default, `normfn` keeps a log file in
 `~/.local/state/normfn-undo.log.sh` of all the actions it takes, in
 shell format to make it easier to undo them. See the comment at the head of that
 file (once normfn has generated it) for more information. You can
-configure this with the `--undo-log-file` and `--no-undo-log-file` options.
+configure this location or disable it entirely using the `undo-log-file` setting
+in the configuration file (see the Configuration section above).
 
 For more information on all the options available, run `normfn --help`. You can
 alter or disable most `normfn` behaviour using these options.

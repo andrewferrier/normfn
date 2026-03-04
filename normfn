@@ -10,6 +10,7 @@ import shlex
 import shutil
 import sys
 import textwrap
+import tomllib
 from collections.abc import Iterable, Sequence
 from contextlib import suppress
 from dataclasses import dataclass
@@ -39,6 +40,21 @@ FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
 
 
 @dataclass
+class Config:
+    max_years_ahead: int
+    max_years_behind: int
+    undo_log_file: Path | None
+
+
+# Configuration schema with defaults
+CONFIG_DEFAULTS = {
+    "max-years-ahead": 5,
+    "max-years-behind": 30,
+    "undo-log-file": None,  # Will be set to get_default_log_file() in read_config
+}
+
+
+@dataclass
 class Args:
     verbose: int
     help: bool
@@ -49,10 +65,6 @@ class Args:
     add_time: bool
     discard_existing_name: bool
     recursive: bool
-    max_years_ahead: int
-    max_years_behind: int
-    undo_log_file: Path | None
-    no_undo_log_file: bool
     time_option: Literal["now", "earliest", "latest"]
     filenames: list[Path]
 
@@ -62,6 +74,56 @@ class YearRegexes:
     four_digit_year_regex: str
     all_digit_year_regex: str
     two_to_four_digit_year_map: dict[str, str]
+
+
+def get_config_file_path() -> Path:
+    """Get the XDG-compliant path for the normfn config file."""
+    home: Path = Path("~").expanduser()
+    xdg_config_home: Path = Path(
+        os.environ.get("XDG_CONFIG_HOME") or home / ".config"
+    )
+    return xdg_config_home / "normfn" / "normfn.toml"
+
+
+def read_config() -> Config:
+    """Read configuration from the config file, falling back to defaults."""
+    config_path = get_config_file_path()
+    
+    # Initialize with defaults
+    config_values = CONFIG_DEFAULTS.copy()
+    
+    if config_path.exists():
+        try:
+            with config_path.open("rb") as f:
+                config_data = tomllib.load(f)
+            
+            # Read config values from file, using defaults if not present
+            for key in CONFIG_DEFAULTS:
+                if key in config_data:
+                    config_values[key] = config_data[key]
+        except (tomllib.TOMLDecodeError, OSError, ValueError) as e:
+            logger = logging.getLogger("normfn")
+            logger.warning(f"Error reading config file {config_path}: {e}. Using defaults.")
+    
+    # Handle undo-log-file special cases
+    undo_log_file: Path | None
+    undo_log_value = config_values["undo-log-file"]
+    if undo_log_value is None:
+        # Not set in config, use default
+        undo_log_file = get_default_log_file()
+    elif undo_log_value == "":
+        # Empty string means no undo log file
+        undo_log_file = None
+    else:
+        # String path from config file - expand ~ and environment variables
+        expanded_path = os.path.expandvars(os.path.expanduser(undo_log_value))
+        undo_log_file = Path(expanded_path)
+    
+    return Config(
+        max_years_ahead=config_values["max-years-ahead"],
+        max_years_behind=config_values["max-years-behind"],
+        undo_log_file=undo_log_file,
+    )
 
 
 def parse_arguments(argv: list[str]) -> Args:
@@ -160,49 +222,6 @@ def parse_arguments(argv: list[str]) -> Args:
         ),
     )
 
-    parser.add_argument(
-        "--max-years-ahead",
-        type=int,
-        dest="max_years_ahead",
-        default=5,
-        help=(
-            "Consider years further ahead from now than this not "
-            "to be valid years. Defaults to 5."
-        ),
-    )
-
-    parser.add_argument(
-        "--max-years-behind",
-        type=int,
-        dest="max_years_behind",
-        default=30,
-        help=(
-            "Consider years further behind from now than this not "
-            "to be valid years. Defaults to 30."
-        ),
-    )
-
-    log_option = parser.add_mutually_exclusive_group()
-
-    log_option.add_argument(
-        "--undo-log-file",
-        type=Path,
-        dest="undo_log_file",
-        help=(
-            "The name of the shell script to log "
-            "'undo commands' for normfn; see the "
-            "instructions in the file to use. "
-            f"Defaults to {get_default_log_file()}"
-        ),
-    )
-
-    log_option.add_argument(
-        "--no-undo-log-file",
-        dest="no_undo_log_file",
-        action="store_true",
-        help="Inverse of --undo-log-file; don't store undo commands.",
-    )
-
     time_option = parser.add_mutually_exclusive_group()
 
     time_option.add_argument(
@@ -246,7 +265,6 @@ def parse_arguments(argv: list[str]) -> Args:
 
     parser.set_defaults(
         time_option="earliest",
-        undo_log_file=get_default_log_file(),
     )
 
     class FilenamesAction(argparse.Action):
@@ -288,6 +306,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
     logger = logging.getLogger("normfn")
 
     args = parse_arguments(argv)
+    config = read_config()
 
     if args.dry_run:
         args.verbose = max(args.verbose, 1)
@@ -301,15 +320,13 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
             syserr_handler.setLevel(logging.WARNING)
 
     logger.debug(f"Arguments are: {args}")
-
-    if args.no_undo_log_file:
-        args.undo_log_file = None
+    logger.debug(f"Configuration is: {config}")
 
     year_now = datetime.datetime.now(tz=datetime.UTC).year
     year_range_list = [
         str(year)
         for year in range(
-            year_now - args.max_years_behind, year_now + args.max_years_ahead
+            year_now - config.max_years_behind, year_now + config.max_years_ahead
         )
     ]
 
@@ -332,10 +349,10 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
                 raise FatalError(msg)
 
             if filename.is_dir() and args.recursive:
-                new_filename = process_filename(filename, args, year_regexes)
-                walk_tree(new_filename, args, year_regexes)
+                new_filename = process_filename(filename, args, config, year_regexes)
+                walk_tree(new_filename, args, config, year_regexes)
             else:
-                process_filename(filename, args, year_regexes)
+                process_filename(filename, args, config, year_regexes)
 
 
 def get_default_log_file() -> Path:
@@ -346,7 +363,7 @@ def get_default_log_file() -> Path:
     return xdg_state_home / "normfn-undo.log.sh"
 
 
-def walk_tree(dirname: Path, args: Args, year_regexes: YearRegexes) -> None:
+def walk_tree(dirname: Path, args: Args, config: Config, year_regexes: YearRegexes) -> None:
     logger = logging.getLogger("normfn")
 
     logger.debug(f"Walking directory tree {dirname}")
@@ -355,9 +372,9 @@ def walk_tree(dirname: Path, args: Args, year_regexes: YearRegexes) -> None:
     for entry in dirlist:
         entry_full = dirname / entry
 
-        entry_full = process_filename(entry_full, args, year_regexes)
+        entry_full = process_filename(entry_full, args, config, year_regexes)
         if entry_full.is_dir():
-            walk_tree(entry_full, args, year_regexes)
+            walk_tree(entry_full, args, config, year_regexes)
 
 
 def create_regex(year_regexes: YearRegexes) -> str:
@@ -635,7 +652,7 @@ def datetime_prefix(
 
 
 def process_filename(
-    original_path: Path, args: Args, year_regexes: YearRegexes
+    original_path: Path, args: Args, config: Config, year_regexes: YearRegexes
 ) -> Path:
     logger = logging.getLogger("normfn")
 
@@ -675,7 +692,7 @@ def process_filename(
 
     if move_it:
         if not args.dry_run:
-            shiftfile(args.undo_log_file, original_path, target_path)
+            shiftfile(config.undo_log_file, original_path, target_path)
             return target_path
 
         logger.info(
