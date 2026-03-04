@@ -617,7 +617,8 @@ def datetime_prefix(
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
 
-        timetouse = get_timetouse(args.time_option, filename)
+        pdf_date = get_pdf_creation_date(filename)
+        timetouse = pdf_date if pdf_date is not None else get_timetouse(args.time_option, filename)
 
         newname_with_dash_if_needed = (
             ("-" + newname) if not args.discard_existing_name else ""
@@ -704,6 +705,40 @@ def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
                 break
 
     return (match, exclude_pattern)
+
+
+def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:
+    logger = logging.getLogger("normfn")
+
+    if filename.suffix.lower() != ".pdf":
+        return None
+
+    try:
+        import pypdf  # noqa: PLC0415
+    except ImportError:
+        logger.info("pypdf library not available; cannot read PDF creation date")
+        return None
+
+    try:
+        reader = pypdf.PdfReader(str(filename))
+        if reader.metadata is None:
+            logger.info(f"No metadata found in PDF {filename}")
+            return None
+        creation_date = reader.metadata.creation_date
+        if creation_date is None:
+            logger.info(f"No creation date found in PDF metadata for {filename}")
+            return None
+        if isinstance(creation_date, datetime.datetime):
+            if creation_date.tzinfo is None:
+                creation_date = creation_date.replace(tzinfo=datetime.UTC)
+            return creation_date
+        logger.info(
+            f"Unexpected type for creation date in PDF {filename}: {type(creation_date)}"
+        )
+        return None
+    except Exception as e:  # noqa: BLE001
+        logger.info(f"Could not read PDF creation date for {filename}: {e}")
+        return None
 
 
 def get_timetouse(
