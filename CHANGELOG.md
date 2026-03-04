@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.3.0](https://github.com/andrewferrier/normfn/compare/v1.2.0...v1.3.0) (2026-03-04)
+
+
+### Features
+
+* add .github/copilot-instructions.md and remove CONTRIBUTING.md ([289d4cd](https://github.com/andrewferrier/normfn/commit/289d4cd53d555fef3d03f851fe6bd49f92fe12b5))
+* add demo scripts for normfn screencast ([875dc29](https://github.com/andrewferrier/normfn/commit/875dc298aad67456b4ccde26fa2cfbf0de6609e7))
+* add support for ordinal date suffixes (1st, 2nd, 3rd, etc.) ([c202c6a](https://github.com/andrewferrier/normfn/commit/c202c6af8cdd4ee88cc7b8e00c3cb1b196cd6a64))
+* support reading creation date from PDFs ([f7a97d6](https://github.com/andrewferrier/normfn/commit/f7a97d6457c354d8a20db212399f978239c60fe2))
+
+
+### Bug Fixes
+
+* Add missing permissions to GitHub workflows ([6272462](https://github.com/andrewferrier/normfn/commit/6272462e035239b1c51e049a655b7f4c99b8338d))
+* Clean up imports ([80d6b3e](https://github.com/andrewferrier/normfn/commit/80d6b3ebd59ba07d1cc2bc80a87d01c1cb2eff4a))
+* create parent directories for undo_log_file if missing ([ac6c630](https://github.com/andrewferrier/normfn/commit/ac6c630731472f11c9963c7e466398538937dc8d))
+* Don't skip PDF tests ([0f732c3](https://github.com/andrewferrier/normfn/commit/0f732c3612e14bb20858db7c3db29f7848f79606))
+* Handle dates like _18-Jun-25 - closes [#99](https://github.com/andrewferrier/normfn/issues/99) ([51f8ad9](https://github.com/andrewferrier/normfn/commit/51f8ad9568771678bb383db0574a543f0245a9e3))
+* Ignore aider ([235407b](https://github.com/andrewferrier/normfn/commit/235407b8b669f1c79e866a14feed94ade40d3e9c))
+* Python syntax issues ([c3b9435](https://github.com/andrewferrier/normfn/commit/c3b9435ffb37d6eafc1d1b2a89a6c4a36a59adfe))
+* remove traceback from user error messages ([3f07bc4](https://github.com/andrewferrier/normfn/commit/3f07bc4c8f93ae88d21897abbdf444f278650c9a))
+* ruff issues ([767a29c](https://github.com/andrewferrier/normfn/commit/767a29c5d80a1378c0fc1535d2c74ea93a266895))
+* shellcheck issue ([1d96bee](https://github.com/andrewferrier/normfn/commit/1d96bee959b8618c9ccbf667dba02c34312b84b5))
+* Some typing issues ([e88d3ed](https://github.com/andrewferrier/normfn/commit/e88d3edc4e2d972f7b44421b28887a317d598151))
+* Typing issues and warnings ([dc3c771](https://github.com/andrewferrier/normfn/commit/dc3c771f38e94d8a38b65ae2e528c3a5244cd7ee))
+
 ## [1.2.0](https://github.com/andrewferrier/normfn/compare/v1.1.9...v1.2.0) (2024-09-09)
 
 
