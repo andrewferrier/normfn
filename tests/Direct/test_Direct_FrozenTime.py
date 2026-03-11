@@ -92,7 +92,9 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
         filename = os.path.join(self.workingDir, "blah-2025-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-ahead=50"]
+            [filename], 
+            extraParams=["--now"], 
+            configOverrides={"max_years_ahead": 50}
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
@@ -106,7 +108,9 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
         filename = os.path.join(self.workingDir, "blah-1970-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-behind=50"]
+            [filename], 
+            extraParams=["--now"], 
+            configOverrides={"max_years_behind": 50}
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
@@ -120,7 +124,9 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
         filename = os.path.join(self.workingDir, "blah-2200-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-ahead=50"]
+            [filename], 
+            extraParams=["--now"], 
+            configOverrides={"max_years_ahead": 50}
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
@@ -136,7 +142,9 @@ class TestDirectFrozenTime(NormalizeFilenameTestCase):
         filename = os.path.join(self.workingDir, "blah-1930-02-03.txt")
         self.touch(filename)
         error = self.invokeDirectly(
-            [filename], extraParams=["--now", "--max-years-behind=50"]
+            [filename], 
+            extraParams=["--now"], 
+            configOverrides={"max_years_behind": 50}
         )
         self.assertFalse(os.path.exists(filename))
         self.assertTrue(
