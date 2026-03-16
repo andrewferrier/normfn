@@ -36,6 +36,8 @@ To install the latest development version directly from GitHub:
 ```sh
 pip install git+https://github.com/andrewferrier/normfn
 # or
+pipx install git+https://github.com/andrewferrier/normfn
+# or
 uv tool install git+https://github.com/andrewferrier/normfn
 ```
 
