@@ -6,9 +6,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from normfn.args import Args
-from normfn.files import get_pdf_creation_date, get_timetouse, insensitiveize
+from normfn.files import get_pdf_creation_date, get_timetouse
 
 logger = logging.getLogger(__name__)
+
+
+def insensitiveize(string: str) -> str:
+    return "".join(("[" + char.lower() + char.upper() + "]") for char in string)
 
 
 @dataclass(frozen=True)

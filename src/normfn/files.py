@@ -234,7 +234,3 @@ def readchar() -> bytes:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
     except termios.error:
         return os.read(sys.stdin.fileno(), 1)
-
-
-def insensitiveize(string: str) -> str:
-    return "".join(("[" + char.lower() + char.upper() + "]") for char in string)
