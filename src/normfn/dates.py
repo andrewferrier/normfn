@@ -1,4 +1,5 @@
 import calendar
+import datetime
 import functools
 import logging
 import re
@@ -33,6 +34,22 @@ def first_not_none[T](values: Iterable[T | None]) -> T | None:
             return item
 
     return None
+
+
+def make_year_regexes(max_years_behind: int, max_years_ahead: int) -> YearRegexes:
+    year_now = datetime.datetime.now(tz=datetime.UTC).year
+    year_range_list = [
+        str(year)
+        for year in range(year_now - max_years_behind, year_now + max_years_ahead)
+    ]
+    two_digit_years = [year_str[-2:] for year_str in year_range_list]
+    return YearRegexes(
+        four_digit_year_regex=r"(" + "|".join(year_range_list) + r")",
+        all_digit_year_regex=r"(" + "|".join(year_range_list + two_digit_years) + r")",
+        two_to_four_digit_year_map={
+            year_str[-2:]: year_str for year_str in year_range_list
+        },
+    )
 
 
 def strip_ordinal_suffix(day_str: str) -> str:

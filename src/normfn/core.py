@@ -1,4 +1,3 @@
-import datetime
 import logging
 import sys
 from contextlib import suppress
@@ -6,7 +5,7 @@ from io import TextIOBase
 from pathlib import Path
 
 from normfn.args import Args, parse_arguments
-from normfn.dates import YearRegexes, datetime_prefix
+from normfn.dates import YearRegexes, datetime_prefix, make_year_regexes
 from normfn.exceptions import FatalError, _QuitSignalError
 from normfn.files import (
     ask_yes_no,
@@ -37,24 +36,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
     logger.debug(f"Arguments are: {args}")
 
-    year_now = datetime.datetime.now(tz=datetime.UTC).year
-    year_range_list = [
-        str(year)
-        for year in range(
-            year_now - args.max_years_behind, year_now + args.max_years_ahead
-        )
-    ]
-
-    two_digit_years: list[str] = [year_str[-2:] for year_str in year_range_list]
-    two_to_four_digit_year_map: dict[str, str] = {
-        year_str[-2:]: year_str for year_str in year_range_list
-    }
-
-    year_regexes = YearRegexes(
-        four_digit_year_regex=r"(" + "|".join(year_range_list) + r")",
-        all_digit_year_regex=r"(" + "|".join(year_range_list + two_digit_years) + r")",
-        two_to_four_digit_year_map=two_to_four_digit_year_map,
-    )
+    year_regexes = make_year_regexes(args.max_years_behind, args.max_years_ahead)
 
     with suppress(_QuitSignalError):
         for arg_filename in args.filenames:
