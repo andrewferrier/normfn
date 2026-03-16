@@ -26,9 +26,6 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
     args = parse_arguments(argv)
 
-    if args.dry_run:
-        args.verbose = max(args.verbose, 1)
-
     if syserr_handler:
         if args.verbose > 1:
             syserr_handler.setLevel(logging.DEBUG)
@@ -38,9 +35,6 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
             syserr_handler.setLevel(logging.WARNING)
 
     logger.debug(f"Arguments are: {args}")
-
-    if args.no_undo_log_file:
-        args.undo_log_file = None
 
     year_now = datetime.datetime.now(tz=datetime.UTC).year
     year_range_list = [

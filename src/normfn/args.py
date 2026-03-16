@@ -25,7 +25,6 @@ class Args:
     max_years_ahead: int
     max_years_behind: int
     undo_log_file: Path | None
-    no_undo_log_file: bool
     time_option: Literal["now", "earliest", "latest"]
     filenames: list[Path]
 
@@ -171,8 +170,9 @@ def parse_arguments(argv: list[str]) -> Args:
 
     log_option.add_argument(
         "--no-undo-log-file",
-        dest="no_undo_log_file",
-        action="store_true",
+        dest="undo_log_file",
+        action="store_const",
+        const=None,
         help="Inverse of --undo-log-file; don't store undo commands.",
     )
 
@@ -258,5 +258,8 @@ def parse_arguments(argv: list[str]) -> Args:
     if args.version:
         print(version("normfn"))  # noqa: T201
         sys.exit(0)
+
+    if args.dry_run:
+        args.verbose = max(args.verbose, 1)
 
     return args
