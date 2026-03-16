@@ -26,8 +26,8 @@ def main() -> None:
 
     try:
         _main(sys.argv, syserrhandler)
-    except FatalError:
-        logger.exception("Fatal error")
+    except FatalError as err:
+        logger.error(str(err))  # noqa: TRY400
         sys.exit(2)
 
 
