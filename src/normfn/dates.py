@@ -11,6 +11,10 @@ from normfn.files import get_pdf_creation_date, get_timetouse
 logger = logging.getLogger(__name__)
 
 
+class _InvalidOrdinalError(Exception):
+    pass
+
+
 def insensitiveize(string: str) -> str:
     return "".join(("[" + char.lower() + char.upper() + "]") for char in string)
 
@@ -167,10 +171,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
 def datetime_prefix(  # noqa: C901
     args: Args, non_extension: str, filename: Path, year_regexes: YearRegexes
 ) -> str:
-    invalid_ordinal_detected = False
-
     def replacement(matchobj: re.Match[str]) -> str:
-        nonlocal invalid_ordinal_detected
         logger.debug(f"replacement() called, matchobj = {matchobj}")
 
         year = str(
@@ -221,8 +222,7 @@ def datetime_prefix(  # noqa: C901
             # If day contains an ordinal suffix but stripping didn't change it,
             # it means the ordinal was invalid - reject this match
             if re.search(r"(st|nd|rd|th)$", day, re.IGNORECASE) and stripped_day == day:
-                invalid_ordinal_detected = True
-                return matchobj.group(0)
+                raise _InvalidOrdinalError
             day = stripped_day
             if len(day) == 1:
                 day = "0" + day
@@ -266,15 +266,15 @@ def datetime_prefix(  # noqa: C901
 
     logger.debug(f"Complete regex used against {non_extension}: {regex}")
 
-    (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
+    try:
+        (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
+    except _InvalidOrdinalError:
+        number_of_subs = 0
+        newname = non_extension
 
     if number_of_subs > 1:
         msg = "Number of subs should be less than 1"
         raise ValueError(msg)
-
-    # If an invalid ordinal was detected, treat as if no match occurred
-    if invalid_ordinal_detected:
-        number_of_subs = 0
 
     if number_of_subs == 0:
         logger.debug("Didn't find date or time")
