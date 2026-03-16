@@ -1,0 +1,294 @@
+import calendar
+import logging
+import re
+from collections.abc import Iterable
+from dataclasses import dataclass
+from pathlib import Path
+
+from normfn.args import Args
+from normfn.files import get_pdf_creation_date, get_timetouse, insensitiveize
+
+
+@dataclass(frozen=True)
+class YearRegexes:
+    four_digit_year_regex: str
+    all_digit_year_regex: str
+    two_to_four_digit_year_map: dict[str, str]
+
+
+def first_not_none[T](values: Iterable[T | None]) -> T | None:
+    for item in values:
+        if item is not None:
+            return item
+
+    return None
+
+
+def strip_ordinal_suffix(day_str: str) -> str:
+    """Strip ordinal suffix from day string if it's valid.
+
+    Args:
+        day_str: Day string that may include ordinal suffix (e.g., "21st", "2nd")
+
+    Returns:
+        Day string without ordinal suffix if valid, original string if invalid
+    """
+    match = re.match(r"^(\d+)(st|nd|rd|th)$", day_str, re.IGNORECASE)
+    if not match:
+        return day_str
+
+    num, suffix = match.groups()
+    suffix = suffix.lower()
+
+    # Validate the ordinal is correct
+    # Special cases: 11, 12, 13 always use 'th'
+    if len(num) >= 2 and num[-2:] in ("11", "12", "13"):  # noqa: PLR2004
+        if suffix == "th":
+            return num
+        return day_str  # Invalid ordinal, keep as-is
+
+    # Check last digit
+    last_digit_suffix = {"1": "st", "2": "nd", "3": "rd"}
+    expected_suffix = last_digit_suffix.get(num[-1], "th")
+
+    if suffix == expected_suffix:
+        return num
+    return day_str  # Invalid ordinal, keep as-is
+
+
+def create_regex(year_regexes: YearRegexes) -> str:
+    month_names_only = (
+        "|".join(map(insensitiveize, calendar.month_name[1:13]))
+        + "|"
+        + "|".join(map(insensitiveize, calendar.month_abbr[1:13]))
+    )
+    month = r"(0[1-9]|1[012]|[1-9](?!\d)|" + month_names_only + ")"
+    day = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))"
+    # Day with optional ordinal suffix - only used with month names
+    day_with_ordinal = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))(?:st|nd|rd|th)?"
+    hour = r"([01]\d|2[0123])"
+    minute = second = r"[012345]\d"
+
+    date_separator = r"[-_.\s]?"
+    ymd_separator_first = r"(?P<ymdsep>" + date_separator + r")"
+    ymd_separator_following = r"(?P=ymdsep)"
+    dmy_separator_first = r"(?P<dmysep>" + date_separator + r")"
+    dmy_separator_following = r"(?P=dmysep)"
+    dmytdy_separator_first = r"(?P<dmytdysep>" + date_separator + r")"
+    dmytdy_separator_following = r"(?P=dmytdysep)"
+    my_separator = date_separator
+    hms_separator_first = r"(?P<hmssep>[-_.\s]?)"
+    hms_separator_following = r"(?P=hmssep)"
+    date_time_separator = r"([-_T\s]|\sat\s|,\s)"
+
+    ymd_style = (
+        r"(?P<year1>"
+        + year_regexes.four_digit_year_regex
+        + r")"
+        + ymd_separator_first
+        + r"(?P<month1>"
+        + month
+        + r")"
+        + r"("
+        + ymd_separator_following
+        + r"(?P<day1>"
+        + day
+        + r"))?"
+    )
+
+    dmy_style = (
+        r"(?P<day2>"
+        + day
+        + r")"
+        + dmy_separator_first
+        + r"(?P<month2>"
+        + month
+        + r")"
+        + dmy_separator_following
+        + r"(?P<year2>"
+        + year_regexes.four_digit_year_regex
+        + r")"
+    )
+
+    dmy_style_twodigityears_months_in_name_only = (
+        r"(?P<day4>"
+        + day_with_ordinal
+        + r")"
+        + dmytdy_separator_first
+        + r"(?P<month4>"
+        + month_names_only
+        + r")"
+        + dmytdy_separator_following
+        + r"(?P<year4>"
+        + year_regexes.all_digit_year_regex
+        + r")"
+    )
+
+    my_style_months_in_name_only = (
+        r"(?P<month3>"
+        + month_names_only
+        + r")"
+        + my_separator
+        + r"(?P<year3>"
+        + year_regexes.four_digit_year_regex
+        + r")"
+    )
+
+    return (
+        r"^(?P<prefix>.*?)[-_]?"
+        + r"("
+        + ymd_style
+        + r"|"
+        + dmy_style
+        + r"|"
+        + dmy_style_twodigityears_months_in_name_only
+        + r"|"
+        + my_style_months_in_name_only
+        + r")"
+        + r"("
+        + date_time_separator
+        + r"(?P<hour>"
+        + hour
+        + r")"
+        + (r"(" + hms_separator_first + r"(?P<minute>" + minute + r")")
+        + (r"(" + hms_separator_following + r"(?P<second>" + second + r"))?)?)?")
+        + r"(?P<suffix>.*)$"
+    )
+
+
+def datetime_prefix(
+    args: Args, non_extension: str, filename: Path, year_regexes: YearRegexes
+) -> str:
+    logger = logging.getLogger("normfn")
+
+    invalid_ordinal_detected = False
+
+    def replacement(matchobj: re.Match[str]) -> str:
+        nonlocal invalid_ordinal_detected
+        logger.debug(f"replacement() called, matchobj = {matchobj}")
+
+        year = str(
+            first_not_none(
+                [
+                    matchobj.group("year1"),
+                    matchobj.group("year2"),
+                    matchobj.group("year3"),
+                    matchobj.group("year4"),
+                ]
+            )
+        )
+        month = str(
+            first_not_none(
+                [
+                    matchobj.group("month1"),
+                    matchobj.group("month2"),
+                    matchobj.group("month3"),
+                    matchobj.group("month4"),
+                ]
+            )
+        )
+        day = first_not_none(
+            [matchobj.group("day1"), matchobj.group("day2"), matchobj.group("day4")]
+        )
+
+        if len(year) == 2:  # noqa: PLR2004
+            year = year_regexes.two_to_four_digit_year_map[year]
+
+        if not month.isdigit():
+            try:
+                month_digit = list(map(str.lower, calendar.month_abbr)).index(
+                    month.lower()
+                )
+            except ValueError:
+                month_digit = list(map(str.lower, calendar.month_name)).index(
+                    month.lower()
+                )
+
+            month = str(month_digit)
+
+        if len(month) == 1:
+            month = "0" + month
+
+        # Strip ordinal suffix from day if present and valid
+        if day is not None:
+            stripped_day = strip_ordinal_suffix(day)
+            # If day contains an ordinal suffix but stripping didn't change it,
+            # it means the ordinal was invalid - reject this match
+            if re.search(r"(st|nd|rd|th)$", day, re.IGNORECASE) and stripped_day == day:
+                invalid_ordinal_detected = True
+                return matchobj.group(0)
+            day = stripped_day
+            if len(day) == 1:
+                day = "0" + day
+
+        replace_value = (
+            year
+            + "-"
+            + month
+            + (("-" + day) if day is not None else "")
+            + (
+                ("T" + matchobj.group("hour"))
+                if matchobj.group("hour") is not None
+                else ""
+            )
+            + (
+                ("-" + matchobj.group("minute"))
+                if matchobj.group("minute") is not None
+                else ""
+            )
+            + (
+                ("-" + matchobj.group("second"))
+                if matchobj.group("second") is not None
+                else ""
+            )
+        )
+
+        if not args.discard_existing_name:
+            replace_value = replace_value + (
+                (
+                    ("-" + matchobj.group("prefix"))
+                    if matchobj.group("prefix") != ""
+                    else ""
+                )
+                + (matchobj.group("suffix") if matchobj.group("suffix") != "" else "")
+            )
+
+        logger.debug(f"replacement() returned: {replace_value}")
+        return replace_value
+
+    regex = create_regex(year_regexes)
+
+    logger.debug(f"Complete regex used against {non_extension}: {regex}")
+
+    (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
+
+    if number_of_subs > 1:
+        msg = "Number of subs should be less than 1"
+        raise ValueError(msg)
+
+    # If an invalid ordinal was detected, treat as if no match occurred
+    if invalid_ordinal_detected:
+        number_of_subs = 0
+
+    if number_of_subs == 0:
+        logger.debug("Didn't find date or time")
+
+        pdf_date = get_pdf_creation_date(filename)
+        timetouse = (
+            pdf_date
+            if pdf_date is not None
+            else get_timetouse(args.time_option, filename)
+        )
+
+        newname_with_dash_if_needed = (
+            ("-" + newname) if not args.discard_existing_name else ""
+        )
+
+        if args.add_time:
+            newname = (
+                timetouse.strftime("%Y-%m-%dT%H-%M-%S") + newname_with_dash_if_needed
+            )
+        else:
+            newname = timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
+
+    return newname

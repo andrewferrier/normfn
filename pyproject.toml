@@ -1,7 +1,46 @@
 [project]
 name = "normfn"
+dynamic = ["version"]
+description = "Normalizes filenames by prefixing a date to them"
+readme = "README.md"
 requires-python = ">=3.12"
-version = "v0.0.1"
+license = { file = "LICENSE.txt" }
+authors = [{ name = "Andrew Ferrier", email = "andrew@andrewferrier.com" }]
+keywords = ["filename", "date", "normalization", "cli"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
+
+[project.scripts]
+normfn = "normfn.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/andrewferrier/normfn"
+Repository = "https://github.com/andrewferrier/normfn"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/normfn"]
+
+[tool.hatch.build.targets.editable]
+packages = ["src/normfn"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/normfn",
+  "pyproject.toml",
+  "README.md",
+]
 
 [tool.basedpyright]
 reportConstantRedefinition = false # See https://github.com/microsoft/pyright/issues/5265
@@ -19,12 +58,8 @@ ignore = [
     "FBT001",
     "G004",
     "ISC003",
-    "TRY003"
+    "TRY003",
 ]
 
 [dependency-groups]
-dev = [
-    "freezegun>=1.5.5",
-    "pexpect>=4.9.0",
-    "pypdf>=3.0.0",
-]
+dev = ["freezegun>=1.5.5", "pexpect>=4.9.0", "pypdf>=3.0.0"]

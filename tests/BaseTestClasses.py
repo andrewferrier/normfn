@@ -1,12 +1,11 @@
 from contextlib import contextmanager
 from datetime import datetime
-from importlib.util import module_from_spec, spec_from_loader
-import inspect
 import io
 import logging
 import os
 import os.path
 import shutil
+import sys
 from stat import S_IRUSR, S_IWUSR, S_IXUSR
 from subprocess import PIPE, Popen, call
 import tempfile
@@ -16,7 +15,7 @@ import pexpect
 
 
 class NormalizeFilenameTestCase(unittest.TestCase):
-    COMMAND = os.path.normpath(os.path.join(os.getcwd(), "normfn"))
+    COMMAND = [sys.executable, "-m", "normfn"]
 
     def setUp(self):
         self.workingDir = tempfile.mkdtemp()
@@ -45,24 +44,10 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             ]
         )
 
-    def getOriginalScriptPath(self):
-        module_path = inspect.getfile(inspect.currentframe())
-        module_path = os.path.join(
-            os.path.dirname(os.path.dirname(module_path)), "normfn"
-        )
-
-        return module_path
-
     def invokeDirectly(self, inputFiles, extraParams=[]):
-        import importlib.machinery
+        from normfn.core import main
 
-        module_path = self.getOriginalScriptPath()
-        loader = importlib.machinery.SourceFileLoader("normfn", module_path)
-        spec = spec_from_loader(os.path.basename(module_path), loader)
-        normalize_filename = module_from_spec(spec)
-        spec.loader.exec_module(normalize_filename)
-
-        options = [module_path]
+        options = ["normfn"]
 
         options.extend(inputFiles)
         options.extend(extraParams)
@@ -76,7 +61,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         log.addHandler(handler)
 
         try:
-            normalize_filename.main(options, handler)
+            main(options, handler)
         finally:
             log.removeHandler(handler)
             handler.close()
@@ -100,10 +85,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         with tempfile.NamedTemporaryFile(delete=False) as undo_log_file:
             undo_log_file.close()
 
-            if os.name == "nt":
-                options = ["python", NormalizeFilenameTestCase.COMMAND]
-            else:
-                options = [NormalizeFilenameTestCase.COMMAND]
+            options = list(NormalizeFilenameTestCase.COMMAND)
 
             options.extend(inputFiles)
             options.extend(extraParams)
@@ -152,7 +134,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         expectedExitStatus=None,
         expectedOutputRegex=None,
     ):
-        options = [NormalizeFilenameTestCase.COMMAND]
+        options = list(NormalizeFilenameTestCase.COMMAND)
         options.extend(inputFiles)
         options.extend(extraParams)
         options.extend(["--no-undo-log-file"])

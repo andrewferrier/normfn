@@ -16,8 +16,7 @@ wheels = [
 
 [[package]]
 name = "normfn"
-version = "0.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [

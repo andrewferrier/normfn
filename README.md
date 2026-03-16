@@ -29,21 +29,35 @@ the time when you run `normfn`. Using the `--earliest` option --- the default
 
 `normfn` requires at least Python 3.12.
 
+### Install from GitHub (any platform with Python)
+
+To install the latest development version directly from GitHub:
+
+```sh
+pip install git+https://github.com/andrewferrier/normfn
+# or
+uv tool install git+https://github.com/andrewferrier/normfn
+```
+
 ### Debian / Ubuntu Linux
 
 Download the `.deb` file from the Assets of the [latest
 release](https://github.com/andrewferrier/normfn/releases/latest) and install
-using any standard `.deb` installation approach, e.g. `dpkg -i normfn*.deb`.
+using any standard `.deb` installation approach, e.g.:
 
-### Other Platforms
+```sh
+dpkg -i normfn*.deb
+```
 
-* Clone this repository locally and change to the directory where you cloned it.
+### Arch Linux
 
-* If you have write-access to the system-wide `/usr/local/bin` directory, just
-  run `make install`.
+Download the `.pkg.tar.zst` file from the Assets of the [latest
+release](https://github.com/andrewferrier/normfn/releases/latest) and install
+with pacman:
 
-* If you don't, install it in your user directory with `PREFIX=~/.local make
-  install` (`~/.local/bin/` needs to be in your `$PATH`).
+```sh
+pacman -U normfn-*.pkg.tar.zst
+```
 
 ## Usage
 
