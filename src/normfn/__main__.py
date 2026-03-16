@@ -10,9 +10,10 @@ from normfn.exceptions import FatalError
 if TYPE_CHECKING:
     from io import TextIOBase
 
+logger = logging.getLogger("normfn")
+
 
 def main() -> None:
-    logger = logging.getLogger("normfn")
     logger.propagate = False
     logger.setLevel(logging.DEBUG)
 

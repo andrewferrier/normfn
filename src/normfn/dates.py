@@ -8,6 +8,8 @@ from pathlib import Path
 from normfn.args import Args
 from normfn.files import get_pdf_creation_date, get_timetouse, insensitiveize
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True)
 class YearRegexes:
@@ -161,8 +163,6 @@ def create_regex(year_regexes: YearRegexes) -> str:
 def datetime_prefix(  # noqa: C901
     args: Args, non_extension: str, filename: Path, year_regexes: YearRegexes
 ) -> str:
-    logger = logging.getLogger("normfn")
-
     invalid_ordinal_detected = False
 
     def replacement(matchobj: re.Match[str]) -> str:

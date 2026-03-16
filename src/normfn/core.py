@@ -20,9 +20,10 @@ if not sys.version_info >= (3, 12):
     msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
     raise ValueError(msg)
 
+logger = logging.getLogger(__name__)
+
 
 def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
-    logger = logging.getLogger("normfn")
 
     args = parse_arguments(argv)
 
@@ -70,8 +71,6 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
 
 
 def walk_tree(dirname: Path, args: Args, year_regexes: YearRegexes) -> None:
-    logger = logging.getLogger("normfn")
-
     logger.debug(f"Walking directory tree {dirname}")
     dirlist: list[Path] = sorted(Path(dirname).iterdir())
 
@@ -86,8 +85,6 @@ def walk_tree(dirname: Path, args: Args, year_regexes: YearRegexes) -> None:
 def process_filename(
     original_path: Path, args: Args, year_regexes: YearRegexes
 ) -> Path:
-    logger = logging.getLogger("normfn")
-
     logger.debug(f"Processing filename {original_path}")
 
     if not args.all:

@@ -12,6 +12,8 @@ from typing import Literal
 
 from normfn.exceptions import FatalError, _QuitSignalError
 
+logger = logging.getLogger(__name__)
+
 EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
 BASENAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
@@ -57,8 +59,6 @@ def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
 
 
 def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:  # noqa: PLR0911
-    logger = logging.getLogger("normfn")
-
     if filename.suffix.lower() != ".pdf":
         return None
 
@@ -133,8 +133,6 @@ def rlinput(prompt: str, prefill: str = "") -> str:
 
 
 def shiftfile(undo_log_file: Path | None, source: Path, target: Path) -> None:
-    logger = logging.getLogger("normfn")
-
     source = source.resolve()
     target = target.resolve()
 
