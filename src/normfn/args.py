@@ -2,6 +2,7 @@ import argparse
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Literal, NoReturn, cast, override
 
@@ -13,6 +14,7 @@ from normfn.files import get_default_log_file
 class Args:
     verbose: int
     help: bool
+    version: bool
     dry_run: bool
     interactive: bool
     all: bool
@@ -56,6 +58,13 @@ def parse_arguments(argv: list[str]) -> Args:
         "--help",
         action="store_true",
         help="Show help information for normfn.",
+    )
+
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="store_true",
+        help="Show the version of normfn and exit.",
     )
 
     parser.add_argument(
@@ -225,7 +234,8 @@ def parse_arguments(argv: list[str]) -> Args:
             typed_values = cast("Sequence[Path]", values)
             namespace.filenames = list(typed_values)
             args_help: bool = namespace.help  # pyright: ignore[reportAny]
-            if not args_help and len(typed_values) < 1:
+            args_version: bool = namespace.version  # pyright: ignore[reportAny]
+            if not args_help and not args_version and len(typed_values) < 1:
                 parser.error("You must specify some file or directory names.")
 
     parser.add_argument(
@@ -243,6 +253,10 @@ def parse_arguments(argv: list[str]) -> Args:
 
     if args.help:
         parser.print_help()
+        sys.exit(0)
+
+    if args.version:
+        print(version("normfn"))  # noqa: T201
         sys.exit(0)
 
     return args
