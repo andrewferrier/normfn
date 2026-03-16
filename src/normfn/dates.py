@@ -1,4 +1,5 @@
 import calendar
+import functools
 import logging
 import re
 from collections.abc import Iterable
@@ -68,7 +69,8 @@ def strip_ordinal_suffix(day_str: str) -> str:
     return day_str  # Invalid ordinal, keep as-is
 
 
-def create_regex(year_regexes: YearRegexes) -> str:
+@functools.lru_cache
+def create_regex(four_digit_year_regex: str, all_digit_year_regex: str) -> str:
     month_names_only = (
         "|".join(map(insensitiveize, calendar.month_name[1:13]))
         + "|"
@@ -95,7 +97,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
 
     ymd_style = (
         r"(?P<year1>"
-        + year_regexes.four_digit_year_regex
+        + four_digit_year_regex
         + r")"
         + ymd_separator_first
         + r"(?P<month1>"
@@ -118,7 +120,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
         + r")"
         + dmy_separator_following
         + r"(?P<year2>"
-        + year_regexes.four_digit_year_regex
+        + four_digit_year_regex
         + r")"
     )
 
@@ -132,7 +134,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
         + r")"
         + dmytdy_separator_following
         + r"(?P<year4>"
-        + year_regexes.all_digit_year_regex
+        + all_digit_year_regex
         + r")"
     )
 
@@ -142,7 +144,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
         + r")"
         + my_separator
         + r"(?P<year3>"
-        + year_regexes.four_digit_year_regex
+        + four_digit_year_regex
         + r")"
     )
 
@@ -262,12 +264,14 @@ def datetime_prefix(  # noqa: C901
         logger.debug(f"replacement() returned: {replace_value}")
         return replace_value
 
-    regex = create_regex(year_regexes)
+    regex_str = create_regex(
+        year_regexes.four_digit_year_regex, year_regexes.all_digit_year_regex
+    )
 
-    logger.debug(f"Complete regex used against {non_extension}: {regex}")
+    logger.debug(f"Complete regex used against {non_extension}: {regex_str}")
 
     try:
-        (newname, number_of_subs) = re.subn(regex, replacement, non_extension)
+        (newname, number_of_subs) = re.subn(regex_str, replacement, non_extension)
     except _InvalidOrdinalError:
         number_of_subs = 0
         newname = non_extension
