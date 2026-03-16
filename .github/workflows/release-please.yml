@@ -56,4 +56,6 @@ jobs:
       - name: Upload Arch package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ needs.release-please.outputs.tag_name }} ./*.pkg.tar.zst
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          gh release upload ${{ needs.release-please.outputs.tag_name }} ./*.pkg.tar.zst
