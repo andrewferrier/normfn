@@ -58,7 +58,7 @@ def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
     return (match, exclude_pattern)
 
 
-def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:  # noqa: PLR0911
+def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:
     if filename.suffix.lower() != ".pdf":
         return None
 
@@ -68,31 +68,31 @@ def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:  # noqa: 
         logger.info("pypdf library not available; cannot read PDF creation date")
         return None
 
+    result: datetime.datetime | None = None
+
     try:
         reader = pypdf.PdfReader(str(filename))
+
         if reader.metadata is None:
             logger.info(f"No metadata found in PDF {filename}")
-            return None
-
-        creation_date = reader.metadata.creation_date
-        if creation_date is None:
-            logger.info(f"No creation date found in PDF metadata for {filename}")
-            return None
-
-        if isinstance(creation_date, datetime.datetime):
-            if creation_date.tzinfo is None:
-                creation_date = creation_date.replace(tzinfo=datetime.UTC)
-            return creation_date
-
-        logger.info(
-            f"Unexpected type for creation date in PDF {filename}: %s",
-            type(creation_date),
-        )
+        else:
+            creation_date = reader.metadata.creation_date
+            if creation_date is None:
+                logger.info(f"No creation date found in PDF metadata for {filename}")
+            elif not isinstance(creation_date, datetime.datetime):
+                logger.info(
+                    "Unexpected type for creation date in PDF %s: %s",
+                    filename,
+                    type(creation_date),
+                )
+            elif creation_date.tzinfo is None:
+                result = creation_date.replace(tzinfo=datetime.UTC)
+            else:
+                result = creation_date
     except Exception as e:  # noqa: BLE001
         logger.info(f"Could not read PDF creation date for {filename}: {e}")
-        return None
-    else:
-        return None
+
+    return result
 
 
 def get_timetouse(
