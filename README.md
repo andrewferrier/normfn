@@ -64,7 +64,7 @@ pacman -U normfn-*.pkg.tar.zst
 <!-- [START AUTO UPDATE] -->
 <!-- Please keep comment here to allow auto-update -->
 ```
-usage: normfn [-v] [-h] [-n] [-i] [-a] [-f] [-t] [-d] [-r]
+usage: normfn [-v] [-h] [-V] [-n] [-i] [-a] [-f] [-t] [-d] [-r]
               [--max-years-ahead MAX_YEARS_AHEAD]
               [--max-years-behind MAX_YEARS_BEHIND]
               [--undo-log-file UNDO_LOG_FILE | --no-undo-log-file]
@@ -81,6 +81,7 @@ options:
   -v, --verbose         Add debugging output. Using this twice makes it doubly
                         verbose.
   -h, --help            Show help information for normfn.
+  -V, --version         Show the version of normfn and exit.
   -n, --dry-run         Don't actually make any changes, just show them.
                         Forces a single level of verbosity (-v).
   -i, --interactive     Ask about each change before it is done.
