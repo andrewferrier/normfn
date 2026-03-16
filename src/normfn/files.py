@@ -98,8 +98,9 @@ def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:  # noqa: 
 def get_timetouse(
     time_option: Literal["now", "earliest", "latest"], filename: Path
 ) -> datetime.datetime:
-    ctime = datetime.datetime.fromtimestamp(filename.stat().st_ctime, tz=datetime.UTC)
-    mtime = datetime.datetime.fromtimestamp(filename.stat().st_mtime, tz=datetime.UTC)
+    stat = filename.stat()
+    ctime = datetime.datetime.fromtimestamp(stat.st_ctime, tz=datetime.UTC)
+    mtime = datetime.datetime.fromtimestamp(stat.st_mtime, tz=datetime.UTC)
 
     if time_option == "now":
         timetouse = datetime.datetime.now(tz=datetime.UTC)
