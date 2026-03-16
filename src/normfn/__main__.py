@@ -23,7 +23,7 @@ def main() -> None:
     try:
         _main(sys.argv, syserrhandler)
     except FatalError as error:
-        logger.error(error.value)
+        logger.error(str(error))
         sys.exit(2)
 
 

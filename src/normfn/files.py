@@ -11,7 +11,7 @@ from pathlib import Path
 from re import Pattern
 from typing import Literal, cast
 
-from normfn.exceptions import FatalError, QuitError
+from normfn.exceptions import FatalError, _QuitSignal
 
 EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
@@ -205,12 +205,12 @@ def ask_yes_no(prompt: str) -> bytes:
         try:
             key = readchar().lower()
         except KeyboardInterrupt as ki:
-            raise QuitError from ki
+            raise _QuitSignal from ki
         print(str(key, "utf-8"))  # noqa: T201
         if key in [b"y", b"n", b"e"]:
             return key
         if key == b"q":
-            raise QuitError
+            raise _QuitSignal
 
 
 def readchar() -> bytes:
