@@ -11,7 +11,7 @@ from pathlib import Path
 from re import Pattern
 from typing import Literal, cast
 
-from normfn.exceptions import FatalError, _QuitSignal
+from normfn.exceptions import FatalError, _QuitSignalError
 
 EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
@@ -57,7 +57,7 @@ def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
     return (match, exclude_pattern)
 
 
-def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:
+def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:  # noqa: PLR0911
     logger = logging.getLogger("normfn")
 
     if filename.suffix.lower() != ".pdf":
@@ -74,20 +74,25 @@ def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:
         if reader.metadata is None:
             logger.info(f"No metadata found in PDF {filename}")
             return None
+
         creation_date = reader.metadata.creation_date
         if creation_date is None:
             logger.info(f"No creation date found in PDF metadata for {filename}")
             return None
+
         if isinstance(creation_date, datetime.datetime):
             if creation_date.tzinfo is None:
                 creation_date = creation_date.replace(tzinfo=datetime.UTC)
             return creation_date
+
         logger.info(
-            f"Unexpected type for creation date in PDF {filename}: {type(creation_date)}"
+            f"Unexpected type for creation date in PDF {filename}: %s",
+            type(creation_date),
         )
-        return None
     except Exception as e:  # noqa: BLE001
         logger.info(f"Could not read PDF creation date for {filename}: {e}")
+        return None
+    else:
         return None
 
 
@@ -205,12 +210,12 @@ def ask_yes_no(prompt: str) -> bytes:
         try:
             key = readchar().lower()
         except KeyboardInterrupt as ki:
-            raise _QuitSignal from ki
+            raise _QuitSignalError from ki
         print(str(key, "utf-8"))  # noqa: T201
         if key in [b"y", b"n", b"e"]:
             return key
         if key == b"q":
-            raise _QuitSignal
+            raise _QuitSignalError
 
 
 def readchar() -> bytes:

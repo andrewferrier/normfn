@@ -25,13 +25,15 @@ def first_not_none[T](values: Iterable[T | None]) -> T | None:
 
 
 def strip_ordinal_suffix(day_str: str) -> str:
-    """Strip ordinal suffix from day string if it's valid.
+    """
+    Strip ordinal suffix from day string if it's valid.
 
     Args:
         day_str: Day string that may include ordinal suffix (e.g., "21st", "2nd")
 
     Returns:
         Day string without ordinal suffix if valid, original string if invalid
+
     """
     match = re.match(r"^(\d+)(st|nd|rd|th)$", day_str, re.IGNORECASE)
     if not match:
@@ -156,7 +158,7 @@ def create_regex(year_regexes: YearRegexes) -> str:
     )
 
 
-def datetime_prefix(
+def datetime_prefix(  # noqa: C901
     args: Args, non_extension: str, filename: Path, year_regexes: YearRegexes
 ) -> str:
     logger = logging.getLogger("normfn")

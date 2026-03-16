@@ -36,11 +36,7 @@ packages = ["src/normfn"]
 packages = ["src/normfn"]
 
 [tool.hatch.build.targets.sdist]
-include = [
-  "src/normfn",
-  "pyproject.toml",
-  "README.md",
-]
+include = ["src/normfn", "pyproject.toml", "README.md"]
 
 [tool.basedpyright]
 reportConstantRedefinition = false # See https://github.com/microsoft/pyright/issues/5265
@@ -55,6 +51,8 @@ ignore = [
     "D103",
     "D105",
     "D107",
+    "D203",
+    "D212",
     "FBT001",
     "G004",
     "ISC003",

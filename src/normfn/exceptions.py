@@ -2,5 +2,5 @@ class FatalError(Exception):
     pass
 
 
-class _QuitSignal(Exception):
+class _QuitSignalError(Exception):
     pass

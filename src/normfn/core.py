@@ -7,7 +7,7 @@ from pathlib import Path
 
 from normfn.args import Args, parse_arguments
 from normfn.dates import YearRegexes, datetime_prefix
-from normfn.exceptions import FatalError, _QuitSignal
+from normfn.exceptions import FatalError, _QuitSignalError
 from normfn.files import (
     ask_yes_no,
     rlinput,
@@ -61,7 +61,7 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         two_to_four_digit_year_map=two_to_four_digit_year_map,
     )
 
-    with suppress(_QuitSignal):
+    with suppress(_QuitSignalError):
         for arg_filename in args.filenames:
             filename = arg_filename.resolve()
             if not filename.exists():

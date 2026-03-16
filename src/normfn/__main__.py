@@ -1,10 +1,14 @@
+#!/usr/bin/env python
+
 import logging
 import sys
-from io import TextIOBase
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from normfn.core import main as _main
 from normfn.exceptions import FatalError
+
+if TYPE_CHECKING:
+    from io import TextIOBase
 
 
 def main() -> None:
@@ -22,8 +26,8 @@ def main() -> None:
 
     try:
         _main(sys.argv, syserrhandler)
-    except FatalError as error:
-        logger.error(str(error))
+    except FatalError:
+        logger.exception("Fatal error")
         sys.exit(2)
 
 
