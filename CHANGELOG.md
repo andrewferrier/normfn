@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/andrewferrier/normfn/compare/v2.0.0...v2.0.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* git ownership in Arch build ([5ee21a3](https://github.com/andrewferrier/normfn/commit/5ee21a3c890070b45d6aceccdb2881d4cc40b372))
+
 ## [2.0.0](https://github.com/andrewferrier/normfn/compare/v1.2.0...v2.0.0) (2026-03-16)
 
 
