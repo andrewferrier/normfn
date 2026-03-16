@@ -6,10 +6,9 @@ import shlex
 import shutil
 import sys
 import textwrap
-from io import TextIOBase
 from pathlib import Path
 from re import Pattern
-from typing import Literal, cast
+from typing import Literal
 
 from normfn.exceptions import FatalError, _QuitSignalError
 
@@ -240,19 +239,3 @@ def readchar() -> bytes:
 
 def insensitiveize(string: str) -> str:
     return "".join(("[" + char.lower() + char.upper() + "]") for char in string)
-
-
-def setup_logging() -> tuple[logging.Logger, logging.StreamHandler[TextIOBase]]:
-    logger = logging.getLogger("normfn")
-    logger.propagate = False
-    logger.setLevel(logging.DEBUG)
-
-    syserrhandler: logging.StreamHandler[TextIOBase] = logging.StreamHandler(
-        stream=cast("TextIOBase", sys.stderr)
-    )
-    syserrhandler.setLevel(logging.WARNING)
-    syserrformatter = logging.Formatter("%(levelname)s: %(message)s")
-    syserrhandler.setFormatter(syserrformatter)
-    logger.addHandler(syserrhandler)
-
-    return logger, syserrhandler
