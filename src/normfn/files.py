@@ -17,16 +17,16 @@ logger = logging.getLogger(__name__)
 EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
 BASENAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
-    [re.compile(r"\..*"), re.compile("Icon\r"), re.compile(r".*\.lo?ck")]
+    {re.compile(r"\..*"), re.compile("Icon\r"), re.compile(r".*\.lo?ck")}
 )
 
 FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
-    [
+    {
         re.compile(r".*\.git" + EFFECTIVE_SEP + r".*"),
         re.compile(r".*\.svn" + EFFECTIVE_SEP + r".*"),
         re.compile(r".*\.hg" + EFFECTIVE_SEP + r".*"),
         re.compile(r".*\.bzr" + EFFECTIVE_SEP + r".*"),
-    ]
+    }
 )
 
 
