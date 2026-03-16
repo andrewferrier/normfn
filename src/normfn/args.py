@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -7,7 +8,6 @@ from pathlib import Path
 from typing import Any, Literal, NoReturn, cast, override
 
 from normfn.exceptions import FatalError
-from normfn.files import get_default_log_file
 
 
 @dataclass
@@ -27,6 +27,14 @@ class Args:
     undo_log_file: Path | None
     time_option: Literal["now", "earliest", "latest"]
     filenames: list[Path]
+
+
+def get_default_log_file() -> Path:
+    home: Path = Path("~").expanduser()
+    xdg_state_home: Path = Path(
+        os.environ.get("XDG_STATE_HOME") or home / ".local" / "state"
+    )
+    return xdg_state_home / "normfn-undo.log.sh"
 
 
 def parse_arguments(argv: list[str]) -> Args:

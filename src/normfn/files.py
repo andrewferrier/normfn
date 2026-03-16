@@ -4,13 +4,12 @@ import os
 import re
 import shlex
 import shutil
-import sys
 import textwrap
 from pathlib import Path
 from re import Pattern
 from typing import Literal
 
-from normfn.exceptions import FatalError, _QuitSignalError
+from normfn.exceptions import FatalError
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +27,6 @@ FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
         re.compile(r".*\.bzr" + EFFECTIVE_SEP + r".*"),
     }
 )
-
-
-def get_default_log_file() -> Path:
-    home: Path = Path("~").expanduser()
-    xdg_state_home: Path = Path(
-        os.environ.get("XDG_STATE_HOME") or home / ".local" / "state"
-    )
-    return xdg_state_home / "normfn-undo.log.sh"
 
 
 def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
@@ -120,18 +111,6 @@ def validate_move(force: bool, original_filename: Path, filename: Path) -> None:
         )
 
 
-def rlinput(prompt: str, prefill: str = "") -> str:
-    if os.name == "nt":
-        return input(prompt)
-    import readline  # noqa: PLC0415
-
-    readline.set_startup_hook(lambda: readline.insert_text(prefill))
-    try:
-        return input(prompt)
-    finally:
-        readline.set_startup_hook()
-
-
 def shiftfile(undo_log_file: Path | None, source: Path, target: Path) -> None:
     source = source.resolve()
     target = target.resolve()
@@ -200,37 +179,3 @@ def check_undo_log_file_header(undo_log_file: Path) -> None:
                 + "\n"
             )
             _ = log_file.write("\n")
-
-
-def ask_yes_no(prompt: str) -> bytes:
-    while True:
-        print(prompt, end="", flush=True)  # noqa: T201
-        try:
-            key = readchar().lower()
-        except KeyboardInterrupt as ki:
-            raise _QuitSignalError from ki
-        print(str(key, "utf-8"))  # noqa: T201
-        if key in [b"y", b"n", b"e"]:
-            return key
-        if key == b"q":
-            raise _QuitSignalError
-
-
-def readchar() -> bytes:
-    if os.name == "nt":
-        import msvcrt  # noqa: PLC0415
-
-        return msvcrt.getch()
-
-    import termios  # noqa: PLC0415
-    import tty  # noqa: PLC0415
-
-    try:
-        old_settings = termios.tcgetattr(sys.stdin)
-        _ = tty.setcbreak(sys.stdin.fileno())
-        try:
-            return os.read(sys.stdin.fileno(), 1)
-        finally:
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-    except termios.error:
-        return os.read(sys.stdin.fileno(), 1)

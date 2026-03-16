@@ -8,12 +8,11 @@ from normfn.args import Args, parse_arguments
 from normfn.dates import YearRegexes, datetime_prefix, make_year_regexes
 from normfn.exceptions import FatalError, _QuitSignalError
 from normfn.files import (
-    ask_yes_no,
-    rlinput,
     shiftfile,
     should_exclude,
     validate_move,
 )
+from normfn.input import ask_yes_no, rlinput
 
 if not sys.version_info >= (3, 12):
     msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
@@ -23,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> None:
-
     args = parse_arguments(argv)
 
     if syserr_handler:
