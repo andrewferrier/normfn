@@ -12,11 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install normfn
+        run: uv sync
       - name: Get help
         uses: mathiasvr/command-output@v2.0.0
         id: vars
         with:
-          run: ./normfn --help
+          run: uv run normfn --help
       - name: Update file
         uses: wow-actions/update-file@v1
         with:
