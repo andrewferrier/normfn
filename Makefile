@@ -5,6 +5,12 @@ ifeq ($(PREFIX),)
     PREFIX := /usr/local
 endif
 
+unittest:
+	uv run -- python -m unittest discover -s tests -p "*.py"
+
+unittest_verbose:
+	uv run -- python -m unittest discover -s tests -p "*.py" -f -v
+
 builddeb:
 	sudo apt-get install build-essential fakeroot dpkg-dev
 	mkdir -p $(TEMPDIR)/DEBIAN
@@ -36,11 +42,3 @@ reinstall_osx_brew:
 	$(eval GITDESCRIBE_BREW := $(shell git describe --tags --abbrev=0))
 	sed 's/X\.Y/$(GITDESCRIBE_BREW)/' brew/normfn_template.rb > brew/normfn.rb
 	brew reinstall file://$(ROOTDIR)/brew/normfn.rb
-
-unittest:
-	uv run -- python -m unittest discover -s tests -p "*.py"
-
-unittest_verbose:
-	uv run -- python -m unittest discover -s tests -p "*.py" -f -v
-
-alltests: unittest
