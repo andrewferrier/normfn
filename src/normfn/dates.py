@@ -29,11 +29,7 @@ class YearRegexes:
 
 
 def first_not_none[T](values: Iterable[T | None]) -> T | None:
-    for item in values:
-        if item is not None:
-            return item
-
-    return None
+    return next((x for x in values if x is not None), None)
 
 
 def make_year_regexes(max_years_behind: int, max_years_ahead: int) -> YearRegexes:

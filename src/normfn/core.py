@@ -7,11 +7,7 @@ from pathlib import Path
 from normfn.args import Args, parse_arguments
 from normfn.dates import YearRegexes, datetime_prefix, make_year_regexes
 from normfn.exceptions import FatalError, _QuitSignalError
-from normfn.files import (
-    shiftfile,
-    should_exclude,
-    validate_move,
-)
+from normfn.files import shiftfile, should_exclude
 from normfn.input import ask_yes_no, rlinput
 
 if not sys.version_info >= (3, 12):
@@ -97,7 +93,11 @@ def process_filename(
         else:
             move_it = move_it_choice == b"y"
 
-    validate_move(args.force, original_path, target_path)
+    if target_path.exists() and not args.force:
+        raise FatalError(
+            f"Want to move {original_path} to "
+            + f"{target_path}, but it already exists."
+        )
 
     if move_it:
         if not args.dry_run:

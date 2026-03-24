@@ -30,23 +30,15 @@ FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
 
 
 def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
-    match = False
-    exclude_pattern: Pattern | None = None
-
     for current_pattern in BASENAME_EXCLUDE_PATTERNS:
         if re.fullmatch(current_pattern, basename):
-            match = True
-            exclude_pattern = current_pattern
-            break
+            return (True, current_pattern)
 
-    if not match:
-        for current_pattern in FULLNAME_EXCLUDE_PATTERNS:
-            if re.fullmatch(current_pattern, filename):
-                match = True
-                exclude_pattern = current_pattern
-                break
+    for current_pattern in FULLNAME_EXCLUDE_PATTERNS:
+        if re.fullmatch(current_pattern, filename):
+            return (True, current_pattern)
 
-    return (match, exclude_pattern)
+    return (False, None)
 
 
 def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:
@@ -101,14 +93,6 @@ def get_timetouse(
         timetouse = max(ctime, mtime)
 
     return timetouse
-
-
-def validate_move(force: bool, original_filename: Path, filename: Path) -> None:
-    if filename.exists() and not force:
-        raise FatalError(
-            f"Want to move {original_filename} to "
-            + f"{filename}, but it already exists."
-        )
 
 
 def shiftfile(undo_log_file: Path | None, source: Path, target: Path) -> None:
