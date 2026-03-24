@@ -48,7 +48,9 @@ ignore = [
     "COM",
     "D100",
     "D101",
+    "D102",
     "D103",
+    "D104",
     "D105",
     "D107",
     "D203",
@@ -56,8 +58,15 @@ ignore = [
     "FBT001",
     "G004",
     "ISC003",
+    "PT009",
+    "PT027",
+    "PTH201",
     "TRY003",
 ]
 
 [dependency-groups]
-dev = ["freezegun>=1.5.5", "pexpect>=4.9.0", "pypdf>=3.0.0"]
+dev = [
+    "freezegun>=1.5.5",
+    "pexpect>=4.9.0",
+    "pypdf>=3.0.0",
+]
