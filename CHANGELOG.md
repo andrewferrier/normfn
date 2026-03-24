@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.1.0](https://github.com/andrewferrier/normfn/compare/v2.0.1...v2.1.0) (2026-03-24)
+
+
+### Features
+
+* Add --version - closes [#117](https://github.com/andrewferrier/normfn/issues/117) ([82c212d](https://github.com/andrewferrier/normfn/commit/82c212d83ea99251ec853d748bca440b4dd26b21))
+
+
+### Bug Fixes
+
+* Error handling for no args ([a37a22d](https://github.com/andrewferrier/normfn/commit/a37a22d408b52ad4319ad9148f66f6bda00e8c4b))
+
+
+### Performance Improvements
+
+* avoid double stat() call in get_timetouse() ([ace4eb0](https://github.com/andrewferrier/normfn/commit/ace4eb0dfd7d41929d596bafb92980acf248aa85))
+* cache create_regex() ([d6d8c17](https://github.com/andrewferrier/normfn/commit/d6d8c1745fc76dc1c7ce866ed1526e8947d80e94))
+
 ## [2.0.1](https://github.com/andrewferrier/normfn/compare/v2.0.0...v2.0.1) (2026-03-16)
 
 
