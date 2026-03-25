@@ -11,8 +11,8 @@ def ask_yes_no(prompt: str) -> bytes:
             key = readchar().lower()
         except KeyboardInterrupt as ki:
             raise _QuitSignalError from ki
-        print(str(key, "utf-8"))  # noqa: T201
-        if key in [b"y", b"n", b"e"]:
+        print(key.decode())  # noqa: T201
+        if key in (b"y", b"n", b"e"):
             return key
         if key == b"q":
             raise _QuitSignalError

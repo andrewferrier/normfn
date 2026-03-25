@@ -1,3 +1,3 @@
-from normfn.core import main  # noqa: D104
+from normfn.core import main
 
 __all__ = ["main"]

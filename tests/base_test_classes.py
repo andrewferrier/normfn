@@ -2,7 +2,6 @@ import datetime
 import io
 import logging
 import os
-import os.path
 import shutil
 import sys
 import tempfile
@@ -197,9 +196,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
 
     def tear_down(self) -> None:
         # Give everything write permissions before rmtree'ing.
-        for root, dirs, files in os.walk(self.working_dir):
+        for root, dirs, files in self.working_dir.walk():
             dirs_and_files = dirs + files
             for dir_and_file in dirs_and_files:
-                (Path(root) / dir_and_file).chmod(S_IRUSR | S_IWUSR | S_IXUSR)
+                (root / dir_and_file).chmod(S_IRUSR | S_IWUSR | S_IXUSR)
 
         shutil.rmtree(self.working_dir)

@@ -229,7 +229,7 @@ def datetime_prefix(  # noqa: C901
             month = str(month_digit)
 
         if len(month) == 1:
-            month = "0" + month
+            month = month.zfill(2)
 
         # Strip ordinal suffix from day if present and valid
         if day is not None:
@@ -240,7 +240,7 @@ def datetime_prefix(  # noqa: C901
                 raise _InvalidOrdinalError
             day = stripped_day
             if len(day) == 1:
-                day = "0" + day
+                day = day.zfill(2)
 
         replace_value = (
             year

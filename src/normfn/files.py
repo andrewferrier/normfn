@@ -6,7 +6,6 @@ import shlex
 import shutil
 import textwrap
 from pathlib import Path
-from re import Pattern
 from typing import Literal
 
 from normfn.exceptions import FatalError
@@ -15,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
 
-BASENAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
+BASENAME_EXCLUDE_PATTERNS: frozenset[re.Pattern[str]] = frozenset(
     {re.compile(r"\..*"), re.compile("Icon\r"), re.compile(r".*\.lo?ck")}
 )
 
-FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
+FULLNAME_EXCLUDE_PATTERNS: frozenset[re.Pattern[str]] = frozenset(
     {
         re.compile(r".*\.git" + EFFECTIVE_SEP + r".*"),
         re.compile(r".*\.svn" + EFFECTIVE_SEP + r".*"),
@@ -29,7 +28,7 @@ FULLNAME_EXCLUDE_PATTERNS: frozenset[Pattern] = frozenset(
 )
 
 
-def should_exclude(filename: str, basename: str) -> tuple[bool, Pattern | None]:
+def should_exclude(filename: str, basename: str) -> tuple[bool, re.Pattern[str] | None]:
     for current_pattern in BASENAME_EXCLUDE_PATTERNS:
         if re.fullmatch(current_pattern, basename):
             return (True, current_pattern)
@@ -128,7 +127,7 @@ def shiftfile(undo_log_file: Path | None, source: Path, target: Path) -> None:
 def check_undo_log_file_header(undo_log_file: Path) -> None:
     if not undo_log_file.exists():
         undo_log_file.parent.mkdir(parents=True, exist_ok=True)
-        with undo_log_file.open("w") as log_file:
+        with undo_log_file.open("w", encoding="utf-8") as log_file:
             wrapper = textwrap.TextWrapper(initial_indent="# ", subsequent_indent="# ")
             _ = log_file.write("#!/bin/sh\n")
             _ = log_file.write(
