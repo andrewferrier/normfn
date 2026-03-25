@@ -64,9 +64,14 @@ ignore = [
     "TRY003",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
 [dependency-groups]
 dev = [
     "freezegun>=1.5.5",
     "pexpect>=4.9.0",
     "pypdf>=3.0.0",
+    "pytest>=8.0.0",
 ]

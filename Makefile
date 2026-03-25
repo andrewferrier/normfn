@@ -5,11 +5,8 @@ ifeq ($(PREFIX),)
     PREFIX := /usr/local
 endif
 
-unittest:
-	uv run -- python -m unittest discover -s tests -p "*.py"
-
-unittest_verbose:
-	uv run -- python -m unittest discover -s tests -p "*.py" -f -v
+test:
+	uv run pytest
 
 builddeb:
 	sudo apt-get install build-essential fakeroot dpkg-dev

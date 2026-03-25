@@ -24,7 +24,7 @@ jobs:
       - name: Install the project
         run: uv sync --locked --all-extras --dev
       - name: Run tests
-        run: uv run -- python -m unittest discover -s tests -p "*.py"
+        run: uv run pytest
 # test-windows:
 #    runs-on: windows-latest
 #    strategy:
