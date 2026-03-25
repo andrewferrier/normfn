@@ -127,10 +127,29 @@ options:
 For safety, by default, `normfn` keeps a log file in
 `~/.local/state/normfn-undo.log.sh` of all the actions it takes, in
 shell format to make it easier to undo them. See the comment at the head of that
-file (once normfn has generated it) for more information. You can
-configure this with the `--undo-log-file` and `--no-undo-log-file` options.
+file (once normfn has generated it) for more information. The undo log location
+and other persistent preferences are configured via the config file (see below).
 
-For more information on all the options available, run `normfn --help`. You can
-alter or disable most `normfn` behaviour using these options.
+For more information on all the options available, run `normfn --help`.
+
+## Configuration
+
+`normfn` reads persistent preferences from a TOML configuration file located at
+`${XDG_CONFIG_HOME}/normfn/normfn.toml`.
+
+If `XDG_CONFIG_HOME` is not set, it defaults to `~/.config`, so the effective
+default path is `~/.config/normfn/normfn.toml`. If the file does not exist,
+`normfn` silently uses its built-in defaults.
+
+### Initialising the config file
+
+To create a starter config file (with all options commented out and annotated),
+run:
+
+```sh
+normfn --initialize-config
+```
+
+All the options are documented as comments in the generated file itself.
 
 Project hosted [on github](https://github.com/andrewferrier/normfn).

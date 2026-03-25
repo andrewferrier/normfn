@@ -25,10 +25,16 @@ COMMAND = [sys.executable, "-m", "normfn"]
 
 class NormfnTestCase:
     working_dir: Path
+    config_file: Path
 
     @pytest.fixture(autouse=True)
-    def setup_working_dir(self, tmp_path: Path) -> None:
+    def setup(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         self.working_dir = tmp_path
+        normfn_config_dir = tmp_path / "xdg_config" / "normfn"
+        normfn_config_dir.mkdir(parents=True)
+        self.config_file = normfn_config_dir / "normfn.toml"
+        self.config_file.write_text("")
+        monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
 
     def get_date_prefix(self, postfix_dash: bool = True) -> str:  # noqa: FBT002
         str_return = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
@@ -47,17 +53,20 @@ class NormfnTestCase:
             [item for item in directory.iterdir() if (directory / item).is_dir()]
         )
 
+    def write_config(self, contents: str) -> None:
+        self.config_file.write_text(contents)
+
     def invoke_directly(
-        self, input_files: list[Path], extra_params: list[str] | None = None
+        self,
+        input_files: list[Path],
+        extra_params: list[str] | None = None,
     ) -> str:
         if extra_params is None:
             extra_params = []
 
-        options: list[str] = ["normfn"]
-
+        options: list[str] = ["normfn", "--config", str(self.config_file)]
         options.extend([str(p) for p in input_files])
         options.extend(extra_params)
-        options.extend(["--no-undo-log-file"])
 
         stream = io.StringIO()
         handler: logging.StreamHandler[TextIOBase] = logging.StreamHandler(
@@ -91,37 +100,45 @@ class NormfnTestCase:
         if cwd is None:
             cwd = Path(self.working_dir)
 
-        with tempfile.NamedTemporaryFile(delete=False) as undo_log_file:
-            undo_log_file.close()
-
-            options: list[str] = list(COMMAND)
-
-            options.extend([str(p) for p in input_files])
-            options.extend(extra_params)
-            options.extend(["--undo-log-file=" + undo_log_file.name])
-
-            if feed_input:
-                p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd)  # noqa: S603
-            else:
-                p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd)  # noqa: S603
-
-            output_bytes, error_bytes = p.communicate(feed_input)
-            p.wait()
-
-            output = output_bytes.decode("utf-8")
-            error = error_bytes.decode("utf-8")
-
-            if expect_output:
-                assert output != ""
-            else:
-                assert output == ""
-
-            with open(undo_log_file.name) as undo_log_file_read:  # noqa: PTH123
-                undo_log_file_contents = undo_log_file_read.readlines()
-
-            os.unlink(undo_log_file.name)  # noqa: PTH108
+        options: list[str] = list(COMMAND)
+        options.extend(["--config", str(self.config_file)])
+        options.extend([str(p) for p in input_files])
+        options.extend(extra_params)
 
         if use_undo_file:
+            with tempfile.NamedTemporaryFile(
+                dir=self.working_dir, suffix=".sh", delete=False
+            ) as tf:
+                undo_log_path = Path(tf.name)
+            with self.config_file.open("a") as f:
+                f.write(f'undo_log_file = "{undo_log_path}"\n')
+
+        env = {**os.environ}
+
+        if feed_input:
+            p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd, env=env)  # noqa: S603
+        else:
+            p = Popen(options, stdin=None, stdout=PIPE, stderr=PIPE, cwd=cwd, env=env)  # noqa: S603
+
+        output_bytes, error_bytes = p.communicate(feed_input)
+        p.wait()
+
+        output = output_bytes.decode("utf-8")
+        error = error_bytes.decode("utf-8")
+
+        if expect_output:
+            assert output != ""
+        else:
+            assert output == ""
+
+        if use_undo_file:
+            undo_log_file_contents = (
+                undo_log_path.read_text().splitlines(keepends=True)
+                if undo_log_path.exists()
+                else []
+            )
+            if undo_log_path.exists():
+                undo_log_path.unlink()
             return (p.returncode, output, error, undo_log_file_contents)
 
         return (p.returncode, output, error, None)
@@ -148,15 +165,16 @@ class NormfnTestCase:
             extra_params = []
 
         options: list[str] = list(COMMAND)
+        options.extend(["--config", str(self.config_file)])
         options.extend(str(p) for p in input_files)
         options.extend(extra_params)
-        options.extend(["--no-undo-log-file"])
 
+        env = {**os.environ}
         command = " ".join(options)
 
         stream = io.BytesIO()
 
-        child = pexpect.spawn(command)
+        child = pexpect.spawn(command, env=env)
         child.logfile_read = stream
 
         yield child

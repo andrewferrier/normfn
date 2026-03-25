@@ -788,3 +788,27 @@ class TestDirectBasic(NormfnTestCase):
         assert (self.working_dir / "2026-01-21 - foo.txt").exists()
         assert self.directory_file_count(self.working_dir) == 1
         assert error == ""
+
+    def test_undo_log_written_to_configured_path(self) -> None:
+        undo_log = self.working_dir / "my-undo.sh"
+        self.write_config(f'undo_log_file = "{undo_log}"\n')
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        self.invoke_directly([filename])
+        assert undo_log.exists()
+        assert "blah" in undo_log.read_text()
+
+    def test_undo_log_disabled_when_empty_string(self) -> None:
+        undo_log = self.working_dir / "state" / "normfn-undo.log.sh"
+        self.write_config('undo_log_file = ""\n')
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        self.invoke_directly([filename])
+        assert not undo_log.exists()
+
+    def test_undo_log_default_path_used_when_not_configured(self) -> None:
+        state_dir = self.working_dir / "state"
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        self.invoke_directly([filename])
+        assert (state_dir / "normfn-undo.log.sh").exists()

@@ -68,9 +68,8 @@ class TestDirectFrozenTime(NormfnTestCase):
     def test_ok_ahead_adjusted(self) -> None:
         filename = self.working_dir / "blah-2025-02-03.txt"
         self.touch(filename)
-        error = self.invoke_directly(
-            [filename], extra_params=["--now", "--max-years-ahead=50"]
-        )
+        self.write_config("max_years_ahead = 50\n")
+        error = self.invoke_directly([filename], extra_params=["--now"])
         assert not filename.exists()
         assert (self.working_dir / "2025-02-03-blah.txt").exists()
         assert self.directory_file_count(self.working_dir) == 1
@@ -80,9 +79,8 @@ class TestDirectFrozenTime(NormfnTestCase):
     def test_ok_behind_adjusted(self) -> None:
         filename = self.working_dir / "blah-1970-02-03.txt"
         self.touch(filename)
-        error = self.invoke_directly(
-            [filename], extra_params=["--now", "--max-years-behind=50"]
-        )
+        self.write_config("max_years_behind = 50\n")
+        error = self.invoke_directly([filename], extra_params=["--now"])
         assert not filename.exists()
         assert (self.working_dir / "1970-02-03-blah.txt").exists()
         assert self.directory_file_count(self.working_dir) == 1
@@ -92,9 +90,8 @@ class TestDirectFrozenTime(NormfnTestCase):
     def test_toofar_ahead_adjusted(self) -> None:
         filename = self.working_dir / "blah-2200-02-03.txt"
         self.touch(filename)
-        error = self.invoke_directly(
-            [filename], extra_params=["--now", "--max-years-ahead=50"]
-        )
+        self.write_config("max_years_ahead = 50\n")
+        error = self.invoke_directly([filename], extra_params=["--now"])
         assert not filename.exists()
         assert (self.working_dir / "2015-04-05-blah-2200-02-03.txt").exists()
         assert self.directory_file_count(self.working_dir) == 1
@@ -104,9 +101,8 @@ class TestDirectFrozenTime(NormfnTestCase):
     def test_toofar_behind_adjusted(self) -> None:
         filename = self.working_dir / "blah-1930-02-03.txt"
         self.touch(filename)
-        error = self.invoke_directly(
-            [filename], extra_params=["--now", "--max-years-behind=50"]
-        )
+        self.write_config("max_years_behind = 50\n")
+        error = self.invoke_directly([filename], extra_params=["--now"])
         assert not filename.exists()
         assert (self.working_dir / "2015-04-05-blah-1930-02-03.txt").exists()
         assert self.directory_file_count(self.working_dir) == 1

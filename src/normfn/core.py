@@ -5,6 +5,12 @@ from io import TextIOBase
 from pathlib import Path
 
 from normfn.args import Args, parse_arguments
+from normfn.config import (
+    create_template_config,
+    get_default_config_path,
+    load_config,
+    resolve_undo_log_file,
+)
 from normfn.dates import YearRegexes, datetime_prefix, make_year_regexes
 from normfn.exceptions import FatalError, _QuitSignalError
 from normfn.files import shiftfile, should_exclude
@@ -28,9 +34,25 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
         else:
             syserr_handler.setLevel(logging.WARNING)
 
-    logger.debug(f"Arguments are: {args}")
+    if args.initialize_config:
+        config_path = args.config or get_default_config_path()
+        if config_path.exists():
+            msg = (
+                f"Config file already exists: {config_path}. "
+                "Remove it first if you want to regenerate it."
+            )
+            raise FatalError(msg)
+        create_template_config(config_path)
+        print(f"Created config file: {config_path}")  # noqa: T201
+        return
 
-    year_regexes = make_year_regexes(args.max_years_behind, args.max_years_ahead)
+    config = load_config(args.config)
+
+    logger.debug(f"Arguments are: {args}")
+    logger.debug(f"Config is: {config}")
+
+    year_regexes = make_year_regexes(config.max_years_behind, config.max_years_ahead)
+    undo_log_file = resolve_undo_log_file(config)
 
     with suppress(_QuitSignalError):
         for arg_filename in args.filenames:
@@ -40,26 +62,36 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
                 raise FatalError(msg)
 
             if filename.is_dir() and args.recursive:
-                new_filename = process_filename(filename, args, year_regexes)
-                walk_tree(new_filename, args, year_regexes)
+                new_filename = process_filename(
+                    filename, args, year_regexes, undo_log_file
+                )
+                walk_tree(new_filename, args, year_regexes, undo_log_file)
             else:
-                process_filename(filename, args, year_regexes)
+                process_filename(filename, args, year_regexes, undo_log_file)
 
 
-def walk_tree(dirname: Path, args: Args, year_regexes: YearRegexes) -> None:
+def walk_tree(
+    dirname: Path,
+    args: Args,
+    year_regexes: YearRegexes,
+    undo_log_file: Path | None,
+) -> None:
     logger.debug(f"Walking directory tree {dirname}")
     dirlist: list[Path] = sorted(Path(dirname).iterdir())
 
     for entry in dirlist:
         entry_full = dirname / entry
 
-        entry_full = process_filename(entry_full, args, year_regexes)
+        entry_full = process_filename(entry_full, args, year_regexes, undo_log_file)
         if entry_full.is_dir():
-            walk_tree(entry_full, args, year_regexes)
+            walk_tree(entry_full, args, year_regexes, undo_log_file)
 
 
 def process_filename(
-    original_path: Path, args: Args, year_regexes: YearRegexes
+    original_path: Path,
+    args: Args,
+    year_regexes: YearRegexes,
+    undo_log_file: Path | None,
 ) -> Path:
     logger.debug(f"Processing filename {original_path}")
 
@@ -101,7 +133,7 @@ def process_filename(
 
     if move_it:
         if not args.dry_run:
-            shiftfile(args.undo_log_file, original_path, target_path)
+            shiftfile(undo_log_file, original_path, target_path)
             return target_path
 
         logger.info(

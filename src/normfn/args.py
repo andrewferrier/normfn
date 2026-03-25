@@ -1,5 +1,4 @@
 import argparse
-import os
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -7,6 +6,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Literal, NoReturn, cast, override
 
+from normfn.config import get_default_config_path
 from normfn.exceptions import FatalError
 
 
@@ -15,6 +15,8 @@ class Args:
     verbose: int
     help: bool
     version: bool
+    config: Path | None
+    initialize_config: bool
     dry_run: bool
     interactive: bool
     all: bool
@@ -22,19 +24,8 @@ class Args:
     add_time: bool
     discard_existing_name: bool
     recursive: bool
-    max_years_ahead: int
-    max_years_behind: int
-    undo_log_file: Path | None
     time_option: Literal["now", "earliest", "latest"]
     filenames: list[Path]
-
-
-def get_default_log_file() -> Path:
-    home: Path = Path("~").expanduser()
-    xdg_state_home: Path = Path(
-        os.environ.get("XDG_STATE_HOME") or home / ".local" / "state"
-    )
-    return xdg_state_home / "normfn-undo.log.sh"
 
 
 def parse_arguments(argv: list[str]) -> Args:
@@ -72,6 +63,30 @@ def parse_arguments(argv: list[str]) -> Args:
         "--version",
         action="store_true",
         help="Show the version of normfn and exit.",
+    )
+
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            f"Path to the configuration file. Defaults to {get_default_config_path()}."
+        ),
+    )
+
+    # I considered and investigating having this conflict with other options
+    # but it's just too much maintenance headache. Long-term approach should
+    # maybe be to refactor to subcommands.
+    parser.add_argument(
+        "--initialize-config",
+        action="store_true",
+        dest="initialize_config",
+        help=(
+            "Create a template configuration file at the path given by --config "
+            f"(default: {get_default_config_path()}) and exit. "
+            "Fails if the file already exists."
+        ),
     )
 
     parser.add_argument(
@@ -140,50 +155,6 @@ def parse_arguments(argv: list[str]) -> Args:
         ),
     )
 
-    parser.add_argument(
-        "--max-years-ahead",
-        type=int,
-        dest="max_years_ahead",
-        default=5,
-        help=(
-            "Consider years further ahead from now than this not "
-            "to be valid years. Defaults to 5."
-        ),
-    )
-
-    parser.add_argument(
-        "--max-years-behind",
-        type=int,
-        dest="max_years_behind",
-        default=30,
-        help=(
-            "Consider years further behind from now than this not "
-            "to be valid years. Defaults to 30."
-        ),
-    )
-
-    log_option = parser.add_mutually_exclusive_group()
-
-    log_option.add_argument(
-        "--undo-log-file",
-        type=Path,
-        dest="undo_log_file",
-        help=(
-            "The name of the shell script to log "
-            "'undo commands' for normfn; see the "
-            "instructions in the file to use. "
-            f"Defaults to {get_default_log_file()}"
-        ),
-    )
-
-    log_option.add_argument(
-        "--no-undo-log-file",
-        dest="undo_log_file",
-        action="store_const",
-        const=None,
-        help="Inverse of --undo-log-file; don't store undo commands.",
-    )
-
     time_option = parser.add_mutually_exclusive_group()
 
     time_option.add_argument(
@@ -226,8 +197,7 @@ def parse_arguments(argv: list[str]) -> Args:
     )
 
     parser.set_defaults(
-        time_option="earliest",
-        undo_log_file=get_default_log_file(),
+        time_option=None,
     )
 
     class FilenamesAction(argparse.Action):
@@ -241,9 +211,12 @@ def parse_arguments(argv: list[str]) -> Args:
         ) -> None:
             typed_values = cast("Sequence[Path]", values)
             namespace.filenames = list(typed_values)
-            args_help: bool = namespace.help  # pyright: ignore[reportAny]
-            args_version: bool = namespace.version  # pyright: ignore[reportAny]
-            if not args_help and not args_version and len(typed_values) < 1:
+            if (
+                not namespace.help
+                and not namespace.version
+                and not namespace.initialize_config
+                and len(typed_values) < 1
+            ):
                 parser.error("You must specify some file or directory names.")
 
     parser.add_argument(
@@ -257,7 +230,10 @@ def parse_arguments(argv: list[str]) -> Args:
 
     args_ns = parser.parse_args(argv[1:])
 
-    args = Args(**vars(args_ns))  # pyright: ignore[reportAny]
+    if args_ns.time_option is None:
+        args_ns.time_option = "earliest"
+
+    args = Args(**vars(args_ns))
 
     if args.help:
         parser.print_help()
