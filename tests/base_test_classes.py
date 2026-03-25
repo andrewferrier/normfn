@@ -2,30 +2,33 @@ import datetime
 import io
 import logging
 import os
-import shutil
+import re
 import sys
 import tempfile
-import types
-import unittest
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from stat import S_IRUSR, S_IWUSR, S_IXUSR
+from stat import S_IRUSR, S_IXUSR
 from subprocess import PIPE, Popen, call
 from typing import TYPE_CHECKING, cast
 
+import pexpect
+import pytest
+
 if TYPE_CHECKING:
     from io import TextIOBase
-
-import pexpect
 
 from normfn.core import main
 
 COMMAND = [sys.executable, "-m", "normfn"]
 
 
-class NormalizeFilenameTestCase(unittest.TestCase):
-    def setUp(self) -> None:
-        self.working_dir: Path = Path(tempfile.mkdtemp())
+class NormfnTestCase:
+    working_dir: Path
+
+    @pytest.fixture(autouse=True)
+    def setup_working_dir(self, tmp_path: Path) -> None:
+        self.working_dir = tmp_path
 
     def get_date_prefix(self, postfix_dash: bool = True) -> str:  # noqa: FBT002
         str_return = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
@@ -109,9 +112,9 @@ class NormalizeFilenameTestCase(unittest.TestCase):
             error = error_bytes.decode("utf-8")
 
             if expect_output:
-                self.assertNotEqual("", output)
+                assert output != ""
             else:
-                self.assertEqual("", output)
+                assert output == ""
 
             with open(undo_log_file.name) as undo_log_file_read:  # noqa: PTH123
                 undo_log_file_contents = undo_log_file_read.readlines()
@@ -140,7 +143,7 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         extra_params: list[str] | None = None,
         expected_exit_status: int | None = None,
         expected_output_regex: str | None = None,
-    ) -> types.GeneratorType:
+    ) -> Iterator[pexpect.spawn]:
         if extra_params is None:
             extra_params = []
 
@@ -162,11 +165,11 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         child.close()
 
         if expected_exit_status is not None:
-            self.assertEqual(expected_exit_status, child.exitstatus)
+            assert child.exitstatus == expected_exit_status
 
         if expected_output_regex is not None:
-            self.assertRegex(
-                str(child.logfile_read.getvalue(), "utf-8"), expected_output_regex
+            assert re.search(
+                expected_output_regex, str(child.logfile_read.getvalue(), "utf-8")
             )
 
     def touch(self, fname: Path) -> None:
@@ -185,20 +188,5 @@ class NormalizeFilenameTestCase(unittest.TestCase):
         with fname.open() as filename:
             return filename.read()
 
-    def assert_path_doesnt_exist(self, path: Path) -> None:
-        self.assertFalse(path.exists())
-
-    def assert_path_exists(self, path: Path) -> None:
-        self.assertTrue(path.exists())
-
     def is_root(self) -> bool:
         return os.geteuid() == 0
-
-    def tear_down(self) -> None:
-        # Give everything write permissions before rmtree'ing.
-        for root, dirs, files in self.working_dir.walk():
-            dirs_and_files = dirs + files
-            for dir_and_file in dirs_and_files:
-                (root / dir_and_file).chmod(S_IRUSR | S_IWUSR | S_IXUSR)
-
-        shutil.rmtree(self.working_dir)

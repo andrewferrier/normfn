@@ -1,25 +1,20 @@
 import re
 from pathlib import Path
 
-from tests.base_test_classes import NormalizeFilenameTestCase
+from tests.base_test_classes import NormfnTestCase
 
 
-class TestSubprocessBasic(NormalizeFilenameTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-
+class TestSubprocessBasic(NormfnTestCase):
     def test_basicdateprefix(self) -> None:
         filename = self.working_dir / "blah.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdateprefix_cwd(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -27,110 +22,108 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, output, error, _) = self.invoke_as_subprocess(
             [Path("blah.txt")], cwd=self.working_dir
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_nodatemoveneeded(self) -> None:
         filename = self.working_dir / "2015-01-01-blah.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertTrue(filename.exists())
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert filename.exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_nodatemoveneeded2(self) -> None:
         filename = self.working_dir / "2015-01-01T12-00-00-blah.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertTrue(filename.exists())
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert filename.exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_nodatemoveneeded_partial(self) -> None:
         filename = self.working_dir / "2015-01-blah.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertTrue(filename.exists())
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert filename.exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdatemove(self) -> None:
         filename = self.working_dir / "blah-2015-01-01.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-01-blah.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdatemove_partial(self) -> None:
         filename = self.working_dir / "blah-2015-01.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-blah.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_datemove_partial(self) -> None:
         filename = self.working_dir / "blah-2015-01-bling.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-blah-bling.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-blah-bling.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdatemove_underscore(self) -> None:
         filename = self.working_dir / "blah_2015_01_01.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-01-blah.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdatemove2(self) -> None:
         filename = self.working_dir / "blah-2015-01-01-bling.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-01-blah-bling.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01-blah-bling.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdatemove2_underscore(self) -> None:
         filename = self.working_dir / "blah_2015_01_01_bling.txt"
         self.touch(filename)
         (rc, output, error, _) = self.invoke_as_subprocess([filename])
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-01-blah_bling.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01-blah_bling.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_basicdateprefix_interactive_yes(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -141,14 +134,12 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
             extra_params=["--interactive"],
             expect_output=True,
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertRegex(output, "Move " + re.escape(str(filename)) + ".*")
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert re.search("Move " + re.escape(str(filename)) + ".*", output)
+        assert error == ""
 
     def test_basicdateprefix_interactive_no(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -159,14 +150,12 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
             extra_params=["--interactive"],
             expect_output=True,
         )
-        self.assertEqual(0, rc)
-        self.assertTrue(filename.exists())
-        self.assertFalse(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertRegex(output, "Move " + re.escape(str(filename)) + ".*")
-        self.assertEqual("", error)
+        assert rc == 0
+        assert filename.exists()
+        assert not (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert re.search("Move " + re.escape(str(filename)) + ".*", output)
+        assert error == ""
 
     def test_basicdateprefix_interactive_oneyesoneno(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -179,25 +168,21 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
             extra_params=["--interactive"],
             expect_output=True,
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assertTrue(filename2.exists())
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertFalse(
-            (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
-        )
-        self.assertEqual(2, self.directory_file_count(self.working_dir))
-        self.assertRegex(
-            output,
+        assert rc == 0
+        assert not filename.exists()
+        assert filename2.exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert not (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 2
+        assert re.search(
             "(?is)Move "
             + re.escape(str(filename))
             + ".*Move "
             + re.escape(str(filename2))
             + ".*",
+            output,
         )
-        self.assertEqual("", error)
+        assert error == ""
 
     def test_basicdateprefix_interactive_oneyesquit(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -212,29 +197,23 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
             extra_params=["--interactive"],
             expect_output=True,
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assertTrue(filename2.exists())
-        self.assertTrue(filename3.exists())
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertFalse(
-            (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
-        )
-        self.assertFalse(
-            (self.working_dir / (self.get_date_prefix() + "blah3.txt")).exists()
-        )
-        self.assertEqual(3, self.directory_file_count(self.working_dir))
-        self.assertRegex(
-            output,
+        assert rc == 0
+        assert not filename.exists()
+        assert filename2.exists()
+        assert filename3.exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert not (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
+        assert not (self.working_dir / (self.get_date_prefix() + "blah3.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 3
+        assert re.search(
             "(?is)Move "
             + re.escape(str(filename))
             + ".*Move "
             + re.escape(str(filename2))
             + ".*",
+            output,
         )
-        self.assertEqual("", error)
+        assert error == ""
 
     def test_basicdateprefix_interactive_edit(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -252,9 +231,9 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
                 child.sendcontrol("H")
             child.send("bling.txt\n")
 
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "bling.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
+        assert not filename.exists()
+        assert (self.working_dir / "bling.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
 
     def test_logfile(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -264,27 +243,20 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, _, error, undo_log_lines) = self.invoke_as_subprocess(
             [filename, filename2], use_undo_file=True
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assertFalse(filename2.exists())
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertTrue(
-            (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
-        )
-        self.assertEqual(2, self.directory_file_count(self.working_dir))
-        self.assertEqual("", error)
-        self.assertEqual(0, self.execute_undo_commands(undo_log_lines))
-        self.assertTrue(filename.exists())
-        self.assertTrue(filename2.exists())
-        self.assertFalse(
-            (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
-        )
-        self.assertFalse(
-            (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
-        )
-        self.assertEqual(2, self.directory_file_count(self.working_dir))
+        assert rc == 0
+        assert not filename.exists()
+        assert not filename2.exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 2
+        assert error == ""
+        assert undo_log_lines is not None
+        assert self.execute_undo_commands(undo_log_lines) == 0
+        assert filename.exists()
+        assert filename2.exists()
+        assert not (self.working_dir / (self.get_date_prefix() + "blah.txt")).exists()
+        assert not (self.working_dir / (self.get_date_prefix() + "blah2.txt")).exists()
+        assert self.directory_file_count(self.working_dir) == 2
 
     def test_logfile_with_spaces(self) -> None:
         filename = self.working_dir / "sub dir" / "foo bar.txt"
@@ -292,19 +264,20 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, _, error, undo_log_lines) = self.invoke_as_subprocess(
             [filename], use_undo_file=True
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(
+        assert rc == 0
+        assert not filename.exists()
+        assert (
             self.working_dir / "sub dir" / (self.get_date_prefix() + "foo bar.txt")
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir / "sub dir"))
-        self.assertEqual("", error)
-        self.assertEqual(0, self.execute_undo_commands(undo_log_lines))
-        self.assertTrue(filename.exists())
-        self.assert_path_doesnt_exist(
+        ).exists()
+        assert self.directory_file_count(self.working_dir / "sub dir") == 1
+        assert error == ""
+        assert undo_log_lines is not None
+        assert self.execute_undo_commands(undo_log_lines) == 0
+        assert filename.exists()
+        assert not (
             self.working_dir / "sub dir" / (self.get_date_prefix() + "foo bar.txt")
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir / "sub dir"))
+        ).exists()
+        assert self.directory_file_count(self.working_dir / "sub dir") == 1
 
     def test_logfile_with_single_quotes(self) -> None:
         filename = self.working_dir / "sub'dir" / "foo'bar.txt"
@@ -312,19 +285,20 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, _, error, undo_log_lines) = self.invoke_as_subprocess(
             [filename], use_undo_file=True
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(
+        assert rc == 0
+        assert not filename.exists()
+        assert (
             self.working_dir / "sub'dir" / (self.get_date_prefix() + "foo'bar.txt")
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir / "sub'dir"))
-        self.assertEqual("", error)
-        self.assertEqual(0, self.execute_undo_commands(undo_log_lines))
-        self.assertTrue(filename.exists())
-        self.assert_path_doesnt_exist(
+        ).exists()
+        assert self.directory_file_count(self.working_dir / "sub'dir") == 1
+        assert error == ""
+        assert undo_log_lines is not None
+        assert self.execute_undo_commands(undo_log_lines) == 0
+        assert filename.exists()
+        assert not (
             self.working_dir / "sub'dir" / (self.get_date_prefix() + "foo'bar.txt")
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir / "sub'dir"))
+        ).exists()
+        assert self.directory_file_count(self.working_dir / "sub'dir") == 1
 
     def test_directory_withfiles_recursive_logfile(self) -> None:
         sub_working_dir = self.working_dir / "subWorkingDir"
@@ -337,37 +311,36 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, _, error, undo_log_lines) = self.invoke_as_subprocess(
             [sub_working_dir], extra_params=["--recursive"], use_undo_file=True
         )
-        self.assertEqual(0, rc)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert error == ""
         newsub_working_dir = self.working_dir / (
             self.get_date_prefix() + "subWorkingDir"
         )
-        self.assert_path_doesnt_exist(filename)
-        self.assert_path_doesnt_exist(filename2)
-        self.assert_path_doesnt_exist(filename3)
-        self.assert_path_exists(newsub_working_dir / "2015-01-01-blah_bling.txt")
-        self.assert_path_exists(newsub_working_dir / "2015-03-04-xyz.txt")
-        self.assert_path_exists(
+        assert not filename.exists()
+        assert not filename2.exists()
+        assert not filename3.exists()
+        assert (newsub_working_dir / "2015-01-01-blah_bling.txt").exists()
+        assert (newsub_working_dir / "2015-03-04-xyz.txt").exists()
+        assert (
             newsub_working_dir
             / (self.get_date_prefix() + "subWorkingDir2")
             / "2015-03-04-abc.txt"
-        )
-        self.assertEqual(2, self.directory_file_count(newsub_working_dir))
-        self.assertEqual(
-            1,
+        ).exists()
+        assert self.directory_file_count(newsub_working_dir) == 2
+        assert (
             self.directory_file_count(
                 newsub_working_dir / (self.get_date_prefix() + "subWorkingDir2")
-            ),
+            )
+            == 1
         )
-        self.assertEqual(0, self.execute_undo_commands(undo_log_lines))
-        self.assert_path_doesnt_exist(newsub_working_dir)
-        self.assert_path_exists(filename)
-        self.assert_path_exists(filename2)
-        self.assert_path_exists(filename3)
-        self.assertEqual(2, self.directory_file_count(sub_working_dir))
-        self.assertEqual(
-            1, self.directory_file_count(sub_working_dir / "subWorkingDir2")
-        )
+        assert undo_log_lines is not None
+        assert self.execute_undo_commands(undo_log_lines) == 0
+        assert not newsub_working_dir.exists()
+        assert filename.exists()
+        assert filename2.exists()
+        assert filename3.exists()
+        assert self.directory_file_count(sub_working_dir) == 2
+        assert self.directory_file_count(sub_working_dir / "subWorkingDir2") == 1
 
     def test_discardprevioussuffix(self) -> None:
         filename = self.working_dir / "blah.txt"
@@ -375,14 +348,14 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, output, error, _) = self.invoke_as_subprocess(
             [filename], extra_params=["--discard-existing-name"]
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(
+        assert rc == 0
+        assert not filename.exists()
+        assert (
             self.working_dir / (self.get_date_prefix(postfix_dash=False) + ".txt")
-        )
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        ).exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""
 
     def test_discardprevioussuffix_existingdate(self) -> None:
         filename = self.working_dir / "2015-01-01-blah.txt"
@@ -390,9 +363,9 @@ class TestSubprocessBasic(NormalizeFilenameTestCase):
         (rc, output, error, _) = self.invoke_as_subprocess(
             [filename], extra_params=["--discard-existing-name"]
         )
-        self.assertEqual(0, rc)
-        self.assertFalse(filename.exists())
-        self.assert_path_exists(self.working_dir / "2015-01-01.txt")
-        self.assertEqual(1, self.directory_file_count(self.working_dir))
-        self.assertEqual("", output)
-        self.assertEqual("", error)
+        assert rc == 0
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+        assert output == ""
+        assert error == ""

@@ -60,11 +60,12 @@ ignore = [
     "FBT001",
     "G004",
     "ISC003",
-    "PT009",
-    "PT027",
     "PTH201",
     "TRY003",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PLR2004", "S101"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

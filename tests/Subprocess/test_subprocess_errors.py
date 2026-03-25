@@ -1,13 +1,12 @@
-from tests.base_test_classes import NormalizeFilenameTestCase
+import re
+
+from tests.base_test_classes import NormfnTestCase
 
 
-class TestSubprocessErrors(NormalizeFilenameTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-
+class TestSubprocessErrors(NormfnTestCase):
     def test_no_files(self) -> None:
         (rc, _, error, _) = self.invoke_as_subprocess([], expect_output=True)
-        self.assertEqual(2, rc)
-        self.assertEqual(0, self.directory_file_count(self.working_dir))
-        self.assertRegex(error, ".*You.*must.*specify.*some.*")
-        self.assertNotIn("Traceback", error)
+        assert rc == 2
+        assert self.directory_file_count(self.working_dir) == 0
+        assert re.search(".*You.*must.*specify.*some.*", error)
+        assert "Traceback" not in error
