@@ -1,29 +1,93 @@
 # normfn
 
-`normfn` is a command-line utility designed to rename files and directories to
-follow a normalized pattern including a leading date. This is a modified version
-of Mark Hurst's file naming strategy from the book [Bit
-Literacy](https://bitliteracy.com/), but based on the international standard,
-ISO-8601.
+`normfn` is a command-line utility that 'normalizes' (renames) files and
+directories to use a leading [ISO-8601](https://xkcd.com/1179/) date prefix
+(`YYYY-MM-DD-rest-of-name.ext`), inspired by Mark Hurst's file naming strategy
+from [Bit Literacy](https://bitliteracy.com/). Files sort naturally and
+consistently in any file manager or shell listing.
 
-`normfn` has an opinionated sense of what a filename should look
-like. It prefers `YYYY-MM-DD-rest-of-the-filename.ext`, where `Y`, `M`, and
-`D` are the year, month and day that filename corresponds to respectively. At
-the moment, you cannot change this pattern, although longer-term it made be made
-configurable if there's enough interest.
+It detects and reformats dates already present in filenames, or adds one from
+the file's timestamps if none is found.
 
-This default pattern is the ISO-8601 pattern, which is
-[superior](https://xkcd.com/1179/). In particular, it's useful because it sorts
-naturally when listing files, browsing them with a file manager, etc.
+## Features
 
-In general, run with the default options, `normfn` will try to locate anything
-that it thinks looks like a date in the filename, using some built-in
-heuristics, and reformat the filename to follow the pattern above. If it doesn't
-find a date, it will add one, using one of the dates/times it finds in the
-filesystem that correspond to the file. On Linux and OS X (the supported
-platforms), there are three: the ctime, the mtime, and the time *now* --- i.e.
-the time when you run `normfn`. Using the `--earliest` option --- the default
---- will pick whichever of these times is earliest (oldest).
+- **Intelligent date detection**: Recognises a wide range of date formats
+  already embedded in filenames (e.g. `2024_03_15`, `15-03-2024`, `March 15
+  2024`) and reformats them to ISO-8601.
+
+- **Timestamp fallback**: When no date is found in the filename, normfn falls
+  back to the file's filesystem timestamps (ctime and mtime) or the current
+  time. By default (`--earliest`), it uses the oldest; `--latest` uses the
+  newest; `--now` always uses the current time. Note: on Linux and macOS, ctime
+  is *not* file creation time.
+
+- **PDF metadata**: For PDF files, normfn reads the embedded creation date from
+  the file's metadata (if available and the optional `pypdf` library is
+  installed), preferring it over filesystem timestamps.
+
+- **Time-based naming**: Use `--add-time` to include the time of day (not just
+  the date) in the prefix, producing filenames like
+  `2026-03-27T09-15-00-report.pdf`.
+
+- **Recursive processing**: Use `-r`/`--recursive` to rename files throughout an
+  entire directory tree.
+
+- **Undo log**: Every rename is recorded as a shell command in
+  `~/.local/state/normfn-undo.log.sh` so it can be reversed. (See the comments
+  at the top of that file for instructions on how to undo changes.)
+
+- **Default exclusions**: By default, normfn skips hidden files, lock files,
+  files inside version-control directories, and other misc files. Use `--all` to
+  override this.
+
+## Examples
+
+Add a date prefix to a file that has none (uses the file's oldest timestamp):
+
+(`-v` is optional, but shows renames):
+
+```sh
+$ normfn -v report.pdf
+INFO: report.pdf moved to 2026-03-27-report.pdf
+```
+
+Reformat a date already in the filename to ISO-8601:
+
+```sh
+$ normfn -v "Invoice_2024_03_15_acme.pdf"
+INFO: Invoice_2024_03_15_acme.pdf moved to 2024-03-15-Invoice_acme.pdf
+```
+
+Preview what would happen without making changes:
+
+```sh
+$ normfn --dry-run *.txt
+INFO: Not moving notes.txt to 2026-03-27-notes.txt; dry run.
+INFO: Not moving todo-25-12-2025.txt to 2025-12-25-todo.txt; dry run.
+```
+
+Add a time component to the prefix:
+
+```sh
+$ normfn -v --add-time meeting-notes.docx
+INFO: meeting-notes.docx moved to 2026-03-27T09-15-00-meeting-notes.docx
+```
+
+Replace the entire filename with just the date prefix:
+
+```sh
+$ normfn -v --discard-existing-name "Invoice_2024_03_15_acme.pdf"
+INFO: Invoice_2024_03_15_acme.pdf moved to 2024-03-15.pdf
+```
+
+Rename a directory and all files inside it recursively:
+
+```sh
+$ normfn -v -r project/
+INFO: project/ moved to 2026-03-27-project/
+INFO: 2026-03-27-project/report.pdf moved to 2026-03-27-project/2024-06-01-report.pdf
+INFO: 2026-03-27-project/notes.txt moved to 2026-03-27-project/2026-03-27-notes.txt
+```
 
 ## Installation
 

@@ -178,7 +178,7 @@ def parse_arguments(argv: list[str]) -> Args:
             "Use the latest of ctime and mtime "
             "to define a file prefix for files without them. "
             "Note: ctime is *not* "
-            "file creation on Linux/OS X; see "
+            "file creation on Linux/macOS; see "
             "http://lwn.net/Articles/397442/."
         ),
     )
