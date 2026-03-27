@@ -169,7 +169,7 @@ options:
                         filenames without them.
   --latest, --newest    Use the latest of ctime and mtime to define a file
                         prefix for files without them. Note: ctime is *not*
-                        file creation on Linux/OS X; see
+                        file creation on Linux/macOS; see
                         http://lwn.net/Articles/397442/.
   --earliest, --oldest  Use earliest of ctime and mtime to define a file
                         prefix for files without them. This is the default.
