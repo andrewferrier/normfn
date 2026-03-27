@@ -66,11 +66,8 @@ pacman -U normfn-*.pkg.tar.zst
 <!-- [START AUTO UPDATE] -->
 <!-- Please keep comment here to allow auto-update -->
 ```
-usage: normfn [-v] [-h] [-V] [-n] [-i] [-a] [-f] [-t] [-d] [-r]
-              [--max-years-ahead MAX_YEARS_AHEAD]
-              [--max-years-behind MAX_YEARS_BEHIND]
-              [--undo-log-file UNDO_LOG_FILE | --no-undo-log-file]
-              [--now | --latest | --earliest]
+usage: normfn [-v] [-h] [-V] [--config PATH] [--initialize-config] [-n] [-i]
+              [-a] [-f] [-t] [-d] [-r] [--now | --latest | --earliest]
               [filename ...]
 
 Normalizes filenames by prefixing a date to them. See
@@ -84,6 +81,12 @@ options:
                         verbose.
   -h, --help            Show help information for normfn.
   -V, --version         Show the version of normfn and exit.
+  --config PATH         Path to the configuration file. Defaults to
+                        /home/runner/.config/normfn/normfn.toml.
+  --initialize-config   Create a template configuration file at the path given
+                        by --config (default:
+                        /home/runner/.config/normfn/normfn.toml) and exit.
+                        Fails if the file already exists.
   -n, --dry-run         Don't actually make any changes, just show them.
                         Forces a single level of verbosity (-v).
   -i, --interactive     Ask about each change before it is done.
@@ -98,18 +101,6 @@ options:
   -r, --recursive       Recurse into directories specified on the command
                         line. The default is not to do this, and simply look
                         at the name of the directory itself.
-  --max-years-ahead MAX_YEARS_AHEAD
-                        Consider years further ahead from now than this not to
-                        be valid years. Defaults to 5.
-  --max-years-behind MAX_YEARS_BEHIND
-                        Consider years further behind from now than this not
-                        to be valid years. Defaults to 30.
-  --undo-log-file UNDO_LOG_FILE
-                        The name of the shell script to log 'undo commands'
-                        for normfn; see the instructions in the file to use.
-                        Defaults to /home/runner/.local/state/normfn-
-                        undo.log.sh
-  --no-undo-log-file    Inverse of --undo-log-file; don't store undo commands.
   --now                 Use date and time now as the default file prefix for
                         filenames without them.
   --latest, --newest    Use the latest of ctime and mtime to define a file
