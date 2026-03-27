@@ -1,6 +1,5 @@
 import calendar
 import datetime
-import functools
 import logging
 import re
 from collections.abc import Iterable
@@ -11,6 +10,12 @@ from normfn.args import Args
 from normfn.files import get_pdf_creation_date, get_timetouse
 
 logger = logging.getLogger(__name__)
+
+# Captured at module import time, before any locale.setlocale() call in main().
+# Used to ensure English month names are always recognised even when a
+# non-English system locale is active.
+_ENGLISH_MONTH_NAMES: list[str] = list(calendar.month_name)
+_ENGLISH_MONTH_ABBRS: list[str] = list(calendar.month_abbr)
 
 
 class _InvalidOrdinalError(Exception):
@@ -82,12 +87,32 @@ def strip_ordinal_suffix(day_str: str) -> str:
     return day_str  # Invalid ordinal, keep as-is
 
 
-@functools.lru_cache
+def _month_name_to_digit(month_name: str) -> int:
+    """Convert a month name to its 1-based digit, trying system locale then English."""
+    month_lower = month_name.lower()
+    for names in (
+        [s.lower() for s in calendar.month_abbr],
+        [s.lower() for s in calendar.month_name],
+        [s.lower() for s in _ENGLISH_MONTH_ABBRS],
+        [s.lower() for s in _ENGLISH_MONTH_NAMES],
+    ):
+        if month_lower in names:
+            return names.index(month_lower)
+    msg = f"Unrecognised month name: {month_name!r}"
+    raise ValueError(msg)
+
+
 def create_regex(four_digit_year_regex: str, all_digit_year_regex: str) -> str:
+    # Combine locale-specific month names with English so that both are always
+    # recognised. dict.fromkeys preserves order while deduplicating.
+    locale_names = list(calendar.month_name[1:13])
+    locale_abbrs = list(calendar.month_abbr[1:13])
+    all_names = list(dict.fromkeys(locale_names + _ENGLISH_MONTH_NAMES[1:]))
+    all_abbrs = list(dict.fromkeys(locale_abbrs + _ENGLISH_MONTH_ABBRS[1:]))
     month_names_only = (
-        "|".join(map(insensitiveize, calendar.month_name[1:13]))
+        "|".join(map(insensitiveize, all_names))
         + "|"
-        + "|".join(map(insensitiveize, calendar.month_abbr[1:13]))
+        + "|".join(map(insensitiveize, all_abbrs))
     )
     month = r"(0[1-9]|1[012]|[1-9](?!\d)|" + month_names_only + ")"
     day = r"(0[1-9]|[12]\d|3[01]|[1-9](?!\d))"
@@ -217,16 +242,7 @@ def datetime_prefix(  # noqa: C901
             year = year_regexes.two_to_four_digit_year_map[year]
 
         if not month.isdigit():
-            try:
-                month_digit = list(map(str.lower, calendar.month_abbr)).index(
-                    month.lower()
-                )
-            except ValueError:
-                month_digit = list(map(str.lower, calendar.month_name)).index(
-                    month.lower()
-                )
-
-            month = str(month_digit)
+            month = str(_month_name_to_digit(month))
 
         if len(month) == 1:
             month = month.zfill(2)

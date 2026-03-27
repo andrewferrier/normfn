@@ -1,3 +1,4 @@
+import locale
 import logging
 import sys
 from contextlib import suppress
@@ -33,6 +34,13 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
             syserr_handler.setLevel(logging.INFO)
         else:
             syserr_handler.setLevel(logging.WARNING)
+
+    try:
+        locale.setlocale(locale.LC_TIME, "")
+    except locale.Error:
+        logger.warning(
+            "Could not apply system locale for date parsing; using English month names."
+        )
 
     if args.initialize_config:
         config_path = args.config or get_default_config_path()

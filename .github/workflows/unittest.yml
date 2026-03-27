@@ -23,5 +23,7 @@ jobs:
           version: "0.9.26"
       - name: Install the project
         run: uv sync --locked --all-extras --dev
+      - name: Install test locales
+        run: sudo locale-gen de_DE.UTF-8 fr_FR.UTF-8
       - name: Run tests
         run: uv run pytest
