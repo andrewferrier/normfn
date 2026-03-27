@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -37,7 +38,8 @@ class NormfnTestCase:
         monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
 
     def get_date_prefix(self, postfix_dash: bool = True) -> str:  # noqa: FBT002
-        str_return = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
+        local_now = datetime.datetime.now(datetime.UTC).astimezone()
+        str_return = local_now.strftime("%Y-%m-%d")
         if postfix_dash is True:
             str_return = str_return + "-"
 
@@ -189,6 +191,31 @@ class NormfnTestCase:
             assert re.search(
                 expected_output_regex, str(child.logfile_read.getvalue(), "utf-8")
             )
+
+    def set_local_timezone(
+        self,
+        tz: str,
+        request: pytest.FixtureRequest,
+    ) -> None:
+        """
+        Set the local timezone for a test, restoring it on teardown.
+
+        POSIX TZ convention note: the offset sign is *inverted* vs ISO 8601.
+        TZ='UTC-2' means local time = UTC + 2 hours (i.e. UTC+2).
+        TZ='UTC+5' means local time = UTC - 5 hours (i.e. UTC-5).
+        """
+        original_tz = os.environ.get("TZ")
+        os.environ["TZ"] = tz
+        time.tzset()
+
+        def _restore() -> None:
+            if original_tz is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = original_tz
+            time.tzset()
+
+        request.addfinalizer(_restore)
 
     def touch(self, fname: Path) -> None:
         fname.parent.mkdir(parents=True, exist_ok=True)

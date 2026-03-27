@@ -38,7 +38,7 @@ def first_not_none[T](values: Iterable[T | None]) -> T | None:
 
 
 def make_year_regexes(max_years_behind: int, max_years_ahead: int) -> YearRegexes:
-    year_now = datetime.datetime.now(tz=datetime.UTC).year
+    year_now = datetime.datetime.now(tz=datetime.UTC).astimezone().year
     year_range_list = [
         str(year)
         for year in range(year_now - max_years_behind, year_now + max_years_ahead)
@@ -323,11 +323,13 @@ def datetime_prefix(  # noqa: C901
             ("-" + newname) if not args.discard_existing_name else ""
         )
 
+        local_timetouse = timetouse.astimezone()
         if args.add_time:
             newname = (
-                timetouse.strftime("%Y-%m-%dT%H-%M-%S") + newname_with_dash_if_needed
+                local_timetouse.strftime("%Y-%m-%dT%H-%M-%S")
+                + newname_with_dash_if_needed
             )
         else:
-            newname = timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
+            newname = local_timetouse.strftime("%Y-%m-%d") + newname_with_dash_if_needed
 
     return newname

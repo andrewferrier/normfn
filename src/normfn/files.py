@@ -68,7 +68,7 @@ def get_pdf_creation_date(filename: Path) -> datetime.datetime | None:
                     type(creation_date),
                 )
             elif creation_date.tzinfo is None:
-                result = creation_date.replace(tzinfo=datetime.UTC)
+                result = creation_date.astimezone()
             else:
                 result = creation_date
     except Exception as e:  # noqa: BLE001

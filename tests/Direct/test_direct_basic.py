@@ -812,3 +812,113 @@ class TestDirectBasic(NormfnTestCase):
         self.touch(filename)
         self.invoke_directly([filename])
         assert (state_dir / "normfn-undo.log.sh").exists()
+
+    def test_mtime_east_of_utc_crosses_midnight(
+        self, request: pytest.FixtureRequest
+    ) -> None:
+        # TZ=UTC-2 means local is UTC+2.
+        # File mtime 2015-01-01 23:00:00 UTC = 2015-01-02 01:00:00 locally.
+        self.set_local_timezone("UTC-2", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 1, 1, 23, 0, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-02-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+
+    def test_mtime_west_of_utc_crosses_midnight(
+        self, request: pytest.FixtureRequest
+    ) -> None:
+        # TZ=UTC+2 means local is UTC-2.
+        # File mtime 2015-01-02 01:00:00 UTC = 2015-01-01 23:00:00 locally.
+        self.set_local_timezone("UTC+2", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 1, 2, 1, 0, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+
+    def test_mtime_east_of_utc_add_time(self, request: pytest.FixtureRequest) -> None:
+        # TZ=UTC-5 means local is UTC+5.
+        # File mtime 2015-01-01 20:00:00 UTC = 2015-01-02 01:00:00 locally.
+        self.set_local_timezone("UTC-5", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 1, 1, 20, 0, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename], extra_params=["--add-time"])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-02T01-00-00-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+
+    def test_dst_summer_timestamp_uses_dst_offset(
+        self, request: pytest.FixtureRequest
+    ) -> None:
+        # America/New_York is EDT (UTC-4) in summer.
+        # 2015-07-01 03:00:00 UTC = 2015-06-30 23:00:00 EDT.
+        self.set_local_timezone("America/New_York", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 7, 1, 3, 0, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-06-30-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+
+    def test_dst_winter_timestamp_uses_standard_offset(
+        self, request: pytest.FixtureRequest
+    ) -> None:
+        # America/New_York is EST (UTC-5) in winter.
+        # 2015-01-02 04:00:00 UTC = 2015-01-01 23:00:00 EST.
+        self.set_local_timezone("America/New_York", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 1, 2, 4, 0, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-01-01-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+
+    def test_dst_file_from_dst_period_uses_dst_time_not_current_offset(
+        self, request: pytest.FixtureRequest
+    ) -> None:
+        # A file's timestamp from a DST period must produce a time reflecting the
+        # UTC offset in effect *at that timestamp*, not the current UTC offset.
+        # This matters when normfn is run in winter (GMT, UTC+0) but the file is
+        # from summer (BST, UTC+1): without historical DST lookup, the time would
+        # appear 1 hour earlier than it should.
+        # 2015-07-15 21:30:00 UTC = 2015-07-15 22:30:00+01:00 (BST).
+        self.set_local_timezone("Europe/London", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 7, 15, 21, 30, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename], extra_params=["--add-time"])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-07-15T22-30-00-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
+
+    def test_dst_file_from_non_dst_period_uses_standard_time_not_current_offset(
+        self, request: pytest.FixtureRequest
+    ) -> None:
+        # A file's timestamp from a non-DST period must produce a time reflecting
+        # UTC+0 (GMT), even when normfn is run during summer (BST, UTC+1).
+        # Without historical DST lookup, the time and possibly the date would be
+        # wrong (e.g. 22:30 UTC would become 23:30 and roll into the next day).
+        # 2015-12-15 22:30:00 UTC = 2015-12-15 22:30:00+00:00 (GMT).
+        self.set_local_timezone("Europe/London", request)
+        filename = self.working_dir / "blah.txt"
+        self.touch(filename)
+        ts = datetime.datetime(2015, 12, 15, 22, 30, 0, tzinfo=datetime.UTC).timestamp()
+        os.utime(filename, (ts, ts))
+        self.invoke_directly([filename], extra_params=["--add-time"])
+        assert not filename.exists()
+        assert (self.working_dir / "2015-12-15T22-30-00-blah.txt").exists()
+        assert self.directory_file_count(self.working_dir) == 1
