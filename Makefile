@@ -9,10 +9,16 @@ test:
 	uv run pytest
 
 builddeb:
-	sudo apt-get install build-essential fakeroot dpkg-dev
+	sudo apt-get install build-essential fakeroot dpkg-dev python3-pip
 	mkdir -p $(TEMPDIR)/DEBIAN
 	sed 's/Version: .*/Version: $(shell git describe --tags --dirty | cut -c 2-)/' debian/DEBIAN/control_template > $(TEMPDIR)/DEBIAN/control
-	pip install --prefix=/usr --root=$(TEMPDIR) --no-deps .
+	uv build --wheel --out-dir $(TEMPDIR)/wheel
+	python3 -m pip install --prefix=/usr --root=$(TEMPDIR) --no-deps $(TEMPDIR)/wheel/*.whl
+	rm -rf $(TEMPDIR)/wheel
+	PYVER=$$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"); \
+	mkdir -p $(TEMPDIR)/usr/lib/python3/dist-packages; \
+	mv $(TEMPDIR)/usr/lib/python$${PYVER}/site-packages/* $(TEMPDIR)/usr/lib/python3/dist-packages/; \
+	rm -rf $(TEMPDIR)/usr/lib/python$${PYVER}
 	mkdir -p $(TEMPDIR)/usr/share/doc/normfn
 	cp README* $(TEMPDIR)/usr/share/doc/normfn
 	cp LICENSE* $(TEMPDIR)/usr/share/doc/normfn
