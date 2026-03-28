@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/andrewferrier/normfn/compare/v3.0.0...v3.0.1) (2026-03-28)
+
+
+### Bug Fixes
+
+* Further fix Debian build ([67bf03e](https://github.com/andrewferrier/normfn/commit/67bf03ed294a1fe238dc9b1903a42f195e9d3691))
+
 ## [3.0.0](https://github.com/andrewferrier/normfn/compare/v2.1.0...v3.0.0) (2026-03-28)
 
 
