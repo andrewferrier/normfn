@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.0.0](https://github.com/andrewferrier/normfn/compare/v2.1.0...v3.0.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Move some lesser-used CLI options to config options - closes #104
+
+### Features
+
+* Move some lesser-used CLI options to config options - closes [#104](https://github.com/andrewferrier/normfn/issues/104) ([50dfb13](https://github.com/andrewferrier/normfn/commit/50dfb13dfe74ab317ef7f3d4fe31b529d3bfbdfc))
+
+
+### Bug Fixes
+
+* Improve Debian packaging ([3539993](https://github.com/andrewferrier/normfn/commit/3539993ac240504775d129d840ca876a6abe6b5b))
+* Minor tweaks ([fa5928c](https://github.com/andrewferrier/normfn/commit/fa5928cfeae43bf9d39f2f4e0cd8b981cbe58339))
+* Misc timezone issues - closes [#28](https://github.com/andrewferrier/normfn/issues/28) ([4034bf2](https://github.com/andrewferrier/normfn/commit/4034bf29b2343912c4c99d70b0eb036ce4243cc5))
+
 ## [2.1.0](https://github.com/andrewferrier/normfn/compare/v2.0.1...v2.1.0) (2026-03-24)
 
 
