@@ -30,6 +30,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "vcs"
+tag-pattern = "^v(?P<version>[0-9]+\\..*)"
+
+[tool.hatch.version.raw-options]
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "v[0-9]*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/normfn"]
