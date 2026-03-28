@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.3](https://github.com/andrewferrier/normfn/compare/v3.0.2...v3.0.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* Debian packaging issues ([139d602](https://github.com/andrewferrier/normfn/commit/139d60279c08ea17d0a559511318814fcd20ea37))
+
 ## [3.0.2](https://github.com/andrewferrier/normfn/compare/v3.0.1...v3.0.2) (2026-03-28)
 
 
