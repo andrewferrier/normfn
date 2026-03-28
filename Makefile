@@ -1,5 +1,4 @@
 ROOTDIR :=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-TEMPDIR := $(shell mktemp -t tmp.XXXXXX -d)
 
 ifeq ($(PREFIX),)
     PREFIX := /usr/local
@@ -8,23 +7,26 @@ endif
 test:
 	uv run pytest
 
+DEB_SYSTEM_DEPS := debhelper dh-python python3-all python3-installer
+
 builddeb:
-	sudo apt-get install build-essential fakeroot dpkg-dev python3-pip
-	mkdir -p $(TEMPDIR)/DEBIAN
-	sed 's/Version: .*/Version: $(shell git describe --tags --dirty | cut -c 2-)/' debian/DEBIAN/control_template > $(TEMPDIR)/DEBIAN/control
-	python3 -m pip install --prefix=/usr --root=$(TEMPDIR) --no-deps .
-	PYVER=$$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"); \
-	mkdir -p $(TEMPDIR)/usr/lib/python3/dist-packages; \
-	mv $(TEMPDIR)/usr/lib/python$${PYVER}/site-packages/* $(TEMPDIR)/usr/lib/python3/dist-packages/; \
-	rm -rf $(TEMPDIR)/usr/lib/python$${PYVER}
-	mkdir -p $(TEMPDIR)/usr/share/doc/normfn
-	cp README* $(TEMPDIR)/usr/share/doc/normfn
-	cp LICENSE* $(TEMPDIR)/usr/share/doc/normfn
-	fakeroot chmod -R u=rwX,go=rX $(TEMPDIR)
-	fakeroot dpkg-deb --build $(TEMPDIR) .
+	@missing=""; \
+	for cmd in dpkg-buildpackage dh dh_python3 uv; do \
+		command -v $$cmd > /dev/null 2>&1 || missing="$$missing $$cmd"; \
+	done; \
+	if [ -n "$$missing" ]; then \
+		echo "ERROR: Missing commands:$$missing"; \
+		echo "For system tools, install with: sudo apt-get install -y $(DEB_SYSTEM_DEPS)"; \
+		echo "For uv, see: https://docs.astral.sh/uv/getting-started/installation/"; \
+		exit 1; \
+	fi
+	uv sync
+	$(ROOTDIR)/debian/gen-changelog
+	dpkg-buildpackage --no-sign --build=binary
+	mv -f $(ROOTDIR)/../normfn_*.deb $(ROOTDIR)/
 
 buildarch:
-	makepkg --skipinteg --nodeps
+	makepkg --noconfirm --skipinteg --nodeps
 
 install_osx_finder:
 	cp src/normfn/__main__.py osx/services/normfn-finder.workflow/Contents/

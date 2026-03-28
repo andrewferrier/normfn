@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+export PYBUILD_NAME=normfn
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_build:
+	uv build --wheel
+
+override_dh_auto_install:
+	python3 $(CURDIR)/debian/install-wheel \
+		$(CURDIR)/debian/normfn dist/normfn-*.whl
+
+override_dh_auto_test:
+	uv run pytest

@@ -1,0 +1,8 @@
+changelog
+*.debhelper
+*.debhelper.log
+*.substvars
+files
+normfn/
+normfn-*/
+.debhelper/

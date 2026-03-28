@@ -1,0 +1,69 @@
+#!/bin/bash
+# Generate debian/changelog from git tags.
+# Full history: one entry per release tag, newest first.
+# If HEAD is ahead of or dirty from the latest tag, an extra entry is prepended.
+
+set -euo pipefail
+
+PACKAGE="normfn"
+MAINTAINER="Andrew Ferrier <andrew@andrewferrier.com>"
+DISTRIBUTION="unstable"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OUTPUT="${SCRIPT_DIR}/changelog"
+
+debian_version() {
+    # Convert git describe output to a Debian-acceptable upstream version.
+    # v3.0.1                     -> 3.0.1
+    # v3.0.1-2-gabcdef1          -> 3.0.1+git2.gabcdef1
+    # v3.0.1-2-gabcdef1-dirty    -> 3.0.1+git2.gabcdef1.dirty
+    echo "$1" | sed 's/^v//; s/-\([0-9]*\)-g\([a-f0-9]*\)/+git\1.\2/; s/-dirty/.dirty/'
+}
+
+rfc2822_date() {
+    # Return an RFC 2822 date for the given git ref (or empty for current time).
+    local ref="${1:-}"
+    if [[ -n "$ref" ]]; then
+        git log -1 --format="%aD" "$ref"
+    else
+        date -R
+    fi
+}
+
+{
+    # Check if HEAD is exactly on a tag and clean.
+    HEAD_DESCRIBE=$(git describe --tags --always --dirty 2>/dev/null || git rev-parse --short HEAD)
+    LATEST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -1)
+
+    HEAD_IS_EXACT_TAG=false
+    if [[ -n "$LATEST_TAG" ]]; then
+        LATEST_TAG_DESCRIBE=$(git describe --tags --always "$LATEST_TAG" 2>/dev/null)
+        if [[ "$HEAD_DESCRIBE" == "$LATEST_TAG_DESCRIBE" ]]; then
+            HEAD_IS_EXACT_TAG=true
+        fi
+    fi
+
+    if [[ "$HEAD_IS_EXACT_TAG" == "false" ]]; then
+        # HEAD is ahead of or dirty from the latest tag — emit a snapshot entry.
+        DEB_VERSION="$(debian_version "$HEAD_DESCRIBE")-1"
+        echo "${PACKAGE} (${DEB_VERSION}) ${DISTRIBUTION}; urgency=low"
+        echo ""
+        echo "  * Snapshot build."
+        echo ""
+        echo " -- ${MAINTAINER}  $(rfc2822_date)"
+        echo ""
+    fi
+
+    # One entry per release tag, newest first.
+    while IFS= read -r tag; do
+        DEB_VERSION="$(debian_version "$tag")-1"
+        echo "${PACKAGE} (${DEB_VERSION}) ${DISTRIBUTION}; urgency=low"
+        echo ""
+        echo "  * New upstream release."
+        echo ""
+        echo " -- ${MAINTAINER}  $(rfc2822_date "$tag")"
+        echo ""
+    done < <(git tag --sort=-version:refname | grep -E '^v[0-9]')
+
+} > "$OUTPUT"
+
+echo "Generated ${OUTPUT}"

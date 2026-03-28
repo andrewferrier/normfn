@@ -1,0 +1,22 @@
+Source: normfn
+Section: utils
+Priority: optional
+Maintainer: Andrew Ferrier <andrew@andrewferrier.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ python3-all,
+ python3-installer,
+Standards-Version: 4.7.0
+Homepage: https://github.com/andrewferrier/normfn
+Rules-Requires-Root: no
+
+Package: normfn
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}
+Suggests: python3-pexpect
+Replaces: normalize-filename
+Description: Utility which normalizes filenames by prefixing a date
+ normfn normalizes filenames and directories by prefixing them with
+ ISO-8601 formatted dates (YYYY-MM-DD), derived from the file's
+ metadata or content where possible.

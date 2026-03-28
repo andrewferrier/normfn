@@ -19,9 +19,9 @@ def _locale_available(loc: str) -> bool:
 
 
 def _require_locale(loc: str) -> None:
-    """Fail the test with installation instructions if the locale is not available."""
+    """Skip the test if the required locale is not available."""
     if not _locale_available(loc):
-        pytest.fail(
+        pytest.skip(
             f"Required locale {loc!r} is not installed on this system.\n"
             f"To install: sudo locale-gen {loc}\n"
         )

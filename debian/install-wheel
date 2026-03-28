@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Install a wheel into a Debian package staging directory using the deb_system scheme."""
+import glob
+import sys
+import sysconfig
+
+from installer import install
+from installer.destinations import SchemeDictionaryDestination
+from installer.sources import WheelFile
+
+destdir, wheel_glob = sys.argv[1], sys.argv[2]
+
+wheels = glob.glob(wheel_glob)
+if len(wheels) != 1:
+    raise SystemExit(f"Expected exactly 1 wheel matching {wheel_glob!r}, found: {wheels}")
+
+dest = SchemeDictionaryDestination(
+    sysconfig.get_paths(scheme="deb_system"),
+    interpreter=sys.executable,
+    script_kind="posix",
+    destdir=destdir,
+)
+
+with WheelFile.open(wheels[0]) as source:
+    install(source=source, destination=dest, additional_metadata={})

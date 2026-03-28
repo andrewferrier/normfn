@@ -22,17 +22,28 @@ jobs:
           release-type: simple
           package-name: normfn
           include-v-in-tag: false
+
+  build-deb:
+    runs-on: ubuntu-24.04
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    steps:
       - uses: actions/checkout@v6
-        if: ${{ steps.release.outputs.release_created }}
         with:
           fetch-depth: 0
-      - name: Build and upload Debian package
-        if: ${{ steps.release.outputs.release_created }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debhelper dh-python python3-all python3-installer
+      - name: Build Debian package
+        run: make builddeb
+      - name: Upload Debian package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          make builddeb
-          gh release upload ${{ steps.release.outputs.tag_name }} ./*.deb
+          gh release upload ${{ needs.release-please.outputs.tag_name }} ./*.deb
 
   build-arch:
     runs-on: ubuntu-24.04
@@ -52,7 +63,7 @@ jobs:
         run: |
           useradd -m builduser
           chown -R builduser:builduser .
-          runuser -u builduser -- makepkg --noconfirm --skipinteg --nodeps
+          runuser -u builduser -- make buildarch
       - name: Upload Arch package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
