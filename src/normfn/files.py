@@ -6,13 +6,13 @@ import shlex
 import shutil
 import textwrap
 from pathlib import Path
-from typing import Literal
+from typing import Final, Literal
 
 from normfn.exceptions import FatalError
 
 logger = logging.getLogger(__name__)
 
-EFFECTIVE_SEP: str = r"\\" if os.sep == "\\" else os.sep
+EFFECTIVE_SEP: Final[str] = r"\\" if os.sep == "\\" else os.sep
 
 BASENAME_EXCLUDE_PATTERNS: frozenset[re.Pattern[str]] = frozenset(
     {re.compile(r"\..*"), re.compile("Icon\r"), re.compile(r".*\.lo?ck")}

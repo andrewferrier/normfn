@@ -5,6 +5,7 @@ import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
 
 from normfn.args import Args
 from normfn.files import get_pdf_creation_date, get_timetouse
@@ -14,8 +15,8 @@ logger = logging.getLogger(__name__)
 # Captured at module import time, before any locale.setlocale() call in main().
 # Used to ensure English month names are always recognised even when a
 # non-English system locale is active.
-_ENGLISH_MONTH_NAMES: list[str] = list(calendar.month_name)
-_ENGLISH_MONTH_ABBRS: list[str] = list(calendar.month_abbr)
+_ENGLISH_MONTH_NAMES: Final[list[str]] = list(calendar.month_name)
+_ENGLISH_MONTH_ABBRS: Final[list[str]] = list(calendar.month_abbr)
 
 
 class _InvalidOrdinalError(Exception):

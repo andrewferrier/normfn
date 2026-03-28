@@ -5,6 +5,7 @@ import types
 import typing
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Final
 
 from normfn.exceptions import FatalError
 
@@ -19,7 +20,7 @@ class Config:
 
 _VALID_KEYS = frozenset(f.name for f in dataclasses.fields(Config))
 
-TEMPLATE_CONFIG = """\
+TEMPLATE_CONFIG: Final[str] = """\
 # normfn configuration file
 # All keys are optional. Uncomment and change the ones you want to override.
 
