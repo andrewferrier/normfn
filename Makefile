@@ -22,7 +22,7 @@ builddeb:
 	fi
 	uv sync
 	$(ROOTDIR)/debian/gen-changelog
-	dpkg-buildpackage --no-sign --build=binary
+	dpkg-buildpackage --no-sign --build=binary -d
 	mv -f $(ROOTDIR)/../normfn_*.deb $(ROOTDIR)/
 
 buildarch:
