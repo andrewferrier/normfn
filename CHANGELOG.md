@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/andrewferrier/normfn/compare/v3.0.1...v3.0.2) (2026-03-28)
+
+
+### Bug Fixes
+
+* Version matching logic for build ([5559339](https://github.com/andrewferrier/normfn/commit/5559339f5c58f0bb1962b79e0f1fac2f1ece4752))
+
 ## [3.0.1](https://github.com/andrewferrier/normfn/compare/v3.0.0...v3.0.1) (2026-03-28)
 
 
