@@ -1,44 +1,28 @@
 # normfn
 
-`normfn` is a command-line utility that 'normalizes' (renames) files and
-directories to use a leading [ISO-8601](https://xkcd.com/1179/) date prefix
+<p align="center">
+<img src="./logo.svg" />
+</p>
+
+`normfn` is a command-line utility that helps you to 'normalize' (rename) files
+and directories to use a leading [ISO-8601](https://xkcd.com/1179/) date prefix
 (`YYYY-MM-DD-rest-of-name.ext`), inspired by Mark Hurst's file naming strategy
-from [Bit Literacy](https://bitliteracy.com/). Files sort naturally and
-consistently in any file manager or shell listing.
+from [Bit Literacy](https://bitliteracy.com/). The date is derived from the
+filename or one of the file's timestamps.
 
-It detects and reformats dates already present in filenames, or adds one from
-the file's timestamps if none is found.
+ISO-8601 is used because it is the only date format that is unambiguous across
+locales - `03/04/2024` means March 4th in the US and April 3rd in the UK, but
+`2024-03-04` means exactly one thing everywhere. It also sorts
+lexicographically: alphabetical order and chronological order are the same
+thing, so files sort naturally and consistently in any file manager, shell
+listing, or search result.
 
-## Features
+Embedding timestamps in a filename is helpful because OS-level file timestamps
+(creation time, modification time) are fragile. They are routinely lost when
+files are copied, emailed, or moved between systems. Embedding the date directly
+in the filename makes it a permanent part of the file's identity.
 
-- **Intelligent date detection**: Recognises a wide range of date formats
-  already embedded in filenames (e.g. `2024_03_15`, `15-03-2024`, `March 15
-  2024`) and reformats them to ISO-8601.
-
-- **Timestamp fallback**: When no date is found in the filename, normfn falls
-  back to the file's filesystem timestamps (ctime and mtime) or the current
-  time. By default (`--earliest`), it uses the oldest; `--latest` uses the
-  newest; `--now` always uses the current time. Note: on Linux and macOS, ctime
-  is *not* file creation time.
-
-- **PDF metadata**: For PDF files, normfn reads the embedded creation date from
-  the file's metadata (if available and the optional `pypdf` library is
-  installed), preferring it over filesystem timestamps.
-
-- **Time-based naming**: Use `--add-time` to include the time of day (not just
-  the date) in the prefix, producing filenames like
-  `2026-03-27T09-15-00-report.pdf`.
-
-- **Recursive processing**: Use `-r`/`--recursive` to rename files throughout an
-  entire directory tree.
-
-- **Undo log**: Every rename is recorded as a shell command in
-  `~/.local/state/normfn-undo.log.sh` so it can be reversed. (See the comments
-  at the top of that file for instructions on how to undo changes.)
-
-- **Default exclusions**: By default, normfn skips hidden files, lock files,
-  files inside version-control directories, and other misc files. Use `--all` to
-  override this.
+[A short video introduction to normfn](https://www.youtube.com/watch?v=thtfyhCpzUA).
 
 ## Examples
 
@@ -88,6 +72,37 @@ INFO: project/ moved to 2026-03-27-project/
 INFO: 2026-03-27-project/report.pdf moved to 2026-03-27-project/2024-06-01-report.pdf
 INFO: 2026-03-27-project/notes.txt moved to 2026-03-27-project/2026-03-27-notes.txt
 ```
+
+## Features
+
+- **Intelligent date detection**: Recognises a wide range of date formats
+  already embedded in filenames (e.g. `2024_03_15`, `15-03-2024`, `March 15
+  2024`) and reformats them to ISO-8601.
+
+- **Timestamp fallback**: When no date is found in the filename, normfn falls
+  back to the file's filesystem timestamps (ctime and mtime) or the current
+  time. By default (`--earliest`), it uses the oldest; `--latest` uses the
+  newest; `--now` always uses the current time. Note: on Linux and macOS, ctime
+  is *not* file creation time.
+
+- **PDF metadata**: For PDF files, normfn reads the embedded creation date from
+  the file's metadata (if available and the optional `pypdf` library is
+  installed), preferring it over filesystem timestamps.
+
+- **Time-based naming**: Use `--add-time` to include the time of day (not just
+  the date) in the prefix, producing filenames like
+  `2026-03-27T09-15-00-report.pdf`.
+
+- **Recursive processing**: Use `-r`/`--recursive` to rename files throughout an
+  entire directory tree.
+
+- **Undo log**: Every rename is recorded as a shell command in
+  `~/.local/state/normfn-undo.log.sh` so it can be reversed. (See the comments
+  at the top of that file for instructions on how to undo changes.)
+
+- **Default exclusions**: By default, normfn skips hidden files, lock files,
+  files inside version-control directories, and other misc files. Use `--all` to
+  override this.
 
 ## Installation
 
