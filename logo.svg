@@ -5,7 +5,7 @@
    height="161.01601"
    version="1.1"
    id="svg10"
-   sodipodi:docname="normfn-logo.svg"
+   sodipodi:docname="logo.svg"
    inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,10 +23,10 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="9.055"
-     inkscape:cx="90.115958"
-     inkscape:cy="74.102706"
+     inkscape:cx="90.171176"
+     inkscape:cy="74.213142"
      inkscape:window-width="3840"
-     inkscape:window-height="2092"
+     inkscape:window-height="2093"
      inkscape:window-x="0"
      inkscape:window-y="30"
      inkscape:window-maximized="1"
@@ -78,7 +78,7 @@
        y1="177.7643"
        x2="117.63865"
        y2="177.7643"
-       gradientTransform="matrix(1.1209754,0,0,0.89208026,-17.338489,-26.283823)"
+       gradientTransform="matrix(1.1209754,0,0,0.89208026,1.3252327,-25.952514)"
        gradientUnits="userSpaceOnUse" />
     <linearGradient
        inkscape:collect="always"
@@ -161,8 +161,8 @@
      id="text9"
      style="fill:url(#linearGradient11)">norm</text>
   <text
-     x="82.661514"
-     y="153.71617"
+     x="101.32523"
+     y="154.04749"
      font-family="'Arial Black', Impact, sans-serif"
      font-size="28px"
      font-weight="900"
@@ -171,7 +171,6 @@
      letter-spacing="-1"
      id="text10"
      style="fill:url(#linearGradient10)"><tspan
-       dx="38"
        fill="#8b5cf6"
        id="tspan9"
        style="fill:url(#linearGradient10)">fn</tspan></text>
