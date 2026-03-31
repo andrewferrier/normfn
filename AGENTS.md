@@ -1,4 +1,4 @@
-# Copilot Instructions for normfn
+# Agent Instructions for normfn
 
 ## Project Overview
 
