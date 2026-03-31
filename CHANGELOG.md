@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.5](https://github.com/andrewferrier/normfn/compare/v3.0.4...v3.0.5) (2026-03-31)
+
+
+### Bug Fixes
+
+* logo - displays consistently ([00292b9](https://github.com/andrewferrier/normfn/commit/00292b9ee5404d87f238ba243c7ceb548be85bf4))
+* Standardize on AGENTS.md ([20223c6](https://github.com/andrewferrier/normfn/commit/20223c6b209fa64eb2d595d598534db49f8f2d26))
+* Update copyright year in LICENSE file ([a2480bd](https://github.com/andrewferrier/normfn/commit/a2480bdbba0b0a29e0c035bd87139e8b65d85755))
+
 ## [3.0.4](https://github.com/andrewferrier/normfn/compare/v3.0.3...v3.0.4) (2026-03-28)
 
 
