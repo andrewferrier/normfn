@@ -7,8 +7,10 @@ class Normfn < Formula
   depends_on "python@3"
 
   def install
-    system Formula["python@3"].opt_bin/"pip3", "install", "--prefix=#{prefix}", "--no-deps", "."
+    system Formula["python@3"].opt_bin/"pip3", "install", "--prefix=#{prefix}", "."
     doc.install "README.md", "LICENSE.txt"
+    (bash_completion/"normfn").write Utils.safe_popen_read(bin/"normfn", "--completions", "bash")
+    (zsh_completion/"_normfn").write Utils.safe_popen_read(bin/"normfn", "--completions", "zsh")
   end
 
   test do

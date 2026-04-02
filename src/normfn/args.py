@@ -1,16 +1,26 @@
 import argparse
+import dataclasses
+import os
 import sys
 from collections.abc import Sequence
-from dataclasses import dataclass
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Literal, NoReturn, cast, override
+
+import shtab
 
 from normfn.config import get_default_config_path
 from normfn.exceptions import FatalError
 
 
-@dataclass
+def _detect_shell() -> str:
+    shell_path = os.environ.get("SHELL", "")
+    shell_name = Path(shell_path).name if shell_path else ""
+    supported: list[str] = shtab.SUPPORTED_SHELLS
+    return shell_name if shell_name in supported else supported[0]
+
+
+@dataclasses.dataclass
 class Args:
     verbose: int
     help: bool
@@ -28,7 +38,7 @@ class Args:
     filenames: list[Path]
 
 
-def parse_arguments(argv: list[str]) -> Args:
+def get_parser() -> argparse.ArgumentParser:
     class ArgumentParser(argparse.ArgumentParser):
         @override
         def error(self, message: str) -> NoReturn:
@@ -36,6 +46,7 @@ def parse_arguments(argv: list[str]) -> Args:
             raise FatalError(message)
 
     parser = ArgumentParser(
+        prog="normfn",
         description=(
             "Normalizes filenames by prefixing a date to them. "
             "See https://github.com/andrewferrier/normfn for more information."
@@ -228,12 +239,46 @@ def parse_arguments(argv: list[str]) -> Args:
         action=FilenamesAction,
     )
 
+    class CompletionsAction(argparse.Action):
+        @override
+        def __call__(
+            self,
+            _parser: argparse.ArgumentParser,
+            namespace: argparse.Namespace,
+            values: str | Sequence[Any] | None,
+            option_string: str | None = None,
+        ) -> None:
+            shell = str(values) if values is not None else _detect_shell()
+            print(shtab.complete(parser, shell=shell))  # noqa: T201
+            sys.exit(0)
+
+    parser.add_argument(
+        "--completions",
+        nargs="?",
+        const=None,
+        default=argparse.SUPPRESS,
+        choices=shtab.SUPPORTED_SHELLS,
+        metavar="{" + ",".join(shtab.SUPPORTED_SHELLS) + "}",
+        action=CompletionsAction,
+        help=(
+            "Output a shell completion script, then exit. "
+            "Shell is auto-detected from $SHELL if not specified."
+        ),
+    )
+
+    return parser
+
+
+def parse_arguments(argv: list[str]) -> Args:
+    parser = get_parser()
+
     args_ns = parser.parse_args(argv[1:])
 
     if args_ns.time_option is None:
         args_ns.time_option = "earliest"
 
-    args = Args(**vars(args_ns))
+    _args_fields = {f.name for f in dataclasses.fields(Args)}
+    args = Args(**{k: v for k, v in vars(args_ns).items() if k in _args_fields})
 
     if args.help:
         parser.print_help()

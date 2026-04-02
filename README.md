@@ -140,6 +140,24 @@ with pacman:
 pacman -U normfn-*.pkg.tar.zst
 ```
 
+## Shell Completion
+
+Shell completion is automatically included when installing via Debian or Arch Linux.
+
+For pip or uv installs, generate and install the completion script manually. Replace `bash` with `zsh` or `tcsh` as appropriate:
+
+```sh
+# bash
+normfn --completions bash > ~/.local/share/bash-completion/completions/normfn
+
+# zsh (add to a directory on your $fpath)
+normfn --completions zsh > ~/.zfunc/_normfn
+
+# tcsh
+normfn --completions tcsh > ~/.normfn.tcsh
+echo 'source ~/.normfn.tcsh' >> ~/.tcshrc
+```
+
 ## Usage
 
 <!-- [START AUTO UPDATE] -->

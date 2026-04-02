@@ -12,6 +12,12 @@ override_dh_auto_build:
 override_dh_auto_install:
 	python3 $(CURDIR)/debian/install-wheel \
 		$(CURDIR)/debian/normfn dist/normfn-*.whl
+	mkdir -p $(CURDIR)/debian/normfn/usr/share/bash-completion/completions
+	mkdir -p $(CURDIR)/debian/normfn/usr/share/zsh/vendor-completions
+	uv run python -m shtab --shell bash normfn.args.get_parser \
+		> $(CURDIR)/debian/normfn/usr/share/bash-completion/completions/normfn
+	uv run python -m shtab --shell zsh normfn.args.get_parser \
+		> $(CURDIR)/debian/normfn/usr/share/zsh/vendor-completions/_normfn
 
 override_dh_auto_test:
 	uv run pytest

@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 license = { file = "LICENSE.txt" }
 authors = [{ name = "Andrew Ferrier", email = "andrew@andrewferrier.com" }]
 keywords = ["filename", "date", "normalization", "cli"]
+dependencies = ["shtab"]
 classifiers = [
     "Environment :: Console",
     "License :: OSI Approved :: MIT License",
