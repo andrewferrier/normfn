@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/andrewferrier/normfn/compare/v3.0.5...v3.1.0) (2026-04-02)
+
+
+### Features
+
+* Add support for completions - closes [#121](https://github.com/andrewferrier/normfn/issues/121) ([ccce5ce](https://github.com/andrewferrier/normfn/commit/ccce5cef99db25608776c3066688be50a5024fca))
+
 ## [3.0.5](https://github.com/andrewferrier/normfn/compare/v3.0.4...v3.0.5) (2026-03-31)
 
 
