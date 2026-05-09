@@ -76,12 +76,17 @@ ignore = [
 testpaths = ["tests"]
 pythonpath = ["src"]
 
+[tool.uv]
+constraint-dependencies = [
+  "pygments>=2.20.0",
+]
+
 [dependency-groups]
 dev = [
     "freezegun>=1.5.5",
     "hatch-vcs>=0.5.0",
     "hatchling>=1.29.0",
     "pexpect>=4.9.0",
-    "pypdf>=6.9.2",
-    "pytest>=8.0.0",
+    "pypdf>=6.10.2",
+    "pytest>=9.0.3",
 ]
