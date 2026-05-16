@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.1](https://github.com/andrewferrier/normfn/compare/v3.1.0...v3.1.1) (2026-05-16)
+
+
+### Bug Fixes
+
+* Dependabot ecosystem ([02ce5fb](https://github.com/andrewferrier/normfn/commit/02ce5fb9c72609079238cdaf93dab3d6e45801f4))
+
 ## [3.1.0](https://github.com/andrewferrier/normfn/compare/v3.0.5...v3.1.0) (2026-04-28)
 
 
