@@ -163,8 +163,8 @@ echo 'source ~/.normfn.tcsh' >> ~/.tcshrc
 <!-- [START AUTO UPDATE] -->
 <!-- Please keep comment here to allow auto-update -->
 ```
-usage: normfn [-v] [-h] [-V] [--config PATH] [--initialize-config] [-n] [-i]
-              [-a] [-f] [-t] [-d] [-r] [--now | --latest | --earliest]
+usage: normfn [-v] [-h] [-V] [--config PATH] [--initialize-config] [-n] [-a]
+              [-f] [-t] [-d] [-r] [--now | --latest | --earliest]
               [--completions [{bash,zsh,tcsh}]]
               [filename ...]
 
@@ -187,7 +187,6 @@ options:
                         Fails if the file already exists.
   -n, --dry-run         Don't actually make any changes, just show them.
                         Forces a single level of verbosity (-v).
-  -i, --interactive     Ask about each change before it is done.
   -a, --all             Affect all files, including those in default exclude
                         lists.
   -f, --force           Overwrite target files if they already exist (USE WITH
