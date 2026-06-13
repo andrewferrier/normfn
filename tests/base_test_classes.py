@@ -2,18 +2,14 @@ import datetime
 import io
 import logging
 import os
-import re
 import sys
 import tempfile
 import time
-from collections.abc import Iterator
-from contextlib import contextmanager
 from pathlib import Path
 from stat import S_IRUSR, S_IXUSR
 from subprocess import PIPE, Popen, call
 from typing import TYPE_CHECKING, cast
 
-import pexpect
 import pytest
 
 if TYPE_CHECKING:
@@ -154,43 +150,6 @@ class NormfnTestCase:
             max_return_code = max(max_return_code, call(command_to_call, shell=True))  # noqa: S602
 
         return max_return_code
-
-    @contextmanager
-    def invoke_as_pexpect(
-        self,
-        input_files: list[Path],
-        extra_params: list[str] | None = None,
-        expected_exit_status: int | None = None,
-        expected_output_regex: str | None = None,
-    ) -> Iterator[pexpect.spawn]:
-        if extra_params is None:
-            extra_params = []
-
-        options: list[str] = list(COMMAND)
-        options.extend(["--config", str(self.config_file)])
-        options.extend(str(p) for p in input_files)
-        options.extend(extra_params)
-
-        env = {**os.environ}
-        command = " ".join(options)
-
-        stream = io.BytesIO()
-
-        child = pexpect.spawn(command, env=env)
-        child.logfile_read = stream
-
-        yield child
-
-        child.expect(pexpect.EOF)
-        child.close()
-
-        if expected_exit_status is not None:
-            assert child.exitstatus == expected_exit_status
-
-        if expected_output_regex is not None:
-            assert re.search(
-                expected_output_regex, str(child.logfile_read.getvalue(), "utf-8")
-            )
 
     def set_local_timezone(
         self,

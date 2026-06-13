@@ -1,7 +1,6 @@
 import locale
 import logging
 import sys
-from contextlib import suppress
 from io import TextIOBase
 from pathlib import Path
 
@@ -13,9 +12,8 @@ from normfn.config import (
     resolve_undo_log_file,
 )
 from normfn.dates import YearRegexes, datetime_prefix, make_year_regexes
-from normfn.exceptions import FatalError, _QuitSignalError
+from normfn.exceptions import FatalError
 from normfn.files import shiftfile, should_exclude
-from normfn.input import ask_yes_no, rlinput
 
 if not sys.version_info >= (3, 12):
     msg = "Needs at least Python 3.12"  # pyright: ignore[reportUnreachable]
@@ -62,20 +60,17 @@ def main(argv: list[str], syserr_handler: logging.StreamHandler[TextIOBase]) -> 
     year_regexes = make_year_regexes(config.max_years_behind, config.max_years_ahead)
     undo_log_file = resolve_undo_log_file(config)
 
-    with suppress(_QuitSignalError):
-        for arg_filename in args.filenames:
-            filename = arg_filename.resolve()
-            if not filename.exists():
-                msg = f"{filename} specified on the command line does not exist."
-                raise FatalError(msg)
+    for arg_filename in args.filenames:
+        filename = arg_filename.resolve()
+        if not filename.exists():
+            msg = f"{filename} specified on the command line does not exist."
+            raise FatalError(msg)
 
-            if filename.is_dir() and args.recursive:
-                new_filename = process_filename(
-                    filename, args, year_regexes, undo_log_file
-                )
-                walk_tree(new_filename, args, year_regexes, undo_log_file)
-            else:
-                process_filename(filename, args, year_regexes, undo_log_file)
+        if filename.is_dir() and args.recursive:
+            new_filename = process_filename(filename, args, year_regexes, undo_log_file)
+            walk_tree(new_filename, args, year_regexes, undo_log_file)
+        else:
+            process_filename(filename, args, year_regexes, undo_log_file)
 
 
 def walk_tree(
@@ -122,16 +117,6 @@ def process_filename(
         return original_path
 
     move_it = True
-
-    if args.interactive:
-        move_it_choice = ask_yes_no(
-            f"Move {str(original_path).strip()} to .../{new_stem} [y/n/e/q]?"
-        )
-        if move_it_choice == b"e":
-            edited_basename = rlinput("What new filename? ", new_stem)
-            target_path = original_path.parent / edited_basename
-        else:
-            move_it = move_it_choice == b"y"
 
     if target_path.exists() and not args.force:
         raise FatalError(

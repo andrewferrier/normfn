@@ -57,45 +57,6 @@ class TestSubprocessArguments(NormfnTestCase):
         assert (newsub_working_dir / (self.get_date_prefix() + "foobar.txt")).exists()
         assert self.directory_file_count(newsub_working_dir) == 1
 
-    def test_recursive_current_directory_interactive(self) -> None:
-        sub_working_dir = self.working_dir / "subWorkingDir"
-        filename = sub_working_dir / "foobar.txt"
-        self.touch(filename)
-        (rc, _, error, _) = self.invoke_as_subprocess(
-            [Path(".")],
-            feed_input=b"ny",
-            extra_params=["--interactive", "--recursive"],
-            cwd=sub_working_dir,
-            expect_output=True,
-        )
-        assert rc == 0
-        assert error == ""
-        assert not filename.exists()
-        assert sub_working_dir.exists()
-        assert (sub_working_dir / (self.get_date_prefix() + "foobar.txt")).exists()
-        assert self.directory_file_count(sub_working_dir) == 1
-
-    def test_recursive_current_directory_interactive_with_dotfile(self) -> None:
-        sub_working_dir = self.working_dir / "subWorkingDir"
-        filename = sub_working_dir / ".bar.txt"
-        filename2 = sub_working_dir / "foo.txt"
-        self.touch(filename)
-        self.touch(filename2)
-        (rc, _, error, _) = self.invoke_as_subprocess(
-            [Path(".")],
-            feed_input=b"ny",
-            extra_params=["--interactive", "--recursive"],
-            cwd=sub_working_dir,
-            expect_output=True,
-        )
-        assert rc == 0
-        assert error == ""
-        assert filename.exists()
-        assert sub_working_dir.exists()
-        assert not filename2.exists()
-        assert (sub_working_dir / (self.get_date_prefix() + "foo.txt")).exists()
-        assert self.directory_file_count(sub_working_dir) == 2
-
     def test_loads_of_files(self) -> None:
         TOTAL_FILES = 100  # noqa: N806
 

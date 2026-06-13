@@ -28,7 +28,6 @@ class Args:
     config: Path | None
     initialize_config: bool
     dry_run: bool
-    interactive: bool
     all: bool
     force: bool
     add_time: bool
@@ -109,14 +108,6 @@ def get_parser() -> argparse.ArgumentParser:
             "Don't actually make any changes, just show them. Forces "
             "a single level of verbosity (-v)."
         ),
-    )
-
-    parser.add_argument(
-        "-i",
-        "--interactive",
-        action="store_true",
-        dest="interactive",
-        help="Ask about each change before it is done.",
     )
 
     parser.add_argument(
