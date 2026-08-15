@@ -189,11 +189,11 @@ wheels = [
 
 [[package]]
 name = "shtab"
-version = "1.8.1"
+version = "1.10.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/56/b3/b7c99318ba2b0d7d7e71b78318c162690dd5639cd06e2d3bca9292737e4e/shtab-1.8.1.tar.gz", hash = "sha256:3edaf857ba164a0d7bb64e958eab8d6756d5aee3949c7f36a7e779bf1ce3b897", size = 46449, upload-time = "2026-07-03T11:43:26.663Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/e2/d174e5a176be1a4de07d125e8276bab2ce469a7d4a4919349e1a7d4f419d/shtab-1.10.0.tar.gz", hash = "sha256:70ccd485d8b38d9458c42b4e911a3d29a685dbea4b9aa7ea2d03ebe1a6e6e94f", size = 56370, upload-time = "2026-08-07T19:04:54.391Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9f/2f/35d4ec80d8ee39e792cd6e0d4f3dd84ea6783f13b7c47b4c319d9062aaf0/shtab-1.8.1-py3-none-any.whl", hash = "sha256:4fc418e0173e66385e4605044a26a4910e73dde2dc23e809acc2f0275e842426", size = 14905, upload-time = "2026-07-03T11:43:25.374Z" },
+    { url = "https://files.pythonhosted.org/packages/c3/49/c1a890168166db658a549f76d4732a40a38c6248127bc0eeb4d97b001f89/shtab-1.10.0-py3-none-any.whl", hash = "sha256:927b63ccf29b12f0aa12a51860695026fcde2b6b2ae95fa7f4fbf0040bd14e90", size = 16873, upload-time = "2026-08-07T19:04:53.177Z" },
 ]
 
 [[package]]
