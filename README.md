@@ -165,7 +165,7 @@ echo 'source ~/.normfn.tcsh' >> ~/.tcshrc
 ```
 usage: normfn [-v] [-h] [-V] [--config PATH] [--initialize-config] [-n] [-a]
               [-f] [-t] [-d] [-r] [--now | --latest | --earliest]
-              [--completions [{bash,zsh,tcsh,fish}]]
+              [--completions [{bash,zsh,tcsh,fish,powershell}]]
               [filename ...]
 
 Normalizes filenames by prefixing a date to them. See
@@ -206,7 +206,7 @@ options:
                         http://lwn.net/Articles/397442/.
   --earliest, --oldest  Use earliest of ctime and mtime to define a file
                         prefix for files without them. This is the default.
-  --completions [{bash,zsh,tcsh,fish}]
+  --completions [{bash,zsh,tcsh,fish,powershell}]
                         Output a shell completion script, then exit. Shell is
                         auto-detected from $SHELL if not specified.
 
